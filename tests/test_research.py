@@ -28,6 +28,7 @@ class TestFunctions(unittest.TestCase):
     def test_array2cpp(self):
         al = oapackage.exampleArray(1)
         cpp=oaresearch.research.array2cpp(al)
+        self.assertEqual(cpp, '   array_link array (16, 5, 0); \n   int array_data_tmp[] = {0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,0,0,0,0,1,1,1,1,0,0,0,0,1,1,1,1,0,0,0,1,0,1,1,1,0,1,1,1,0,0,0,1,0,0,1,0,1,0,1,1,1,0,1,1,0,0,1,0,0,0,1,1,0,0,1,1,1,1,0,0,1,1,0,0};\n   array.setarraydata (array_data_tmp, array.n_rows * array.n_columns);\n')
 
 
 if __name__=='__main__':
