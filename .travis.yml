@@ -8,6 +8,10 @@ matrix:
   - name: "Python 2.7"
     python: "2.7"
 
+addons:
+  apt_packages:
+    - swig
+        
 install:
     - python setup.py develop
     - pip install pytest
