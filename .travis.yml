@@ -15,7 +15,6 @@ before_install:
 install:
     - ls
     - which swig3.0
-    - which swig 
     - python setup.py develop
     - pip install pytest
 
