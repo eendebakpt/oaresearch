@@ -1,0 +1,23 @@
+language: python
+cache: pip
+
+matrix:
+  include:
+  - name: "Python 3.6"
+    python: "3.6"
+  - name: "Python 2.7"
+    python: "2.7"
+
+before_install:
+  - sudo apt-get install -y swig3.0
+  
+       
+install:
+    - ls
+    - which swig3.0
+    - python setup.py develop
+    - pip install pytest
+
+script: 
+    - pytest
+    
