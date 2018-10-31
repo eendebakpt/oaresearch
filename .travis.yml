@@ -5,8 +5,6 @@ matrix:
   include:
   - name: "Python 3.6"
     python: "3.6"
-  - name: "Python 2.7"
-    python: "2.7"
 
 before_install:
   - sudo apt-get install -y swig3.0

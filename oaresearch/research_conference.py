@@ -27,6 +27,7 @@ from oapackage.markup import oneliner as e
 
 import oaresearch
 from oaresearch.research import citation
+import oaresearch.filetools
 
 #%%
 
@@ -404,7 +405,6 @@ def conferenceDesignsPage(rr, verbose=1, makeheader=True, htmlsubdir=None):
     pstr += ' If you use these data, please cite the paper ' + \
         citation('conference', style='full') + '.'
     page.p(pstr)
-    # 1. calculate values
 
     full_results = rr.get('full')
     if full_results:
@@ -428,8 +428,8 @@ def conferenceDesignsPage(rr, verbose=1, makeheader=True, htmlsubdir=None):
     simpleRow('Number of non-isomorphic designs', str(rr['narrays']))
 
     if narrays > 0:
-        simpleRow('Minimum/Maximum rank of X2', '%d/%d' % (rr['minrankX2'] , rr['maxrankX2']))
-        simpleRow('Minimum/Maximum rank of X2 with quadratics','%d/%d' % (rr['minrankX2q'] , rr['maxrankX2q']))
+        simpleRow('Minimum/Maximum rank of X2', '%d/%d' % (rr['minrankX2'], rr['maxrankX2']))
+        simpleRow('Minimum/Maximum rank of X2 with quadratics', '%d/%d' % (rr['minrankX2q'], rr['maxrankX2q']))
         simpleRow('Minimum B4', '%.4f' % rr['minB4'])
         simpleRow('Maximum B4', '%.4f' % rr['maxB4'])
         simpleRow('Minimum F4', str(rr['minF4']))
@@ -448,28 +448,24 @@ def conferenceDesignsPage(rr, verbose=1, makeheader=True, htmlsubdir=None):
         if verbose >= 2:
             print('conferenceDesignsPage: read arrayfile %s: na %d' % (iafile, na))
 
-        import researchOA
         if na < 5000 and na >= 0 and 1:
             if htmlsubdir is None:
                 raise Exception('need html subdirectory to copy .oa file')
-            outfilefinal = researchOA.copyOAfile(iafile, htmlsubdir, outfile0, convert='T', zipfile=None, verbose=1, cache=0)
+            outfilefinal = oaresearch.filetools.copyOAfile(iafile, htmlsubdir, outfile0, convert='T', zipfile=None, verbose=1, cache=0)
 
             if rr.get('full', False):
-                # pdb.set_trace()
-                htag = researchOA.formatAtag(
+                htag = oaresearch.htmltools.formatArrayHyperlink(
                     'all arrays', outfile0, iafile)
 
-                # xxx=e.a('all arrays', href=outfile0final)
                 rr['datafilestr'] = 'all arrays'
             else:
-                na = nArrayFile(os.path.join(htmlsubdir, outfilefinal))
-                htag = researchOA.formatAtag(
+                na = oapackage.nArrayFile(os.path.join(htmlsubdir, outfilefinal))
+                htag = oaresearch.htmltools.formatArrayHyperlink(
                     'all arrays', outfile0, iafile)
                 rr['datafilestr'] = '%d array(s)' % na
 
             simpleRow('Data', htag)
 
-            #rr['datafilestrfile'] = outfile0final
         else:
             if verbose:
                 print('conferenceDesignsPage: no datafile (na %d)' % na)
@@ -481,13 +477,13 @@ def conferenceDesignsPage(rr, verbose=1, makeheader=True, htmlsubdir=None):
     page.table.close()
 
     if narrays > 0 and full_results:
-        add_extra=True
+        add_extra = True
         print('do statistics2htmltable')
 
         header = ['Array index', 'Rank X2', 'F4', 'B4']
-        if     add_extra:
-            header+=['Rank X2 with q']
-            
+        if add_extra:
+            header += ['Rank X2 with q']
+
         rtable = np.zeros((1 + len(presults.pareto_indices), len(header)), dtype='|U208')
         rtable[:] = ' '
         for ii, h in enumerate(header):
@@ -497,15 +493,15 @@ def conferenceDesignsPage(rr, verbose=1, makeheader=True, htmlsubdir=None):
         for ii, idx in enumerate(pidx):
             rtable[ii + 1, 0:4] = ['%d' % idx, str(presults.ranks[idx]), str(presults.f4s[idx]), '%.4f' % (presults.b4s[idx])]
             if add_extra:
-                rtable[ii + 1, -1:]=[str(presults.ranksX2Q[idx])] 
-                
+                rtable[ii + 1, -1:] = [str(presults.ranksX2Q[idx])]
+
         subpage = oaresearch.research.array2html(rtable, header=1, tablestyle='border-collapse: collapse;',
                                                  trclass='', tdstyle='padding-right:1em;', trstyle='', thstyle='text-align:left; padding-right: 1em;', comment=None)
         page.br(clear='both')
         page.h2('Pareto optimal designs')
         page.p()
         page.add('There are %d Pareto optimal designs in %d classes.' % (presults.npareto, presults.nclasses))
-        page.add('Pareto optimality is according to rank, F4 and B4 (the other statistics are ignored).' )
+        page.add('Pareto optimality is according to rank, F4 and B4 (the other statistics are ignored).')
         page.p.close()
         if rr.get('pareto_designs', None) is not None:
             pdesigns = rr.get('pareto_designs', None)
@@ -519,39 +515,13 @@ def conferenceDesignsPage(rr, verbose=1, makeheader=True, htmlsubdir=None):
 
         page.add(str(subpage))
         page.br(clear='both')
-        #pagex = researchOA.statistics2htmltable(page, rr['fullstatistics'])
 
-    # subpage: make image
-    if 0:
-        if verbose:
-            print('generating image')
-        page.h2('Image')
-        xl = list(range(ad.strength + 1, len(nums) + ad.strength + 1))
-        pnums = np.array(nums, dtype=np.float)
-        pnums[pnums < 0] = np.nan
-        axes = plt.figure(1)
-        plt.clf()
-        plt.plot(xl, pnums, '.b', markersize=20)
-        plt.title(r'$%s$' % ad.latexstr(), fontsize=18)
-        plt.ylabel('Number of arrays', fontsize=15)
-        plt.xlabel('Number of columns', fontsize=15)
-        plt.xticks(xl, xl)
-        plt.ylim(-1, max(nums) + 1)
-        plt.xlim(min(xl) - 1, max(xl) + 1)
-
-        subimage = 'series-%s-t%d.png' % (ad.idstr(), ad.strength)
-        plt.savefig(os.path.join(htmldir, 'subpages', subimage))
-
-        page.img(src='' + subimage, style='max-width: 70%')
 
     localtime = time.asctime(time.localtime(time.time()))
     dstr = str(localtime)
 
-    page.p('<br/>\n')  # clear='left')
+    page.p('<br/>\n')  
     page.p('Page generated on %s.' % dstr)
-    # page.p.close()
-    # subpage: raw data
-    # page.pre(xx)
 
     pstr = str(page).replace('<meta content="charset=utf-8" name="text/html" />',
                              '<meta http-equiv="Content-Type" content="charset=utf-8" name="text/html" />')
