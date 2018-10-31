@@ -16,17 +16,17 @@ import oaresearch.htmltools
 
 #%%
 
+
 class TestHTMLtools(unittest.TestCase):
-    
+
     def test_formatArrayHyperlink(self):
-        txt='hello'
+        txt = 'hello'
         url = 'http://www.world'
         with patch('sys.stdout', new_callable=io.StringIO) as mock_stdout:
             html = oaresearch.htmltools.formatArrayHyperlink(txt, url, 'arrayfile')
-        self.assertTrue(html.startswith('<a href'))
-        self.assertTrue(txt in html)
-        self.assertTrue(url in html)
-        
-if __name__=='__main__':
+            self.assertTrue(html.startswith('<a '))
+            self.assertTrue(txt in html)
+            self.assertTrue(url in html)
+
+if __name__ == '__main__':
     unittest.main()
-    
