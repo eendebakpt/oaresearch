@@ -23,7 +23,7 @@ from oapackage.markup import oneliner as e
 from oaresearch.research_conference import htmlTag, nprevzero
 import oaresearch.research_conference
 reload(oaresearch.research_conference)
-from oaresearch.research_conference import  calculateConferencePareto, conferenceResultsFile, generateConferenceResults,conferenceDesignsPage
+from oaresearch.research_conference import calculateConferencePareto, conferenceResultsFile, generateConferenceResults, conferenceDesignsPage
 from oaresearch.research_conference import latexResults
 
 #import researchOA
@@ -82,45 +82,44 @@ def conferenceSubPages(tag='conference', Nmax=26, Nstart=4, kmax=None,
             subpages[tag]['N%dk%d' % (N, kk)] = {}
 
             # get arrays
-            cfile, nn, mode=conferenceResultsFile(N, kk, outputdir, tags=['cdesign', 'cdesign-diagonal', 'cdesign-diagonal-r'],tagtype=['full', 'r', 'r'], verbose=1)
+            cfile, nn, mode = conferenceResultsFile(N, kk, outputdir, tags=['cdesign', 'cdesign-diagonal', 'cdesign-diagonal-r'], tagtype=['full', 'r', 'r'], verbose=1)
 
-            if nn>=5000 or N>NmaxPareto or mode!='full':
+            if nn >= 5000 or N > NmaxPareto or mode != 'full':
                 continue
-            
-            ll=oapackage.readarrayfile(cfile)
+
+            ll = oapackage.readarrayfile(cfile)
             if verbose:
                 print('conferenceSubPages: generate %s N %d k %d: %d designs' % (tag, N, kk, nn))
-            # calculate statistics                    
+            # calculate statistics
             presults, pareto = calculateConferencePareto(ll, N=N, k=kk, verbose=1)
-            rr=generateConferenceResults(presults, ll, ct=None, full=mode=='full')
-            rr['arrayfile']=cfile
-            rr['datadir']=''
-              
+            rr = generateConferenceResults(presults, ll, ct=None, full=mode == 'full')
+            rr['arrayfile'] = cfile
+            rr['datadir'] = ''
+
             # create HTML page
             page = conferenceDesignsPage(rr, verbose=1, makeheader=True, htmlsubdir=cdir)
 
             # write results
-            htmlfile0=os.path.basename(cfile).replace('.oa.gz','.html').replace('.oa','.html')
-            htmlfile=os.path.join(cdir, htmlfile0)
-             
-            sx=subpages[tag]['N%dk%d' % (N, kk)]
-            sx['htmlpage0']=htmlfile0
-            sx['htmlpage']=htmlfile
-            sx['presults']=presults
-            sx['arrayfile']=cfile
+            htmlfile0 = os.path.basename(cfile).replace('.oa.gz', '.html').replace('.oa', '.html')
+            htmlfile = os.path.join(cdir, htmlfile0)
+
+            sx = subpages[tag]['N%dk%d' % (N, kk)]
+            sx['htmlpage0'] = htmlfile0
+            sx['htmlpage'] = htmlfile
+            sx['presults'] = presults
+            sx['arrayfile'] = cfile
 
             import tempfile
-            subfilef=tempfile.mktemp(suffix='.html')
+            subfilef = tempfile.mktemp(suffix='.html')
             print('writing to %s' % subfilef)
             with open(htmlfile, 'wt') as fid:
                 fid.write(page)
-                
+
     return subpages
 
 generated_subpages = conferenceSubPages(tag='cdesign', Nmax=26, Nstart=4, verbose=2)
 
 #%% Results table
-
 
 
 if platform.node() == 'woelmuis':
@@ -160,44 +159,7 @@ def cdesignTag(N, kk, page, outputdir, tdstyle='', tags=['cdesign', 'cdesign-dia
         ncache (dict): store results
 
     """
-    cfile, nn, mode=conferenceResultsFile(N, kk, outputdir, tags=['cdesign', 'cdesign-diagonal', 'cdesign-diagonal-r'],tagtype=['full', 'r', 'r'], verbose=1)
-
-#    for ii, tag in enumerate(tags):
-#
-#        cfile0 = '%s-%d-%d.oa' % (tag, N, kk)
-#        cfile = os.path.join(outputdir, cfile0)
-#        gfile = os.path.join(outputdir, cfile0 + '.gz')
-#        if verbose >= 2:
-#            print('cdesignTag: try file %s' % cfile0)
-#        if os.path.exists(os.path.join(outputdir, cfile0)) and os.path.exists(gfile):
-#            nn1 = oapackage.nArrayFile(cfile)
-#            nn2 = oapackage.nArrayFile(gfile)
-#            raise Exception('both .oa and .oa.gz exist: %s' % cfile)
-#            if nn2 > nn1:
-#                print('### removing %s!!!' % cfile)
-#                os.remove(cfile)
-#
-#        nn = oapackage.nArrays(cfile)
-#        mode = tagtype[ii]
-#        cfilex = oapackage.oahelper.checkOAfile(cfile)
-#        if cfilex is not None:
-#            cfilebase = os.path.basename(cfilex)
-#        else:
-#            cfilebase = None
-#        if nn >= 0:
-#            break
-#
-#    if verbose:
-#        print('cdesignTag: N %d, kk %d: selected tag %s: nn %d' %
-#              (N, kk, tag, nn))
-#    # special case
-#    if kk == N and tag == 'cdesign-diagonal':
-#        mode = 'full'
-#
-#    if ncache is not None:
-#        if not 'full' in ncache:
-#            ncache['full'] = {}
-#        ncache['full']['N%dk%d' % (N, kk)] = nn
+    cfile, nn, mode = conferenceResultsFile(N, kk, outputdir, tags=tags, tagtype=tagtype, verbose=1)
 
     if ncache is not None:
         if 'full' not in ncache:
@@ -209,16 +171,16 @@ def cdesignTag(N, kk, page, outputdir, tdstyle='', tags=['cdesign', 'cdesign-dia
         cfilebase = os.path.basename(cfilex)
     else:
         cfilebase = None
-        
+
     if page is not None:
         if subpage:
             hreflink = os.path.join('conference', subpage)
-            print('hreflink: %s'  % subpage)
+            print('hreflink: %s' % subpage)
         else:
             hreflink = 'conference/%s' % cfilebase
-            
+
         txt, link = htmlTag(nn, kk, N, mode=mode,
-                            href=hreflink, ncache=ncache, verbose=2)
+                            href=hreflink, ncache=ncache, verbose=verbose >= 2)
         if verbose >= 2:
             print('cdesignTag: txt %s' % (txt,))
         if link:
@@ -337,6 +299,7 @@ specialdataDC = specialdata
 
 #%%
 
+
 def DconferencePage(page, tag='dconference', Nmax=26, Nstart=4, kmax=None,
                     ta='left', maxarrays=20000, verbose=1, specials={}, Nstep=2,
                     tableclass='conftable', tdstyle=None, subpages=None):
@@ -382,16 +345,16 @@ def DconferencePage(page, tag='dconference', Nmax=26, Nstart=4, kmax=None,
     page.tr.close()
 
     ncache = {}
-    subpage=None
+    subpage = None
     for ki, kk in enumerate(krange):
         page.tr()
         page.td('%s' % str(kk), style=tdstyle)
         for Ni, N in enumerate(Nrange):
             if subpages is not None:
-                subpage = subpages.get('N%dk%d'  % (N, kk), None)
-                if subpage is not None and len(subpage)!=0:
-                    subpage=subpage['htmlpage0']
-            
+                subpage = subpages.get('N%dk%d' % (N, kk), None)
+                if subpage is not None and len(subpage) != 0:
+                    subpage = subpage['htmlpage0']
+
             if tag in specials:
                 if N in specials[tag]:
                     if kk in specials[tag][N]:
@@ -405,8 +368,8 @@ def DconferencePage(page, tag='dconference', Nmax=26, Nstart=4, kmax=None,
 
                             continue
             if verbose:
-                print('DconferencePage: tag %s: %d %d: subpage %s'  % (tag, N, kk, subpage))
-                
+                print('DconferencePage: tag %s: %d %d: subpage %s' % (tag, N, kk, subpage))
+
             if tag == 'cdesign':
                 cdesignTag(N, kk, page, outputdir, tdstyle,
                            ['cdesign', 'cdesign-diagonal', 'cdesign-diagonal-r'],
@@ -436,8 +399,6 @@ if 0:
             cfile = cdesignTag(N, kk, page=None, outputdir=outputdir, tags=[
                                tag, tag + '-r'], tagtype=['full', 'r'])
             na = oapackage.nArrayFile(cfile)
-            #print('%s: %d ' % (cfile, na))
-        #DconferencePage(page, tag='dconferencej1j3', Nstart=4, Nmax=56, kmax=28)
 
             eolist = []
             if na > 100000:

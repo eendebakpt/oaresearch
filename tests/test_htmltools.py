@@ -5,13 +5,10 @@ Pieter Eendebak <pieter.eendebak@gmail.com>
 """
 
 #%%
-import os
-import numpy as np
 import unittest
 from unittest.mock import patch
 import io
 
-import oapackage
 import oaresearch.htmltools
 
 #%%

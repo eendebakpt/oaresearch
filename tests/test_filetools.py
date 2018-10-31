@@ -4,9 +4,7 @@ Pieter Eendebak <pieter.eendebak@gmail.com>
 
 """
 
-#%%
 import os
-import numpy as np
 import unittest
 import tempfile
 import oapackage
