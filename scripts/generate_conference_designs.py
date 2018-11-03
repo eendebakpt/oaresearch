@@ -27,7 +27,7 @@ from researchOA import job, createJobScript
 basedir=os.path.expanduser('~')
 resultsdir = join(basedir, 'oatmp')
 outputdir = oapackage.mkdirc(
-    os.path.join(os.path.expanduser('~'), 'oatmp', 'conf2'))
+    os.path.join(os.path.expanduser('~'), 'oatmp', 'conf'))
 
 scriptdir = join(os.path.expanduser('~'), 'confjobs')
 
@@ -127,14 +127,7 @@ LL = generateConference(12, outputdir=outputdir)
 #%% Test maxz values
 
 
-def showMaxZ(LL):
-    N = LL[3][0].n_rows
-
-    for ii, L in enumerate(LL):
-        k = ii + 1
-        s = [oapackage.maxz(al) for al in L]
-        mm, _ = np.histogram(s, range(N + 1))
-        print('%d cols: maxz seq %s' % (k, list(mm)) )
+from oaresearch.research_conference import showMaxZ
 
 showMaxZ(LL)
 
@@ -142,8 +135,8 @@ showMaxZ(LL)
 #%%
 if not full_generation:
     # only do small cases
-    for NN in range(4, 12, 2):
-        _ = generateConference(N=NN)
+    for NN in range(4, 18, 2):
+        _ = generateConference(N=NN, outputdir=outputdir)
 
 else:
     for NN in range(4, 18, 2):
@@ -152,7 +145,7 @@ else:
         _ = generateConference(N=NN, kmax=3)
     # big cases (takes a longer time)
     LL = generateConference(N=18)
-    LL = generateConference(N=20, kmax=20)
+    LL = generateConference(N=20, kmax=20, outputdir=outputdir)
     LL = generateConference(N=22, kmax=7)
     _ = generateConference(N=24, kmax=6)
     LL = generateConference(N=26, kmax=6)

@@ -26,8 +26,11 @@ reload(oaresearch.research_conference)
 from oaresearch.research_conference import calculateConferencePareto, conferenceResultsFile, generateConferenceResults, conferenceDesignsPage
 from oaresearch.research_conference import latexResults
 
-#import researchOA
+# TODO: refactor conferenceDesignsPage
+# TODO: make generate_conference_webpage run again
 
+
+generate_webpage=True
 
 #%% Setup directories
 resultsdir = join(os.path.expanduser('~'), 'oatmp')
@@ -40,16 +43,56 @@ outputdir = oapackage.mkdirc(
 if platform.node() == 'woelmuis':
     paperdir = '/home/eendebakpt/misc/oa/article-conference/'
 
-if platform.node() == 'woelmuis':
-    htmldir = '/home/eendebakpt/misc/oapage2'
+if generate_webpage:
+    htmldir = os.path.join(os.path.expanduser('~'),  'misc/oapage2')
     htemplate = True
     if 1:
         # for testing...
-        htmldir = oapackage.mkdirc('/home/eendebakpt/oatmp/confpage')
+        htmldir = os.path.join(os.path.expanduser('~'),  'oatmp', 'confpage')
         htemplate = False
+    oapackage.mkdirc(os.path.join(htmldir))
     cdir = oapackage.mkdirc(os.path.join(htmldir, 'conference'))
 
 
+#%%
+from oapackage.oahelper import create_pareto_element
+reload(oaresearch.research_conference )
+from oaresearch.research_conference import createConferenceParetoElement, calculateConferencePareto, generateConferenceResults
+
+N=12
+kk=7    
+cfile, nn, mode = conferenceResultsFile(N, kk, outputdir, tags=['cdesign', 'cdesign-diagonal', 'cdesign-diagonal-r'], tagtype=['full', 'r', 'r'], verbose=1)
+
+ll = oapackage.readarrayfile(cfile)
+
+presults, pareto = calculateConferencePareto(ll, N=N, k=kk, verbose=1)
+pareto_results = generateConferenceResults(presults, ll, ct=None, full=mode == 'full')
+
+page = conferenceDesignsPage(pareto_results, verbose=1, makeheader=True, htmlsubdir=cdir)
+
+oapackage.oahelper.testHtml(str(page))
+
+#%%
+al=ll[1]
+f4 = al.FvaluesConference(4)
+print(f4)
+dsd=oapackage.conference2DSD(al)
+f4 = dsd.FvaluesConference(4)
+print(f4)
+
+#%%
+
+from oapackage.oahelper import create_pareto_element
+from oaresearch.research_conference import createConferenceParetoElement, calculateConferencePareto
+
+presults = calculateConferencePareto(ll, N=None, k=None, verbose=1)
+
+
+class designResults:
+    pass
+
+
+    
 #%% Generate subpages for the designs
 
 def conferenceSubPages(tag='conference', Nmax=26, Nstart=4, kmax=None,
@@ -92,12 +135,12 @@ def conferenceSubPages(tag='conference', Nmax=26, Nstart=4, kmax=None,
                 print('conferenceSubPages: generate %s N %d k %d: %d designs' % (tag, N, kk, nn))
             # calculate statistics
             presults, pareto = calculateConferencePareto(ll, N=N, k=kk, verbose=1)
-            rr = generateConferenceResults(presults, ll, ct=None, full=mode == 'full')
-            rr['arrayfile'] = cfile
-            rr['datadir'] = ''
+            pareto_results = generateConferenceResults(presults, ll, ct=None, full=mode == 'full')
+            pareto_results['arrayfile'] = cfile
+            pareto_results['datadir'] = ''
 
             # create HTML page
-            page = conferenceDesignsPage(rr, verbose=1, makeheader=True, htmlsubdir=cdir)
+            page = conferenceDesignsPage(pareto_results, verbose=1, makeheader=True, htmlsubdir=cdir)
 
             # write results
             htmlfile0 = os.path.basename(cfile).replace('.oa.gz', '.html').replace('.oa', '.html')
@@ -444,7 +487,7 @@ if 0:
 #%%
 
 
-if platform.node() == 'woelmuis':
+if generate_webpage:
     tdstyle = 'text-align:left; padding-left: .6em; margin-right: 0em; padding-right: .6em; margin-left: 0px;'
 
     citation = oaresearch.research.citation('cenumeration', style='brief')
