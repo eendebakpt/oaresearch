@@ -60,6 +60,7 @@ def conferenceJ4(al, jj=4):
     return jj
 
 
+@oapackage.oahelper.deprecated
 def conferenceSecondOrder(al, include_so=False):
     """ Calculate second-order interaction matrix for a conference matrix """
     x = np.array(al)
@@ -75,10 +76,81 @@ def conferenceSecondOrder(al, include_so=False):
     idx = 0
     for ii in range(k):
         for jj in range(ii + offset, k):
-            #print('%d %d -> %d'  %(ii, jj,idx) )
             y[:, idx] = x[:, ii] * x[:, jj]
             idx = idx + 1
     return y
+
+def leftDivide(A, B):
+    """ Perform left division of a matrix
+    
+    Args:
+        A (aray)
+        B (array)
+    Returns:
+        array: the result of A\B
+    """
+    x,resid,rank,s = np.linalg.lstsq(A,B, rcond=None)   
+    #x = lin.solve(A.T.dot(A), A.T.dot(B))
+    return x
+
+def conferenceProjectionStatistics(al, ncolumns=4, verbose=0):
+    """ Calculate the projection statistics of a conference design
+    
+    The PECk, PICk and PPCk are calculated with k the number of columns specified.
+    
+    Args:
+        al (array): conference design
+        ncolumns (int): number of column on which to project
+        
+    Returns:
+        pec, pic, ppc (float)
+    """
+    nc = al.shape[1]
+    AA = np.array(al)
+    Eestx = []
+    Deff=[]
+    invAPV_values=[]
+    for c in list(itertools.combinations(range(nc), ncolumns)):
+        X = AA[:, c]
+        dsd=oapackage.conference2DSD(oapackage.array_link(X))
+        k=X.shape[1]
+        
+        modelmatrix = oapackage.array2modelmatrix(dsd, 'q')
+        modelmatrix = oapackage.array_link(modelmatrix.astype(int))
+    
+        r=modelmatrix.rank()
+        Eest=0
+        M=(np.array(modelmatrix).T).dot(np.array(modelmatrix))
+        mr=np.linalg.matrix_rank(M)
+        
+        if verbose>=2:
+            print('conferenceProjectionStatistics: combindation %s: condition number: %s' % (c, np.linalg.cond(M)) )
+        if verbose:
+            print('%d, cond %.5f' % (mr==modelmatrix.shape[1], np.linalg.cond(M), ) )
+        if mr==modelmatrix.shape[1]: #np.linalg.cond(np.array(A).dot(np.array(A).T))<1000:
+            Eest=1
+            pk=int(1+k+k*(k+1)/2)
+            kappa=np.linalg.det(M)
+            if 1:
+                lnkappa=np.log(kappa)/(pk); 
+                D=np.exp(lnkappa)
+            else:
+                D=(kappa)**(1./pk)
+            D=D
+            
+            apv=np.trace(leftDivide(M,momentMatrix(k)))
+            invAPV=1/apv;
+        else:
+            Eest=0
+            D=0
+            invAPV=0
+
+        Deff +=[D]
+        Eestx += [Eest]
+        invAPV_values+=[invAPV]
+    if verbose:
+        print(jj)
+    return np.mean(Eestx), np.mean(Deff), np.mean(invAPV_values)
 
 
 def conferenceStatistics(al, verbose=0):
