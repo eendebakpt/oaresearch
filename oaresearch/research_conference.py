@@ -31,7 +31,19 @@ import oaresearch.filetools
 
 #%%
 
+def momentMatrix(k):
+   """ Return the moment matrix of a conference design """
+   pk=int(1+0.5*k*(k+1)+k)
+   M=np.zeros((pk,pk));
+   M[0,0]=1;
+   M[0,int(0.5*k*(k+1)+1):]=1/3;
+   M[int(0.5*k*(k+1)+1):,0]=1/3;
+   M[1:(k+1),1:(k+1)]=np.eye(k)*1./3;
+   M[(k+1):int(0.5*k*(k+1)+1),(k+1):int(0.5*k*(k+1)+1)]=np.eye(int(0.5*k*(k-1)))/9;
+   M[int(0.5*k*(k+1)+1):,int(0.5*k*(k+1)+1):]=np.eye(k)/5+(np.ones( (k,k) )-np.eye(k))/9;
+   return M
 
+#%%
 def conferenceJ4(al, jj=4):
     """ Calculate J4 values for a conference matrix """
 
