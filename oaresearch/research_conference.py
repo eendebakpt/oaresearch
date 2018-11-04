@@ -258,7 +258,7 @@ def calculateConferencePareto(ll, N=None, k=None, verbose=1, add_data = True):
     
     presults = designResults()
     for ii, al in  enumerate(ll):
-        oapackage.oahelper.tprint('calculateConferencePareto: N %s column %s: array %d/%d: %s' % (str(N), str(k), ii, len(ll), str(pareto).strip() , dt=2)
+        oapackage.oahelper.tprint('calculateConferencePareto: N %s column %s: array %d/%d: %s' % (str(N), str(k), ii, len(ll), str(pareto).strip() ) , dt=2)
         pareto_element, data = createConferenceParetoElement(al, addFoldover=True, pareto=pareto)
         
         pareto.addvalue(pareto_element, ii)

@@ -26,9 +26,10 @@ reload(oaresearch.research_conference)
 from oaresearch.research_conference import calculateConferencePareto, conferenceResultsFile, generateConferenceResults, conferenceDesignsPage
 from oaresearch.research_conference import latexResults
 
-# TODO: refactor conferenceDesignsPage
+# TODO: full calculate of results
+# TODO: large cases: on cluster?
 # TODO: make generate_conference_webpage run again
-
+# TODO make conferenceSubPages faster
 
 generate_webpage=True
 
@@ -44,7 +45,7 @@ if platform.node() == 'woelmuis':
     paperdir = '/home/eendebakpt/misc/oa/article-conference/'
 
 if generate_webpage:
-    htmldir = os.path.join(os.path.expanduser('~'),  'misc/oapage2')
+    htmldir = os.path.join(os.path.expanduser('~'),  'misc', 'oapage2')
     htemplate = True
     if 1:
         # for testing...
@@ -165,7 +166,7 @@ def conferenceSubPages(tag='conference', Nmax=26, Nstart=4, kmax=None,
     return subpages
 
 #generated_subpages = conferenceSubPages(tag='cdesign', Nmax=26, Nstart=4, verbose=2)
-generated_subpages = conferenceSubPages(tag='cdesign', Nmax=20, Nstart=4, verbose=2)
+generated_subpages = conferenceSubPages(tag='cdesign', Nmax=16, Nstart=4, verbose=2)
 
 #%% Results table
 
