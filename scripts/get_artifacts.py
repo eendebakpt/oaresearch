@@ -5,10 +5,15 @@
 from coreapi import Client
 import urllib.request
 import os
+import platform
 
 #%% Get information on latest build
 
-targetdir = '/home/eendebakpt/misc/oa/oacode/dist/'
+if platform.system()=='Windows':
+    targetdir = r'c:\\svn\\oapackage\\dist'
+else:
+    targetdir = '/home/eendebakpt/misc/oa/oacode/dist/'
+
 username = 'eendebakpt'
 project_name = 'oapackage-4lws8'
 baseurl = 'https://ci.appveyor.com/api'

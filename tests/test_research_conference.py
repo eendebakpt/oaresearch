@@ -16,6 +16,16 @@ import oaresearch.research_conference
 
 class TestResearchConference(unittest.TestCase):
 
+    def test_generateConference(self):
+        LL=oaresearch.research_conference.generateConference(8)
+        self.assertEqual([len(l) for l in LL], [0, 1, 1, 2, 1, 1, 1, 1])
+        
+    def test_calculateConferencePareto(self):
+        arrays=[oapackage.exampleArray(idx,1 ) for idx in [45,46,47,48]]
+
+        presults, pareto = oaresearch.research_conference.calculateConferencePareto(arrays, N=None, k=None, verbose=1)
+        self.assertEqual(presults.nclasses, 2)
+        self.assertEqual(presults.pareto_indices, (0,3) )
         
     def test_conference_statistics(self):
         arrays=[oapackage.exampleArray(idx,1 ) for idx in [45,46,47,48]]

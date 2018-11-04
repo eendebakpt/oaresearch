@@ -57,7 +57,7 @@ if generate_webpage:
 #%%
 from oapackage.oahelper import create_pareto_element
 reload(oaresearch.research_conference )
-from oaresearch.research_conference import createConferenceParetoElement, calculateConferencePareto, generateConferenceResults
+from oaresearch.research_conference import createConferenceParetoElement, calculateConferencePareto, generateConferenceResults,conferenceDesignsPage
 
 N=12
 kk=7    
@@ -67,36 +67,28 @@ ll = oapackage.readarrayfile(cfile)
 
 presults, pareto = calculateConferencePareto(ll, N=N, k=kk, verbose=1)
 pareto_results = generateConferenceResults(presults, ll, ct=None, full=mode == 'full')
+pareto_results['arrayfile'] = cfile
 
 page = conferenceDesignsPage(pareto_results, verbose=1, makeheader=True, htmlsubdir=cdir)
 
 oapackage.oahelper.testHtml(str(page))
 
-#%%
-al=ll[1]
-f4 = al.FvaluesConference(4)
-print(f4)
-dsd=oapackage.conference2DSD(al)
-f4 = dsd.FvaluesConference(4)
-print(f4)
 
 #%%
 
-from oapackage.oahelper import create_pareto_element
-from oaresearch.research_conference import createConferenceParetoElement, calculateConferencePareto
-
-presults = calculateConferencePareto(ll, N=None, k=None, verbose=1)
-
-
-class designResults:
-    pass
-
+if 0:
+    from oapackage.oahelper import create_pareto_element
+    from oaresearch.research_conference import createConferenceParetoElement, calculateConferencePareto
+    
+    presults = calculateConferencePareto(ll, N=None, k=None, verbose=1)
 
     
 #%% Generate subpages for the designs
+import simplejson
+import pickle
 
 def conferenceSubPages(tag='conference', Nmax=26, Nstart=4, kmax=None,
-                       verbose=1, specials={}, Nstep=2, NmaxPareto=26):
+                       verbose=1, specials={}, Nstep=2, NmaxPareto=26, cache=True):
     """ Generate a table with matrices
 
     Arguments:
@@ -120,24 +112,38 @@ def conferenceSubPages(tag='conference', Nmax=26, Nstart=4, kmax=None,
 
     subpages = {}
     subpages[tag] = {}
+    oapackage.mkdirc(os.path.join(outputdir, 'results_cachev5'))
     for ki, kk in enumerate(krange):
         for Ni, N in enumerate(Nrange):
             subpages[tag]['N%dk%d' % (N, kk)] = {}
+            cachefile = os.path.join(outputdir, 'results_cachev5', tag+'-'+'N%dk%d' % (N, kk)+'.pickle')
+            
+            if cache and os.path.exists(cachefile):
+                with open(cachefile, 'rb') as fid:
+                    print('loading results from cachefile %s' % cachefile)
+                    pareto_results, cfile = pickle.load(fid)
+            else:
 
-            # get arrays
-            cfile, nn, mode = conferenceResultsFile(N, kk, outputdir, tags=['cdesign', 'cdesign-diagonal', 'cdesign-diagonal-r'], tagtype=['full', 'r', 'r'], verbose=1)
+                # get arrays
+                cfile, nn, mode = conferenceResultsFile(N, kk, outputdir, tags=['cdesign', 'cdesign-diagonal', 'cdesign-diagonal-r'], tagtype=['full', 'r', 'r'], verbose=1)
+    
+                if nn >= 5000 or N > NmaxPareto or mode != 'full':
+                    continue
+    
+                ll = oapackage.readarrayfile(cfile)
+                if verbose:
+                    print('conferenceSubPages: generate %s N %d k %d: %d designs' % (tag, N, kk, nn))
+                # calculate statistics
+                presults, pareto = calculateConferencePareto(ll, N=N, k=kk, verbose=1)
+                pareto_results = generateConferenceResults(presults, ll, ct=None, full=mode == 'full')
+                pareto_results['arrayfile'] = cfile
+                pareto_results['datadir'] = ''
+    
+                print('storing results in cachefile %s' % cachefile)
 
-            if nn >= 5000 or N > NmaxPareto or mode != 'full':
-                continue
-
-            ll = oapackage.readarrayfile(cfile)
-            if verbose:
-                print('conferenceSubPages: generate %s N %d k %d: %d designs' % (tag, N, kk, nn))
-            # calculate statistics
-            presults, pareto = calculateConferencePareto(ll, N=N, k=kk, verbose=1)
-            pareto_results = generateConferenceResults(presults, ll, ct=None, full=mode == 'full')
-            pareto_results['arrayfile'] = cfile
-            pareto_results['datadir'] = ''
+                with open(cachefile, 'wb') as fid:
+                    pareto_results['presults']=None
+                    pickle.dump( (pareto_results, cfile), fid)
 
             # create HTML page
             page = conferenceDesignsPage(pareto_results, verbose=1, makeheader=True, htmlsubdir=cdir)
@@ -149,18 +155,17 @@ def conferenceSubPages(tag='conference', Nmax=26, Nstart=4, kmax=None,
             sx = subpages[tag]['N%dk%d' % (N, kk)]
             sx['htmlpage0'] = htmlfile0
             sx['htmlpage'] = htmlfile
-            sx['presults'] = presults
+            sx['pareto_results'] = pareto_results
             sx['arrayfile'] = cfile
 
-            import tempfile
-            subfilef = tempfile.mktemp(suffix='.html')
-            print('writing to %s' % subfilef)
+            print('writing to %s' % htmlfile)
             with open(htmlfile, 'wt') as fid:
                 fid.write(page)
 
     return subpages
 
-generated_subpages = conferenceSubPages(tag='cdesign', Nmax=26, Nstart=4, verbose=2)
+#generated_subpages = conferenceSubPages(tag='cdesign', Nmax=26, Nstart=4, verbose=2)
+generated_subpages = conferenceSubPages(tag='cdesign', Nmax=20, Nstart=4, verbose=2)
 
 #%% Results table
 
@@ -242,7 +247,6 @@ if 0:
                tags=[tag, tag + '-r'], tagtype=['full', 'r'], verbose=2, ncache=ncache)
 
 #%%
-
 
 def specialData():
     """ Special data """
@@ -405,7 +409,6 @@ def DconferencePage(page, tag='dconference', Nmax=26, Nstart=4, kmax=None,
                         print('special case: %s N %d, kk %d' % (tag, N, kk))
                         nn, mode = specials[tag][N][kk]
                         if 1:
-                            #txt='%s N %d, kk %d' % (tag, N, kk)
                             txt, link = htmlTag(nn, kk, N, mode=mode)
                             page.td(txt, style=tdstyle)
 
