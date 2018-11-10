@@ -25,11 +25,14 @@ import oaresearch.research_conference
 reload(oaresearch.research_conference)
 from oaresearch.research_conference import calculateConferencePareto, conferenceResultsFile, generateConferenceResults, conferenceDesignsPage
 from oaresearch.research_conference import latexResults
+from oapackage.conference import conferenceProjectionStatistics
 
 # TODO: full calculate of results
 # TODO: large cases: on cluster?
 # TODO: make generate_conference_webpage run again
 # TODO make conferenceSubPages faster
+# TODO:
+# TODO: check memory requirements
 
 generate_webpage=True
 
@@ -55,25 +58,56 @@ if generate_webpage:
     cdir = oapackage.mkdirc(os.path.join(htmldir, 'conference'))
 
 
+
 #%%
+from oapackage import markup
 from oapackage.oahelper import create_pareto_element
 reload(oaresearch.research_conference )
-from oaresearch.research_conference import createConferenceParetoElement, calculateConferencePareto, generateConferenceResults,conferenceDesignsPage
+from oaresearch.research_conference import createConferenceParetoElement, calculateConferencePareto, generateConferenceResults,conferenceDesignsPage,createConferenceDesignsPageParetoTable
 
-N=12
-kk=7    
+N=16; kk=6
+N=20; kk=13;
+N=20; kk=8;
+t0=time.time()
 cfile, nn, mode = conferenceResultsFile(N, kk, outputdir, tags=['cdesign', 'cdesign-diagonal', 'cdesign-diagonal-r'], tagtype=['full', 'r', 'r'], verbose=1)
 
 ll = oapackage.readarrayfile(cfile)
+ll=ll[0:]
 
-presults, pareto = calculateConferencePareto(ll, N=N, k=kk, verbose=1)
+presults, pareto = calculateConferencePareto(ll, N=N, k=kk, verbose=1, addProjectionStatistics=False)
 pareto_results = generateConferenceResults(presults, ll, ct=None, full=mode == 'full')
 pareto_results['arrayfile'] = cfile
 
 page = conferenceDesignsPage(pareto_results, verbose=1, makeheader=True, htmlsubdir=cdir)
+dt=time.time()-t0
+print('processing time: %.1f [s]' % dt)
 
 oapackage.oahelper.testHtml(str(page))
 
+# 600 seconds for N=20, kk=13
+# with refactoring and mkl: 251 [s]
+
+
+#%%
+
+designs = [oapackage.array_link(al) for al in pareto_results['pareto_designs']]
+
+for jj, al in enumerate(designs):
+    f4, b4, rank, rankq = oaresearch.research_conference.conferenceStatistics(al, verbose=0)
+    print('array %d:' % jj)
+    print(b4)
+    print(f4)
+    pec, pic, ppc= conferenceProjectionStatistics(al, 4)
+    print(pec)
+    pec, pic, ppc= conferenceProjectionStatistics(al, 5)
+    print(pec)
+    
+ 
+#%%
+if 0:
+    rtable = createConferenceDesignsPageParetoTable(markup.page(), pareto_results, verbose=2, htmlsubdir=None)
+    latextable=oapackage.array2latex(rtable)
+    print(latextable)
 
 #%%
 
@@ -85,11 +119,10 @@ if 0:
 
     
 #%% Generate subpages for the designs
-import simplejson
 import pickle
 
-def conferenceSubPages(tag='conference', Nmax=26, Nstart=4, kmax=None,
-                       verbose=1, specials={}, Nstep=2, NmaxPareto=26, cache=True):
+def conferenceSubPages(tag='conference', Nmax=40, Nstart=4, kmax=None,
+                       verbose=1, specials={}, Nstep=2, NmaxPareto=40, cache=True):
     """ Generate a table with matrices
 
     Arguments:
@@ -128,7 +161,7 @@ def conferenceSubPages(tag='conference', Nmax=26, Nstart=4, kmax=None,
                 # get arrays
                 cfile, nn, mode = conferenceResultsFile(N, kk, outputdir, tags=['cdesign', 'cdesign-diagonal', 'cdesign-diagonal-r'], tagtype=['full', 'r', 'r'], verbose=1)
     
-                if nn >= 5000 or N > NmaxPareto or mode != 'full':
+                if nn >= 10000 or N > NmaxPareto or mode != 'full':
                     continue
     
                 ll = oapackage.readarrayfile(cfile)
@@ -165,8 +198,8 @@ def conferenceSubPages(tag='conference', Nmax=26, Nstart=4, kmax=None,
 
     return subpages
 
-#generated_subpages = conferenceSubPages(tag='cdesign', Nmax=26, Nstart=4, verbose=2)
-generated_subpages = conferenceSubPages(tag='cdesign', Nmax=16, Nstart=4, verbose=2)
+#generated_subpages = conferenceSubPages(tag='cdesign', Nmax=40, Nstart=4, verbose=2, cache=False)
+generated_subpages = conferenceSubPages(tag='cdesign', Nmax=40, Nstart=4, verbose=2, cache=True)
 
 #%% Results table
 
@@ -349,7 +382,7 @@ specialdataDC = specialdata
 
 
 def DconferencePage(page, tag='dconference', Nmax=26, Nstart=4, kmax=None,
-                    ta='left', maxarrays=20000, verbose=1, specials={}, Nstep=2,
+                    ta='left', verbose=1, specials={}, Nstep=2,
                     tableclass='conftable', tdstyle=None, subpages=None):
     """ Generate a table with matrices
 
