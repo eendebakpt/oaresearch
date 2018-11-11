@@ -24,6 +24,7 @@ document = client.get(baseurl+'/projects/%s/%s/history?recordsNumber=10' % (user
 latest_build = document['builds'][0]
 build = client.get(baseurl+'/projects/%s/%s/builds/%d' % (username, project_name, latest_build['buildId']))
 
+print('latest build: %s: branch %s: %s: %s' % (build['build']['status'], build['build']['branch'], build['build']['message'], build['build']['created']))
 
 #%% Get artifacts
 

@@ -24,8 +24,8 @@ class TestResearchConference(unittest.TestCase):
         arrays=[oapackage.exampleArray(idx,1 ) for idx in [45,46,47,48]]
 
         presults, pareto = oaresearch.research_conference.calculateConferencePareto(arrays, N=None, k=None, verbose=1)
-        self.assertEqual(presults.nclasses, 2)
-        self.assertEqual(presults.pareto_indices, (0,3) )
+        self.assertEqual(presults['nclasses'], 2)
+        self.assertEqual(presults['pareto_indices'], (0,3) )
         
     def test_conference_statistics(self):
         arrays=[oapackage.exampleArray(idx,1 ) for idx in [45,46,47,48]]

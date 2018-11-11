@@ -63,7 +63,7 @@ from oaresearch.research_conference import createConferenceParetoElement, calcul
 N=16; kk=6
 N=20; kk=13;
 N=20; kk=8;
-N=22;kk=13
+#N=24;kk=22
 t0=time.time()
 cfile, nn, mode = conferenceResultsFile(N, kk, outputdir, tags=['cdesign', 'cdesign-diagonal', 'cdesign-diagonal-r'], tagtype=['full', 'r', 'r'], verbose=1)
 
