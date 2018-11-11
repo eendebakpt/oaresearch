@@ -258,14 +258,22 @@ def calculateConferencePareto(ll, N=None, k=None, verbose=1, add_data = True, ad
     
     if len(ll)>0:
         N=ll[0].n_rows
-        
+        k=ll[0].n_columns
+
     if addProjectionStatistics is None:
-        if len(ll)<400 or N<=20:
-            addProjectionStatistics=True
+        if (len(ll)<400 or N<=20):
+            if N is not None and k is not None:
+                if N>26 and oapackage.choose(N, 5)*len(ll)>1e6:
+                    addProjectionStatistics=False
+                else:
+                    addProjectionStatistics=True
+            else:
+                addProjectionStatistics=True
         else:
             addProjectionStatistics=False
         
     presults = designResults()
+    data=None
     for ii, al in  enumerate(ll):
         oapackage.oahelper.tprint('calculateConferencePareto: N %s column %s: array %d/%d: %s' % (str(N), str(k), ii, len(ll), str(pareto).strip() ) , dt=2)
         pareto_element, data = createConferenceParetoElement(al, addFoldover=False, addProjectionStatistics=addProjectionStatistics, pareto=pareto)
@@ -286,7 +294,10 @@ def calculateConferencePareto(ll, N=None, k=None, verbose=1, add_data = True, ad
         presults.N = ll[0].n_rows
         presults.ncolumns = ll[0].n_columns
         
-    presults['pareto_type']=', '.join([key for key in data.keys() if data[key] is not None] )
+    if data is None:
+        presults['pareto_type']='no design'
+    else:
+        presults['pareto_type']=', '.join([key for key in data.keys() if data[key] is not None] )
     if 0:
         if addProjectionStatistics:
             for kk in [4,5]:
@@ -682,15 +693,18 @@ def createConferenceDesignsPageParetoTable(page, pareto_results, verbose=0, html
 
         page.add(str(subpage))
         page.br(clear='both')
-    
+    else:
+        rtable = np.zeros( (0,0))
+        
     return rtable
 
 def _convert_to_latex_table(rtable, N, ncolumns):
     import copy
     rtable_latex = copy.deepcopy(rtable)
-    for row in range(1, rtable_latex.shape[0]):
-        rtable_latex[row, 0]=str(int(rtable_latex[row, 0])+1)
-        rtable_latex[row, 1]=str(int(rtable_latex[row, 1])+1)
+    if len(rtable)>1:
+        for row in range(1, rtable_latex.shape[0]):
+            rtable_latex[row, 0]=str(int(rtable_latex[row, 0])+1)
+            rtable_latex[row, 1]=str(int(rtable_latex[row, 1])+1)
     latextable=oapackage.array2latex(rtable_latex, hlines=[0], comment=['conference desgins N=%d, k=%d' % (N, ncolumns), 'offset for indices is 1'])
     return latextable
             

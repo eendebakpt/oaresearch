@@ -27,12 +27,7 @@ from oaresearch.research_conference import calculateConferencePareto, conference
 from oaresearch.research_conference import latexResults
 from oapackage.conference import conferenceProjectionStatistics
 
-# TODO: full calculate of results
 # TODO: large cases: on cluster?
-# TODO: make generate_conference_webpage run again
-# TODO make conferenceSubPages faster
-# TODO:
-# TODO: check memory requirements
 
 generate_webpage=True
 
@@ -68,13 +63,14 @@ from oaresearch.research_conference import createConferenceParetoElement, calcul
 N=16; kk=6
 N=20; kk=13;
 N=20; kk=8;
+N=22;kk=13
 t0=time.time()
 cfile, nn, mode = conferenceResultsFile(N, kk, outputdir, tags=['cdesign', 'cdesign-diagonal', 'cdesign-diagonal-r'], tagtype=['full', 'r', 'r'], verbose=1)
 
 ll = oapackage.readarrayfile(cfile)
 ll=ll[0:]
 
-presults, pareto = calculateConferencePareto(ll, N=N, k=kk, verbose=1, addProjectionStatistics=False)
+presults, pareto = calculateConferencePareto(ll, N=N, k=kk, verbose=1, addProjectionStatistics=True)
 pareto_results = generateConferenceResults(presults, ll, ct=None, full=mode == 'full')
 pareto_results['arrayfile'] = cfile
 
