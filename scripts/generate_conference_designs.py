@@ -27,9 +27,9 @@ from researchOA import job, createJobScript
 basedir=os.path.expanduser('~')
 resultsdir = join(basedir, 'oatmp')
 outputdir = oapackage.mkdirc(
-    os.path.join(os.path.expanduser('~'), 'oatmp', 'conf2'))
+    os.path.join(os.path.expanduser('~'), 'oatmp', 'conf'))
 
-scriptdir = join(os.path.expanduser('~'), 'confjobs')
+scriptdir = oapackage.mkdirc(join(os.path.expanduser('~'), 'confjobs') )
 
 full_generation = False
 verbose=1
@@ -88,7 +88,7 @@ def generateConference(N, kmax=None, verbose=1, diagc=False, nmax=None, selectme
 
     for extcol in range(2, kmax):
         if verbose:
-            print('generateConference: extcol %d: %d designs' % (extcol, len(LL[extcol - 1])) )
+            print('generateConference: N %d, extcol %d: %d designs' % (N, extcol, len(LL[extcol - 1])) )
             sys.stdout.flush()
         LL[extcol] = oapackage.extend_conference(
             LL[extcol - 1], ctype, verbose=verbose >= 2)
@@ -121,20 +121,13 @@ def generateConference(N, kmax=None, verbose=1, diagc=False, nmax=None, selectme
     return LL
 
 
-LL = generateConference(12, outputdir=outputdir)
+LL = generateConference(12, outputdir=None)
 
 
 #%% Test maxz values
 
 
-def showMaxZ(LL):
-    N = LL[3][0].n_rows
-
-    for ii, L in enumerate(LL):
-        k = ii + 1
-        s = [oapackage.maxz(al) for al in L]
-        mm, _ = np.histogram(s, range(N + 1))
-        print('%d cols: maxz seq %s' % (k, list(mm)) )
+from oaresearch.research_conference import showMaxZ
 
 showMaxZ(LL)
 
@@ -142,31 +135,33 @@ showMaxZ(LL)
 #%%
 if not full_generation:
     # only do small cases
-    for NN in range(4, 12, 2):
-        _ = generateConference(N=NN)
+    for NN in range(4, 18, 2):
+        _ = generateConference(N=NN, outputdir=outputdir)
 
 else:
     for NN in range(4, 18, 2):
-        _ = generateConference(N=NN)
+        _ = generateConference(N=NN, outputdir=outputdir)
     for NN in range(20, 26, 2):
-        _ = generateConference(N=NN, kmax=3)
+        _ = generateConference(N=NN, kmax=3, outputdir=outputdir)
     # big cases (takes a longer time)
-    LL = generateConference(N=18)
-    LL = generateConference(N=20, kmax=20)
-    LL = generateConference(N=22, kmax=7)
-    _ = generateConference(N=24, kmax=6)
-    LL = generateConference(N=26, kmax=6)
-    LL = generateConference(N=28, kmax=5)
-    LL = generateConference(N=30, kmax=4)
+    LL = generateConference(N=18, outputdir=outputdir)
+    LL = generateConference(N=20, kmax=20, outputdir=outputdir)
+    LL = generateConference(N=22, kmax=7, outputdir=outputdir)
+    _ = generateConference(N=24, kmax=6, outputdir=outputdir)
+    LL = generateConference(N=26, kmax=6, outputdir=outputdir)
+    LL = generateConference(N=28, kmax=5, outputdir=outputdir)
+    LL = generateConference(N=30, kmax=4, outputdir=outputdir)
+    for N in [30,32,34,36,38,40]:
+        LL = generateConference(N=N, kmax=5, outputdir=outputdir)
 
-    LL = generateConference(22, diagc=True)
-    LL = generateConference(24, diagc=True)
+    LL = generateConference(22, diagc=True, outputdir=outputdir)
+    LL = generateConference(24, diagc=True, outputdir=outputdir)
 
-    LL = generateConference(26, diagc=True)
-    LL = generateConference(28, kmax=9, diagc=True)  # started...
+    LL = generateConference(26, diagc=True, outputdir=outputdir)
+    LL = generateConference(28, kmax=9, diagc=True, outputdir=outputdir)  # started...
     #LL=generateConference(30, kmax=7, diagc=True)
 
-    LL = generateConference(28, diagc=True, nmax=100)
+    LL = generateConference(28, diagc=True, nmax=100, outputdir=outputdir)
 
     cmd = './oaconference  -N 22  -o cdesign'
     print('do manually: %s' % cmd)

@@ -30,6 +30,11 @@ class TestResearchoaFiletools(unittest.TestCase):
         resultfile = oaresearch.filetools.copyOAfile(source, targetdir, target0)
         self.assertEqual(resultfile, target0)
 
+        target = tempfile.mktemp(suffix='.oa')
+        targetdir, target0 = os.path.split(target)
+        resultfile = oaresearch.filetools.copyOAfile(source, targetdir, target0, convert='B', zipfile=False)
+        self.assertEqual(resultfile, target0)
+
 
 if __name__ == '__main__':
     unittest.main()

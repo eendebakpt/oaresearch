@@ -10,17 +10,18 @@ Pieter Eendebak <pieter.eendebak@gmail.com>
 from __future__ import print_function
 
 import os
+import sys
 import numpy as np
 import time
 import itertools
 
 try:
-    import matplotlib
     import matplotlib.pyplot as plt
 except:
     pass
 
 import oapackage
+import oapackage.conference
 import oapackage.markup as markup
 import oapackage.oahelper as oahelper
 from oapackage.markup import oneliner as e
@@ -31,18 +32,80 @@ import oaresearch.filetools
 
 #%%
 
-def momentMatrix(k):
-   """ Return the moment matrix of a conference design """
-   pk=int(1+0.5*k*(k+1)+k)
-   M=np.zeros((pk,pk));
-   M[0,0]=1;
-   M[0,int(0.5*k*(k+1)+1):]=1/3;
-   M[int(0.5*k*(k+1)+1):,0]=1/3;
-   M[1:(k+1),1:(k+1)]=np.eye(k)*1./3;
-   M[(k+1):int(0.5*k*(k+1)+1),(k+1):int(0.5*k*(k+1)+1)]=np.eye(int(0.5*k*(k-1)))/9;
-   M[int(0.5*k*(k+1)+1):,int(0.5*k*(k+1)+1):]=np.eye(k)/5+(np.ones( (k,k) )-np.eye(k))/9;
-   return M
+from oapackage.conference import momentMatrix, modelStatistics, conferenceProjectionStatistics
 
+
+def generateConference(N, kmax=None, verbose=1, diagc=False, nmax=None, selectmethod='random', tag='cdesign', outputdir=None):
+    """ Generate sequece of conference designs
+
+    Arguments:
+        N : integer
+            number of rows in the array
+        kmax : integer
+            maximum number of columns to compute
+        verbose : integer
+            output level
+        diagc : boolean
+            the default value is False. If True, then only the diagonal
+            matrices will be computed (e.g. all zeros are on the diagonal)
+
+    """
+    if kmax is None:
+        kmax = N
+    ctype = oapackage.conference_t(N, N, 0)
+
+    if diagc:
+        ctype.ctype = oapackage.conference_t.CONFERENCE_DIAGONAL
+        tag += '-diagonal'
+    if not nmax is None:
+        tag += '-r'
+
+    al = ctype.create_root()
+
+    ll = oapackage.arraylist_t()
+    ll.push_back(al)
+    LL = [[]] * (kmax)
+    LL[1] = ll
+    print('generateConference: start: %s' % ctype)
+    if outputdir is not None:
+        _ = oapackage.writearrayfile(
+            os.path.join(outputdir, 'cdesign-%d-%d.oa' % (N, 2)), LL[1], oapackage.ATEXT, N, 2)
+
+    for extcol in range(2, kmax):
+        if verbose:
+            print('generateConference: extcol %d: %d designs' % (extcol, len(LL[extcol - 1])) )
+            sys.stdout.flush()
+        LL[extcol] = oapackage.extend_conference(
+            LL[extcol - 1], ctype, verbose=verbose >= 2)
+
+        LL[extcol] = oapackage.selectConferenceIsomorpismClasses(LL[extcol], 1)
+
+        LL[extcol] = oapackage.sortLMC0(LL[extcol])
+
+        if nmax is not None:
+            na = min(nmax, len(LL[extcol]))
+            if na > 0:
+                if selectmethod == 'random':
+                    idx = np.random.choice(len(LL[extcol]), na, replace=False)
+                    LL[extcol] = [LL[extcol][i] for i in idx]
+                elif selectmethod == 'first':
+                    LL[extcol] = [LL[extcol][i] for i in range(na)]
+                else:
+                    # mixed
+                    raise Exception('not implemented')
+        afmode = oapackage.ATEXT
+        if (len(LL[extcol]) > 1000):
+            afmode = oapackage.ABINARY
+        if outputdir is not None:
+            _ = oapackage.writearrayfile(os.path.join(
+                outputdir, '%s-%d-%d.oa' % (tag, N, extcol + 1)), LL[extcol], afmode, N, extcol + 1)
+
+    ll = [len(l) for l in LL]
+    if verbose:
+        print('generated sequence: %s' % ll)
+    return LL
+
+   
 #%%
 def conferenceJ4(al, jj=4):
     """ Calculate J4 values for a conference matrix """
@@ -80,78 +143,6 @@ def conferenceSecondOrder(al, include_so=False):
             idx = idx + 1
     return y
 
-def leftDivide(A, B):
-    """ Perform left division of a matrix
-    
-    Args:
-        A (aray)
-        B (array)
-    Returns:
-        array: the result of A\B
-    """
-    x,resid,rank,s = np.linalg.lstsq(A,B, rcond=None)   
-    #x = lin.solve(A.T.dot(A), A.T.dot(B))
-    return x
-
-def conferenceProjectionStatistics(al, ncolumns=4, verbose=0):
-    """ Calculate the projection statistics of a conference design
-    
-    The PECk, PICk and PPCk are calculated with k the number of columns specified.
-    
-    Args:
-        al (array): conference design
-        ncolumns (int): number of column on which to project
-        
-    Returns:
-        pec, pic, ppc (float)
-    """
-    nc = al.shape[1]
-    AA = np.array(al)
-    Eestx = []
-    Deff=[]
-    invAPV_values=[]
-    for c in list(itertools.combinations(range(nc), ncolumns)):
-        X = AA[:, c]
-        dsd=oapackage.conference2DSD(oapackage.array_link(X))
-        k=X.shape[1]
-        
-        modelmatrix = oapackage.array2modelmatrix(dsd, 'q')
-        modelmatrix = oapackage.array_link(modelmatrix.astype(int))
-    
-        r=modelmatrix.rank()
-        Eest=0
-        M=(np.array(modelmatrix).T).dot(np.array(modelmatrix))
-        mr=np.linalg.matrix_rank(M)
-        
-        if verbose>=2:
-            print('conferenceProjectionStatistics: combindation %s: condition number: %s' % (c, np.linalg.cond(M)) )
-        if verbose:
-            print('%d, cond %.5f' % (mr==modelmatrix.shape[1], np.linalg.cond(M), ) )
-        if mr==modelmatrix.shape[1]: #np.linalg.cond(np.array(A).dot(np.array(A).T))<1000:
-            Eest=1
-            pk=int(1+k+k*(k+1)/2)
-            kappa=np.linalg.det(M)
-            if 1:
-                lnkappa=np.log(kappa)/(pk); 
-                D=np.exp(lnkappa)
-            else:
-                D=(kappa)**(1./pk)
-            D=D
-            
-            apv=np.trace(leftDivide(M,momentMatrix(k)))
-            invAPV=1/apv;
-        else:
-            Eest=0
-            D=0
-            invAPV=0
-
-        Deff +=[D]
-        Eestx += [Eest]
-        invAPV_values+=[invAPV]
-    if verbose:
-        print(jj)
-    return np.mean(Eestx), np.mean(Deff), np.mean(invAPV_values)
-
 
 def conferenceStatistics(al, verbose=0):
     """ Calculate statistics for a conference design
@@ -167,33 +158,24 @@ def conferenceStatistics(al, verbose=0):
     j4 = conferenceJ4(al)
     b4 = np.sum(np.array(j4)**2) / N**2
 
-    # print(al.Jcharacteristics(4))
-    #X2 = al.getModelMatrix(2)[:, (1 + al.n_columns):]
-    X2 = conferenceSecondOrder(al, False)
-    rank = np.linalg.matrix_rank(X2)
-    # oapackage.makearraylink(X2).showarray()
+    ncols=al.n_columns
+    modelmatrix = oapackage.array2modelmatrix(al, 'i')[:,(1+ncols):]
+    rank = np.linalg.matrix_rank(modelmatrix)
 
-    X2 = conferenceSecondOrder(al, True)
-    rankq = np.linalg.matrix_rank(X2)
-    # oapackage.makearraylink(X2).showarray()
+    modelmatrix_quadratic = oapackage.array2modelmatrix(al, 'q')
+    rankq = np.linalg.matrix_rank(modelmatrix_quadratic)
 
     if verbose:
-        x = np.array(al)
-        x2 = x.copy()
-        x2 *= -1
-        # x2[:,0]*=-1
-        foldover = np.vstack((x, x2))
-        foldover = oapackage.makearraylink(foldover)
-        #X2 = al.getModelMatrix(2)[:, (1 + al.n_columns):]
-        X2 = conferenceSecondOrder(foldover, False)
-        rankfoldover = np.linalg.matrix_rank(X2)
+        foldover = oapackage.conference2DSD(al)
+        #mm = conferenceSecondOrder(foldover, False)
+        #rankfoldover = np.linalg.matrix_rank(mm)
 
     if verbose:
         print('f4: %s' % (f4,))
         print('j4: %s' % (j4,))
         print('rank X2: %s' % (rank,))
         print('rank X2+quadratics: %s' % (rankq,))
-        print('rank of foldover X2: %s' % (rankfoldover,))
+        #print('rank of foldover X2: %s' % (rankfoldover,))
     return [f4, b4, rank, rankq]
 
 
@@ -205,7 +187,39 @@ def test_confJ4():
 
 from oapackage.oahelper import create_pareto_element
 
+def createConferenceParetoElement(al, addFoldover=True, addProjectionStatistics=True, pareto=None):
+    """ Create Pareto element from conference design """
+    rr = oaresearch.research_conference.conferenceStatistics(al, verbose=0)
+    [f4, b4, rankinteraction, ranksecondorder] = rr[0:4]
+    f4minus = [-float(x) for x in f4]
+    values = [ list(f4minus), [-float(b4)], [float(ranksecondorder)] ]
+    data ={'F4': f4, 'B4': b4, 'ranksecondorder': ranksecondorder, 'rankinteraction': rankinteraction}
+    
+    for kk in [4,5]:
+        if addProjectionStatistics:
+            PEC, PIC, PPC = oapackage.conference.conferenceProjectionStatistics(al, ncolumns=kk)
 
+            values += [ [PEC] ]
+            values += [ [PIC] ]
+            values += [ [PPC] ]
+            data['PEC%d' % kk] = PEC
+            data['PIC%d' % kk] = PIC
+            data['PPC%d' % kk] = PPC
+        else:
+            data['PEC%d' % kk] = None
+            data['PIC%d' % kk] = None
+            data['PPC%d' % kk] = None
+
+
+    if addFoldover:
+            foldover=oapackage.isConferenceFoldover(al)
+            values += [[int(foldover)], [int(not foldover)]]
+
+    pareto_element = create_pareto_element(values, pareto=pareto)
+
+    return pareto_element, data
+
+@oapackage.oahelper.deprecated
 def makePareto(presults, addFoldover=True):
     pareto = oapackage.ParetoMultiDoubleLong()
 
@@ -221,56 +235,111 @@ def makePareto(presults, addFoldover=True):
     return pareto
 
 
-def test_makePareto():
+
+
+class designResults(dict):
     pass
 
+    def add_value(self, tag, value):
+        mintag=tag+'_min'
+        maxtag=tag+'_max'
+        if not mintag in self:
+                self[mintag]=value
+        if not maxtag in self:
+                self[maxtag]=value
+        self[mintag]=min(value, self[mintag])
+        self[maxtag]=max(value, self[maxtag])
 
-class designResults:
-    pass
-
-
-def calculateConferencePareto(ll, N=None, k=None, verbose=1):
+def calculateConferencePareto(ll, N=None, k=None, verbose=1, add_data = True, addProjectionStatistics=None):
+    """ Calculate Pareto optimal designs from a list of designs """
     if verbose:
-        print('analysing %d arrays ' % (len(ll), ))
-        print('  criteria: rank, F4, B4')
-        print('\n')
+        print('calculateConferencePareto: analysing %d arrays, addProjectionStatistics %s' % (len(ll), addProjectionStatistics))
+    pareto = oapackage.ParetoMultiDoubleLong()
+    
+    if len(ll)>0:
+        N=ll[0].n_rows
+        k=ll[0].n_columns
 
+    if addProjectionStatistics is None:
+        if (len(ll)<400 or N<=20):
+            if N is not None and k is not None:
+                if N>26 and oapackage.choose(N, 5)*len(ll)>1e6:
+                    addProjectionStatistics=False
+                else:
+                    addProjectionStatistics=True
+            else:
+                addProjectionStatistics=True
+        else:
+            addProjectionStatistics=False
+        
     presults = designResults()
-    presults.N = N
-    presults.k = k
+    data=None
+    for ii, al in  enumerate(ll):
+        oapackage.oahelper.tprint('calculateConferencePareto: N %s column %s: array %d/%d: %s' % (str(N), str(k), ii, len(ll), str(pareto).strip() ) , dt=2)
+        pareto_element, data = createConferenceParetoElement(al, addFoldover=False, addProjectionStatistics=addProjectionStatistics, pareto=pareto)
+        
+        pareto.addvalue(pareto_element, ii)
+
+        if add_data:
+            for tag in ['ranksecondorder', 'rankinteraction',  'B4', 'F4']:
+                presults.add_value(tag, data[tag])
+            if addProjectionStatistics:
+                for tag in ['PEC4', 'PIC4']:
+                    presults.add_value(tag, data[tag])
+    
+    presults['N']=N
+    presults['ncolumns']=k
+    
     if len(ll) > 0:
         presults.N = ll[0].n_rows
-        presults.k = ll[0].n_columns
+        presults.ncolumns = ll[0].n_columns
+        
+    if data is None:
+        presults['pareto_type']='no design'
+    else:
+        presults['pareto_type']=', '.join([key for key in data.keys() if data[key] is not None] )
+    if 0:
+        if addProjectionStatistics:
+            for kk in [4,5]:
+                presults['pareto_type']+=', '
+                presults['pareto_type']+=', '.join(['PIC%d' %kk, 'PEC%d' %kk, 'PPC%d' % kk ])
+            
+    presults['pareto_type']=presults['pareto_type'].replace('ranksecondorder', 'r(2FI, QE)')
+    presults['pareto_type']=presults['pareto_type'].replace('rankinteraction', 'r(2FI)')
+    
+    pareto.show()
 
-    presults.ranks = []
-    presults.ranksX2Q = []
-    presults.b4s = []
-    presults.f4s = []
-    presults.foldover = []
-    for ii, al in enumerate(ll):
-        if verbose:
-            oapackage.tprint('processing array %d/%d' % (ii, len(ll)), dt=5)
+    presults['pareto_indices']=  pareto.allindices()
+    presults['nclasses']= pareto.number()
+    presults['npareto']= pareto.numberindices()
+    presults['_version']='0.2'
+    
+    presults['pareto_designs']= [ll[ii] for ii in presults['pareto_indices']]
+    presults[ 'pareto_data']=[]
+    for ii, al in  enumerate(presults['pareto_designs']):
+        pareto_element, data = createConferenceParetoElement(al, addFoldover=True)
+        presults[ 'pareto_data'].append(data)
 
-        rr = conferenceStatistics(al, verbose=0)
-        [f4, b4, rank, rankq] = rr[0:4]
-        N = al.n_rows
-
-        presults.b4s += [b4]
-        presults.f4s += [f4]
-        presults.ranks += [rank]
-        presults.ranksX2Q += [rankq]
-        presults.foldover += [oapackage.isConferenceFoldover(al)]
-
-    pareto = makePareto(presults, addFoldover=True)
-
-    presults.pareto_indices = pareto.allindices()
-    presults.nclasses = pareto.number()
-    presults.npareto = pareto.numberindices()
-
-    # print(al.GWLP()[0:5])
     return presults, pareto
 
+def test_calculateConferencePareto():
+    ll=[oapackage.exampleArray(idx) for idx in [45,46,47,45]]
+    presults, _ = calculateConferencePareto(ll, N=None, k=None, verbose=1, add_data = True)
 
+if __name__=='__main__':
+    test_calculateConferencePareto()
+    
+
+def showMaxZ(LL):
+    """ For a list of generated designs show the maximum zero position """
+    N = LL[3][0].n_rows
+
+    for ii, L in enumerate(LL):
+        k = ii + 1
+        s = [oapackage.maxz(al) for al in L]
+        mm, _ = np.histogram(s, range(N + 1))
+        print('%d cols: maxz seq %s' % (k, list(mm)) )
+        
 def conferenceResultsFile(N, kk, outputdir, tags=['cdesign', 'cdesign-diagonal', 'cdesign-diagonal-r'], tagtype=['full', 'r', 'r'], verbose=1):
     """ Create html tag for oa page
 
@@ -321,34 +390,34 @@ def conferenceResultsFile(N, kk, outputdir, tags=['cdesign', 'cdesign-diagonal',
 
 
 def generateConferenceResults(presults, ll, ct=None, full=None):
-    rr = {'type': 'conference designs', 'arrayfile': None, 'presults': presults}
-    rr['full'] = full
-    rr['N'] = presults.N
-    rr['k'] = presults.k
-    rr['idstr'] = 'cdesign-%d-%d' % (rr['N'], rr['k'])
+    pareto_results = presults
+    pareto_results['type']='conference designs'
+    pareto_results['arrayfile']=None
+    pareto_results[ 'presults']=None
+    
+    pareto_results['full'] = full
+    pareto_results['full_results'] = full
+    if 0:
+        pareto_results['N'] = presults.N
+        pareto_results['ncolumns'] = presults.ncolumns
+        pareto_results['pareto_type'] = presults['pareto_type']
+        if len(ll) == 0:
+            pass
+        else:
+            for tag in ['B4_min', 'B4_max', 'ranksecondorder_min', 'ranksecondorder_max', 'rankinteraction_min', 'rankinteraction_max']:
+                   pareto_results[tag] =presults[tag]
+        for tag in ['npareto', 'nclasses', 'pareto_data', 'pareto_indices']:
+            pareto_results[tag]=presults.get(tag)
+    pareto_results['idstr'] = 'cdesign-%d-%d' % (pareto_results['N'], pareto_results['ncolumns'])
     if ct is not None:
-        rr['ctidstr'] = ct.idstr()
-        assert(ct.N == presults.N)
-        assert(ct.ncols == presults.k)
+        pareto_results['ctidstr'] = ct.idstr()
+        assert(ct.N == pareto_results['N'])
+        assert(ct.ncols ==pareto_results['ncolumns'])
 
-    rr['narrays'] = len(ll)
-    if len(ll) == 0:
-        pass
-    else:
-        rr['minrankX2'] = np.min(presults.ranks)
-        rr['maxrankX2'] = np.max(presults.ranks)
-        rr['minrankX2q'] = np.min(presults.ranksX2Q)
-        rr['maxrankX2q'] = np.max(presults.ranksX2Q)
-
-        rr['maxB4'] = np.max(presults.b4s)
-        rr['minB4'] = np.min(presults.b4s)
-
-        rr['minF4'] = presults.f4s[oapackage.oahelper.sortrows(np.abs(presults.f4s))[0]]
-        rr['maxF4'] = presults.f4s[oapackage.oahelper.sortrows(np.abs(presults.f4s))[-1]]
-    if hasattr(presults, 'pareto_indices'):
-        rr['pareto_designs'] = [ll[ii] for ii in presults.pareto_indices]
-
-    return rr
+    pareto_results['narrays'] = len(ll)
+        
+    pareto_results['pareto_designs'] = [np.array(array) for array in presults['pareto_designs']]
+    return pareto_results
 
 #%% Webpage generation
 
@@ -449,27 +518,10 @@ def latexResults(outputdir):
     return X
 
 
-def conferenceDesignsPage(rr, verbose=1, makeheader=True, htmlsubdir=None):
-    """ Generate html page for class conference desgins """
-    #idstr = rr['ctidstr']
-    #idstr = '%s' % (ct.idstr(),)
-    N = rr['N']
-    k = rr['k']
-
-    if makeheader:
-        pext = 'html'
-    else:
-        pext = 'html.template'
-
-    xstr = 'C(%d, %d)' % (N, k)
+def createConferenceDesignsPageHeader(page, makeheader, conference_class, ncolumns):
+    
+    xstr = 'C(%d, %d)' % (conference_class.N, ncolumns)
     xstrplain = xstr
-
-    if verbose:
-        print('conferenceDesignsPage: start of generation')
-
-    presults = rr.get('presults', None)
-
-    page = markup.page()
     if makeheader:
         page.init(title="Class %s" % xstrplain,
                   css=('../oastyle.css'),
@@ -490,7 +542,8 @@ def conferenceDesignsPage(rr, verbose=1, makeheader=True, htmlsubdir=None):
         citation('conference', style='full') + '.'
     page.p(pstr)
 
-    full_results = rr.get('full')
+def createConferenceDesignsPageResultsTable(page, pareto_results, verbose=0):
+    full_results = pareto_results.get('full')
     if full_results:
         page.h2('Results')
     else:
@@ -508,98 +561,182 @@ def conferenceDesignsPage(rr, verbose=1, makeheader=True, htmlsubdir=None):
         page.td(b, style='padding-right:8px;')
         page.tr.close()
 
-    narrays = rr['narrays']
-    simpleRow('Number of non-isomorphic designs', str(rr['narrays']))
+    narrays = pareto_results['narrays']
+    simpleRow('Number of non-isomorphic designs', str(pareto_results['narrays']))
 
     if narrays > 0:
-        simpleRow('Minimum/Maximum rank of X2', '%d/%d' % (rr['minrankX2'], rr['maxrankX2']))
-        simpleRow('Minimum/Maximum rank of X2 with quadratics', '%d/%d' % (rr['minrankX2q'], rr['maxrankX2q']))
-        simpleRow('Minimum B4', '%.4f' % rr['minB4'])
-        simpleRow('Maximum B4', '%.4f' % rr['maxB4'])
-        simpleRow('Minimum F4', str(rr['minF4']))
-        simpleRow('Maximum F4', str(rr['maxF4']))
+        #simpleRow('Minimum/Maximum rank of X2', '%d/%d' % (rr['minrankX2'], rr['maxrankX2']))
+        simpleRow('Minimum/Maximum rank of model matrix with 2FI and QE', '%d/%d' % (pareto_results['ranksecondorder_min'], pareto_results['ranksecondorder_max']))
+        simpleRow('Minimum/Maximum rank of model matrix for 2FI', '%d/%d' % (pareto_results['rankinteraction_min'], pareto_results['rankinteraction_max']))
+        simpleRow('Minimum B4', '%.4f' % pareto_results['B4_min'])
+        simpleRow('Maximum B4', '%.4f' % pareto_results['B4_max'])
+        simpleRow('Minimum F4', '%s' %  (pareto_results['F4_min'],))
+        simpleRow('Maximum F4', '%s' % (pareto_results['F4_max'],))
+    if 'totaltime' in list(pareto_results.keys()):
+        simpleRow('Processing time', str(pareto_results['totaltime']) + 's')
+    
+    if pareto_results['datafile_tag'] is not None:
+        simpleRow('Data', pareto_results['datafile_tag'])
+
+
+    page.table.close()
+    page.p(style='font-size: smaller;')
+    page.add('Note: 2FI: two-factor interaction; QE: quadratic effect')
+    page.p.close()
+    
+def createConferenceDesignsPageLoadDesignsFile( pareto_results, htmlsubdir=None, verbose=1):
 
     havearrayfile = 0
-    if 'arrayfile' in list(rr.keys()):
-        if not rr['arrayfile'] is None:
+    if 'arrayfile' in list(pareto_results.keys()):
+        if not pareto_results['arrayfile'] is None:
             havearrayfile = 1
 
+    if verbose:
+        print('createConferenceDesignsPageLoadDesignsFile: havearrayfile %d' % havearrayfile)
     if havearrayfile:
-        iafile = rr['arrayfile']
-        outfile0 = rr['idstr'] + '.oa'
+        iafile = pareto_results['arrayfile']
+        outfile0 = pareto_results['idstr'] + '.oa'
 
         na = oapackage.nArrayFile(iafile)
         if verbose >= 2:
             print('conferenceDesignsPage: read arrayfile %s: na %d' % (iafile, na))
 
-        if na < 5000 and na >= 0 and 1:
+        if na < 5000 and na >= 0:
             if htmlsubdir is None:
                 raise Exception('need html subdirectory to copy .oa file')
             outfilefinal = oaresearch.filetools.copyOAfile(iafile, htmlsubdir, outfile0, convert='T', zipfile=None, verbose=1, cache=0)
 
-            if rr.get('full', False):
+            if pareto_results.get('full', False):
                 htag = oaresearch.htmltools.formatArrayHyperlink(
                     'all arrays', outfile0, iafile)
 
-                rr['datafilestr'] = 'all arrays'
+                pareto_results['datafilestr'] = 'all arrays'
+                pareto_results['datafile_tag'] = htag
             else:
                 na = oapackage.nArrayFile(os.path.join(htmlsubdir, outfilefinal))
                 htag = oaresearch.htmltools.formatArrayHyperlink(
                     'all arrays', outfile0, iafile)
-                rr['datafilestr'] = '%d array(s)' % na
+                pareto_results['datafilestr'] = '%d array(s)' % na
+                pareto_results['datafile_tag'] = htag
 
-            simpleRow('Data', htag)
 
         else:
             if verbose:
                 print('conferenceDesignsPage: no datafile (na %d)' % na)
-            rr['datafilestrfile'] = None
-            rr['datafilestr'] = '-'
+            pareto_results['datafilestr'] = '-'
+            pareto_results['datafile_tag'] = None
 
-    if 'totaltime' in list(rr.keys()):
-        simpleRow('Processing time', str(rr['totaltime']) + 's')
-    page.table.close()
+def createConferenceDesignsPageParetoTable(page, pareto_results, verbose=0, htmlsubdir = None):
 
-    if narrays > 0 and full_results:
+    if verbose:
+        print('createConferenceDesignsPageParetoTable: start')
+        
+    pareto_indices = pareto_results['pareto_indices']
+    pareto_data = pareto_results['pareto_data']
+        
+    if pareto_results['narrays'] > 0 and pareto_results.get('full_results'):
         add_extra = True
         print('do statistics2htmltable')
 
-        header = ['Array index', 'Rank X2', 'F4', 'B4']
+        header = ['Index Pareto file', 'Index design file', 'Rank 2FI and QE', 'Rank 2FI', 'F4', 'B4']
         if add_extra:
-            header += ['Rank X2 with q']
-
-        rtable = np.zeros((1 + len(presults.pareto_indices), len(header)), dtype='|U208')
+                for tag  in ['PEC', 'PIC', 'PPC']:
+                    for kk in [4,5]:
+                        header+=[tag +'%d' % kk]
+                        
+        rtable = np.zeros((1 + len(pareto_results['pareto_indices']), len(header)), dtype='|U208')
         rtable[:] = ' '
         for ii, h in enumerate(header):
             rtable[0, ii] = header[ii]
 
-        pidx = presults.pareto_indices  # pareto.allindices()
-        for ii, idx in enumerate(pidx):
-            rtable[ii + 1, 0:4] = ['%d' % idx, str(presults.ranks[idx]), str(presults.f4s[idx]), '%.4f' % (presults.b4s[idx])]
+        sort_indices = oapackage.sortrows(np.array([ p['F4'] for p in pareto_results['pareto_data'] ]) )
+        
+        for ii, sort_index in enumerate(sort_indices):
+            pareto_idx = sort_index
+            array_list_idx = pareto_indices[sort_index]
+            rank_secondorder =  str(pareto_data[pareto_idx]['ranksecondorder'])
+            rank_interaction =  str(pareto_data[pareto_idx]['rankinteraction'])
+            rowdata = ['%d' % pareto_idx, '%d' % array_list_idx, rank_secondorder, rank_interaction, str(pareto_data[pareto_idx]['F4']), '%.2f' % ((pareto_data[pareto_idx]['B4']))]
+            rtable[ii + 1, 0:len(rowdata)] = rowdata
+            column_offset = len(rowdata)
             if add_extra:
-                rtable[ii + 1, -1:] = [str(presults.ranksX2Q[idx])]
-
+                for tag  in ['PEC', 'PIC', 'PPC']:
+                    for kk in [4,5]:
+                        rtable[ii + 1, column_offset] = '%.3f' % (pareto_data[pareto_idx][tag +'%d' % kk])
+                        column_offset=column_offset+1
+                        
         subpage = oaresearch.research.array2html(rtable, header=1, tablestyle='border-collapse: collapse;',
                                                  trclass='', tdstyle='padding-right:1em;', trstyle='', thstyle='text-align:left; padding-right: 1em;', comment=None)
         page.br(clear='both')
         page.h2('Pareto optimal designs')
         page.p()
-        page.add('There are %d Pareto optimal designs in %d classes.' % (presults.npareto, presults.nclasses))
-        page.add('Pareto optimality is according to rank, F4 and B4 (the other statistics are ignored).')
-        page.p.close()
-        if rr.get('pareto_designs', None) is not None:
-            pdesigns = rr.get('pareto_designs', None)
+        if pareto_results['npareto']==1:
+            page.add('There is %d Pareto optimal design in %d classes.' % (pareto_results['npareto'], pareto_results['nclasses']))
+        else:
+            page.add('There are %d Pareto optimal designs in %d classes.' % (pareto_results['npareto'], pareto_results['nclasses']))
+        pareto_type = pareto_results['pareto_type']
+        if ',' in pareto_type:
+            k = pareto_type.rfind(", ")
+            pareto_type = pareto_type[:k] + ", and " + pareto_type[k+1:]
 
-        pfile0 = outfile0 = rr['idstr'] + '-pareto.oa'
+        page.add('Pareto optimality is according to %s (any other statistics are ignored).' % pareto_type)
+        page.p.close()
+        if pareto_results.get('pareto_designs', None) is not None:
+            pdesigns = pareto_results.get('pareto_designs', None)
+
+        pfile0 = pareto_results['idstr'] + '-pareto.oa'
 
         if htmlsubdir is not None:
             pfile = os.path.join(htmlsubdir, pfile0)
-            oapackage.writearrayfile(pfile, pdesigns)
+            oapackage.writearrayfile(pfile, [oapackage.array_link(array) for array in pdesigns])
             page.p('All %s' % e.a('Pareto optimal designs', href=pfile0) + '.')
 
         page.add(str(subpage))
         page.br(clear='both')
+    else:
+        rtable = np.zeros( (0,0))
+        
+    return rtable
 
+def _convert_to_latex_table(rtable, N, ncolumns):
+    import copy
+    rtable_latex = copy.deepcopy(rtable)
+    if len(rtable)>1:
+        for row in range(1, rtable_latex.shape[0]):
+            rtable_latex[row, 0]=str(int(rtable_latex[row, 0])+1)
+            rtable_latex[row, 1]=str(int(rtable_latex[row, 1])+1)
+    latextable=oapackage.array2latex(rtable_latex, hlines=[0], comment=['conference desgins N=%d, k=%d' % (N, ncolumns), 'offset for indices is 1'])
+    return latextable
+            
+def conferenceDesignsPage(pareto_results, verbose=1, makeheader=True, htmlsubdir=None, generate_latex=True):
+    """ Generate html page for class conference designs """
+
+    N = pareto_results['N']
+    ncolumns = pareto_results['ncolumns']
+   
+
+    if makeheader:
+        pext = 'html'
+    else:
+        pext = 'html.template'
+
+    conference_class=oapackage.conference_t(N, ncolumns, 0)
+
+
+    if verbose:
+        print('conferenceDesignsPage: start of generation')
+
+    page = markup.page()
+    createConferenceDesignsPageHeader(page, makeheader=makeheader, conference_class=conference_class, ncolumns=ncolumns)
+    createConferenceDesignsPageLoadDesignsFile( pareto_results, htmlsubdir=htmlsubdir)
+    createConferenceDesignsPageResultsTable(page, pareto_results, verbose=verbose)
+    rtable = createConferenceDesignsPageParetoTable(page, pareto_results, verbose=verbose, htmlsubdir=htmlsubdir)
+    
+    latextable = _convert_to_latex_table(rtable, N, ncolumns)
+    
+    if generate_latex:
+        with open(os.path.join(htmlsubdir, 'conference-N%dk%d.tex' % (N, ncolumns)), 'wt') as fid:
+            fid.write(latextable)
 
     localtime = time.asctime(time.localtime(time.time()))
     dstr = str(localtime)

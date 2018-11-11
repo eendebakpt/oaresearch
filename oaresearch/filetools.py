@@ -65,11 +65,12 @@ def copyOAfile(source, targetdir, target0, convert=None, zipfile=None, verbose=1
         if checkFiles(targetfilefinal, cache):
             print('  copyOAfile: target file already exist')
         else:
+            file_mode = oapackage.arrayfile_t_parseModeString(convert)
+            oapackage.convert_array_file(source, targetfile, file_mode)
             if verbose >= 2:
                 print('cmd: oaconvert -v 0 -f %s %s %s' %
-                      (convert, source, targetfile))
-            os.system('oaconvert -v 0 -f %s %s %s' %
                       (convert, source, targetfile))
             if zipfile:
                 os.system('gzip -f %s' % targetfile)
     return target0final
+
