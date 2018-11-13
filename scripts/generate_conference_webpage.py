@@ -26,8 +26,6 @@ reload(oaresearch.research_conference)
 from oaresearch.research_conference import calculateConferencePareto, conferenceResultsFile, generateConferenceResults, conferenceDesignsPage
 from oapackage.conference import conferenceProjectionStatistics
 
-# TODO: large cases: on cluster?
-
 generate_webpage=True
 
 #%% Setup directories
@@ -146,11 +144,12 @@ def conferenceSubPages(tag='conference', Nmax=40, Nstart=4, kmax=None,
 
     subpages = {}
     subpages[tag] = {}
-    oapackage.mkdirc(os.path.join(outputdir, 'results_cachev5'))
+    cache_tag = 'results_cachev5'
+    oapackage.mkdirc(os.path.join(outputdir, cache_tag))
     for ki, kk in enumerate(krange):
         for Ni, N in enumerate(Nrange):
             subpages[tag]['N%dk%d' % (N, kk)] = {}
-            cachefile = os.path.join(outputdir, 'results_cachev6', tag+'-'+'N%dk%d' % (N, kk)+'.pickle')
+            cachefile = os.path.join(outputdir, cache_tag, tag+'-'+'N%dk%d' % (N, kk)+'.pickle')
             
             if cache and os.path.exists(cachefile):
                 with open(cachefile, 'rb') as fid:
@@ -199,8 +198,7 @@ def conferenceSubPages(tag='conference', Nmax=40, Nstart=4, kmax=None,
     return subpages
 
 #generated_subpages = conferenceSubPages(tag='cdesign', Nmax=40, Nstart=4, verbose=2, cache=False)
-#generated_subpages = conferenceSubPages(tag='cdesign', Nmax=40, Nstart=4, verbose=2, cache=True)
-generated_subpages = conferenceSubPages(tag='cdesign', Nmax=16, Nstart=4, verbose=2, cache=True)
+generated_subpages = conferenceSubPages(tag='cdesign', Nmax=40, Nstart=4, verbose=2, cache=True)
 
 #%% Results table
 

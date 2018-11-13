@@ -73,4 +73,3 @@ def copyOAfile(source, targetdir, target0, convert=None, zipfile=None, verbose=1
             if zipfile:
                 os.system('gzip -f %s' % targetfile)
     return target0final
-
