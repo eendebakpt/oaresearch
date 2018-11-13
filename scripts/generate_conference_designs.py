@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+o# -*- coding: utf-8 -*-
 """
 
 Example script for calculating conference designs

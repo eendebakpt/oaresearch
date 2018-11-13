@@ -166,16 +166,10 @@ def conferenceStatistics(al, verbose=0):
     rankq = np.linalg.matrix_rank(modelmatrix_quadratic)
 
     if verbose:
-        foldover = oapackage.conference2DSD(al)
-        #mm = conferenceSecondOrder(foldover, False)
-        #rankfoldover = np.linalg.matrix_rank(mm)
-
-    if verbose:
         print('f4: %s' % (f4,))
         print('j4: %s' % (j4,))
         print('rank X2: %s' % (rank,))
         print('rank X2+quadratics: %s' % (rankq,))
-        #print('rank of foldover X2: %s' % (rankfoldover,))
     return [f4, b4, rank, rankq]
 
 

@@ -24,7 +24,6 @@ from oaresearch.research_conference import htmlTag, nprevzero
 import oaresearch.research_conference
 reload(oaresearch.research_conference)
 from oaresearch.research_conference import calculateConferencePareto, conferenceResultsFile, generateConferenceResults, conferenceDesignsPage
-from oaresearch.research_conference import latexResults
 from oapackage.conference import conferenceProjectionStatistics
 
 # TODO: large cases: on cluster?
@@ -61,8 +60,8 @@ reload(oaresearch.research_conference )
 from oaresearch.research_conference import createConferenceParetoElement, calculateConferencePareto, generateConferenceResults,conferenceDesignsPage,createConferenceDesignsPageParetoTable
 
 N=16; kk=6
-N=20; kk=13;
-N=20; kk=8;
+#N=20; kk=13;
+#N=20; kk=8;
 #N=24;kk=22
 t0=time.time()
 cfile, nn, mode = conferenceResultsFile(N, kk, outputdir, tags=['cdesign', 'cdesign-diagonal', 'cdesign-diagonal-r'], tagtype=['full', 'r', 'r'], verbose=1)
@@ -83,26 +82,26 @@ oapackage.oahelper.testHtml(str(page))
 # 600 seconds for N=20, kk=13
 # with refactoring and mkl: 251 [s]
 
-
+  
 #%%
-
-data=pareto_results['pareto_data']
-for tag in ['PIC4', 'PEC4', 'PIC5', 'PEC5', 'PPC4', 'PPC5']:
-    print('tag %s: %s' % (tag, data[0][tag]==data[1][tag] ) )
+if 0:    
+    #designs = [oapackage.array_link(al) for al in pareto_results['pareto_designs']]
     
-#%%
+    #designs=ll[5168:5171]
+    #designs=ll[4347:4349]
     
-designs = [oapackage.array_link(al) for al in pareto_results['pareto_designs']]
-
-#designs=ll[5168:5171]
-#designs=ll[4347:4349]
-
-for jj, al in enumerate(designs):
-    f4, b4, rank, rankq = oaresearch.research_conference.conferenceStatistics(al, verbose=0)
-    print('array %d: b4 %s f4 %s' % (jj, b4, f4))
-    pec, pic, ppc= conferenceProjectionStatistics(al, 4)
-    pec5, pic5, ppc5= conferenceProjectionStatistics(al, 5)
-    print('  pec %s, pec5 %s' % (pec, pec5) )
+    al1=ll[4347]
+    al2=ll[4506]
+    
+    designs = ll[4000:]
+    for jj, al in enumerate(designs):
+        f4, b4, rank, rankq = oaresearch.research_conference.conferenceStatistics(al, verbose=0)
+        pec5, pic5, ppc5= conferenceProjectionStatistics(al, 5)
+        if np.abs(ppc5- 1.2130420253)<1e-4:
+            pec, pic, ppc= conferenceProjectionStatistics(al, 4)
+            print('array %d: b4 %s f4 %s' % (jj, b4, f4))
+            print('  pec %s, pec5 %s, ppc %s, ppc5 %s' % (pec, pec5, ppc, ppc5) )
+        
     
  
 #%%
@@ -142,7 +141,6 @@ def conferenceSubPages(tag='conference', Nmax=40, Nstart=4, kmax=None,
     if kmax is None:
         kmax = np.max(Nrange) + 2
     krange = range(2, kmax)
-    ncols = len(Nrange) + 1
     if verbose:
         print('conferenceSubPages: tag %s, Nmax %d, kmax %d' % (tag, Nmax, kmax))
 
@@ -152,7 +150,7 @@ def conferenceSubPages(tag='conference', Nmax=40, Nstart=4, kmax=None,
     for ki, kk in enumerate(krange):
         for Ni, N in enumerate(Nrange):
             subpages[tag]['N%dk%d' % (N, kk)] = {}
-            cachefile = os.path.join(outputdir, 'results_cachev5', tag+'-'+'N%dk%d' % (N, kk)+'.pickle')
+            cachefile = os.path.join(outputdir, 'results_cachev6', tag+'-'+'N%dk%d' % (N, kk)+'.pickle')
             
             if cache and os.path.exists(cachefile):
                 with open(cachefile, 'rb') as fid:
@@ -665,24 +663,3 @@ if generate_webpage:
     webbrowser.open_new_tab(hfile)
 
 
-#%%
-if 0:
-    N = 40
-    tag = 'dconferencej1j3'
-    for k in [5]:  # range(3, int(N/2)+1):
-        ll = oapackage.readarrayfile(
-            os.path.join(outputdir, '%s-%d-%d.oa' % (tag, N, k)))
-        print('N %d, k %d: %d' % (N, k, len(ll)))
-        for i, al in enumerate(ll):
-            print('j5: %s' % np.abs(al.Jcharacteristics(5)))
-            if not oapackage.isConferenceFoldover(al):
-                print('even-odd: %d' % i)
-                al.showarray()
-                v = np.bincount(np.abs(al.Jcharacteristics(4)))
-                print(v)
-            else:
-                v = np.bincount(np.abs(al.Jcharacteristics(4)))
-                print(v)
-
-print('TODO: check definition of plain DCDs and weighing matrices')
-print('TODO: link to arrayfile in subpages')

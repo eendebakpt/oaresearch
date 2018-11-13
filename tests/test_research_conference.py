@@ -7,6 +7,7 @@ Pieter Eendebak <pieter.eendebak@gmail.com>
 #%%
 import numpy as np
 import unittest
+import collections
 
 import oapackage
 import oaresearch.research_conference
@@ -16,6 +17,28 @@ import oaresearch.research_conference
 
 class TestResearchConference(unittest.TestCase):
 
+    def test_createConferenceParetoElement(self):
+        al1=oapackage.exampleArray(49)
+        pareto1, data1=oaresearch.research_conference.createConferenceParetoElement(al1)
+        al2=oapackage.exampleArray(50)
+        pareto2, data2=oaresearch.research_conference.createConferenceParetoElement(al2)
+        
+        self.assertEqual(data1, collections.OrderedDict([('ranksecondorder', 20),
+             ('rankinteraction', 19),
+             ('F4', (0, 0, 4, 46, 20)),
+             ('B4', 2.48),
+             ('PEC4', 1.0),
+             ('PEC5', 1.0),
+             ('PIC4', 17.1051554812),
+             ('PIC5', 16.536564697),
+             ('PPC4', 1.7894608545),
+             ('PPC5', 1.2130420253),
+             ('foldover', 0),
+             ('notfoldover', 1)]))
+    
+        # numerial instabilities can cause rounding errors in the PPC5. this should be solved by rounding in test_createConferenceParetoElement
+        self.assertEqual(data1['PPC5'], data2['PPC5'])
+    
     def test_generateConference(self):
         LL=oaresearch.research_conference.generateConference(8)
         self.assertEqual([len(l) for l in LL], [0, 1, 1, 2, 1, 1, 1, 1])
