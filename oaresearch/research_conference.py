@@ -186,35 +186,43 @@ def test_confJ4():
     assert(np.sum(np.abs(np.array(J)) == 0) == 23)
 
 from oapackage.oahelper import create_pareto_element
+from collections import OrderedDict
 
 def createConferenceParetoElement(al, addFoldover=True, addProjectionStatistics=True, pareto=None):
     """ Create Pareto element from conference design """
     rr = oaresearch.research_conference.conferenceStatistics(al, verbose=0)
     [f4, b4, rankinteraction, ranksecondorder] = rr[0:4]
     f4minus = [-float(x) for x in f4]
-    values = [ list(f4minus), [-float(b4)], [float(ranksecondorder)] ]
-    data ={'F4': f4, 'B4': b4, 'ranksecondorder': ranksecondorder, 'rankinteraction': rankinteraction}
+    values = [ [float(ranksecondorder)], [float(rankinteraction)], list(f4minus), [-float(b4)] ]
+    data =OrderedDict(ranksecondorder=ranksecondorder,rankinteraction=rankinteraction,F4=f4, B4= b4)
     
-    for kk in [4,5]:
-        if addProjectionStatistics:
-            PEC, PIC, PPC = oapackage.conference.conferenceProjectionStatistics(al, ncolumns=kk)
-
-            values += [ [PEC] ]
-            values += [ [PIC] ]
-            values += [ [PPC] ]
-            data['PEC%d' % kk] = PEC
-            data['PIC%d' % kk] = PIC
-            data['PPC%d' % kk] = PPC
-        else:
-            data['PEC%d' % kk] = None
-            data['PIC%d' % kk] = None
-            data['PPC%d' % kk] = None
+    if addProjectionStatistics:
+        proj_data=np.zeros( (2, 3))
+        proj_data[0] = oapackage.conference.conferenceProjectionStatistics(al, ncolumns=4)
+        proj_data[1] = oapackage.conference.conferenceProjectionStatistics(al, ncolumns=5)
+    
+        proj_data=np.around(proj_data, 10)
+        
+        for tag_index, tag in enumerate(['PEC', 'PIC', 'PPC']):
+            for ni, kk in enumerate([4,5]):
+            
+                values += [ [proj_data[ni, tag_index]] ]
+                
+                data[tag+'%d' % kk] = proj_data[ni, tag_index]
+    else:
+        for tag in ['PEC', 'PIC', 'PPC']:
+            for kk in [4,5]:
+                data[tag+'%d' % kk] = None
 
 
     if addFoldover:
             foldover=oapackage.isConferenceFoldover(al)
             values += [[int(foldover)], [int(not foldover)]]
-
+            data['foldover']=int(foldover)
+            data['notfoldover']=int(not foldover)
+            
+    if addProjectionStatistics:
+        assert(len(values)==len(data.keys()))
     pareto_element = create_pareto_element(values, pareto=pareto)
 
     return pareto_element, data
@@ -698,13 +706,13 @@ def createConferenceDesignsPageParetoTable(page, pareto_results, verbose=0, html
         
     return rtable
 
-def _convert_to_latex_table(rtable, N, ncolumns):
+def _convert_to_latex_table(rtable, N, ncolumns, offset_columns=[0,1]):
     import copy
     rtable_latex = copy.deepcopy(rtable)
     if len(rtable)>1:
         for row in range(1, rtable_latex.shape[0]):
-            rtable_latex[row, 0]=str(int(rtable_latex[row, 0])+1)
-            rtable_latex[row, 1]=str(int(rtable_latex[row, 1])+1)
+            for col in offset_columns:
+                rtable_latex[row, col]=str(int(rtable_latex[row, col])+1)
     latextable=oapackage.array2latex(rtable_latex, hlines=[0], comment=['conference desgins N=%d, k=%d' % (N, ncolumns), 'offset for indices is 1'])
     return latextable
             
@@ -737,6 +745,9 @@ def conferenceDesignsPage(pareto_results, verbose=1, makeheader=True, htmlsubdir
     if generate_latex:
         with open(os.path.join(htmlsubdir, 'conference-N%dk%d.tex' % (N, ncolumns)), 'wt') as fid:
             fid.write(latextable)
+        import pickle
+        with open(os.path.join(htmlsubdir, 'conference-N%dk%d-rtable.pickle' % (N, ncolumns)), 'wb') as fid:
+            pickle.dump({'rtable': rtable, 'N': pareto_results['N'], 'ncolumns': pareto_results['ncolumns']},fid)
 
     localtime = time.asctime(time.localtime(time.time()))
     dstr = str(localtime)

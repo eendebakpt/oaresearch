@@ -86,17 +86,23 @@ oapackage.oahelper.testHtml(str(page))
 
 #%%
 
+data=pareto_results['pareto_data']
+for tag in ['PIC4', 'PEC4', 'PIC5', 'PEC5', 'PPC4', 'PPC5']:
+    print('tag %s: %s' % (tag, data[0][tag]==data[1][tag] ) )
+    
+#%%
+    
 designs = [oapackage.array_link(al) for al in pareto_results['pareto_designs']]
+
+#designs=ll[5168:5171]
+#designs=ll[4347:4349]
 
 for jj, al in enumerate(designs):
     f4, b4, rank, rankq = oaresearch.research_conference.conferenceStatistics(al, verbose=0)
-    print('array %d:' % jj)
-    print(b4)
-    print(f4)
+    print('array %d: b4 %s f4 %s' % (jj, b4, f4))
     pec, pic, ppc= conferenceProjectionStatistics(al, 4)
-    print(pec)
-    pec, pic, ppc= conferenceProjectionStatistics(al, 5)
-    print(pec)
+    pec5, pic5, ppc5= conferenceProjectionStatistics(al, 5)
+    print('  pec %s, pec5 %s' % (pec, pec5) )
     
  
 #%%
@@ -195,30 +201,42 @@ def conferenceSubPages(tag='conference', Nmax=40, Nstart=4, kmax=None,
     return subpages
 
 #generated_subpages = conferenceSubPages(tag='cdesign', Nmax=40, Nstart=4, verbose=2, cache=False)
-generated_subpages = conferenceSubPages(tag='cdesign', Nmax=40, Nstart=4, verbose=2, cache=True)
+#generated_subpages = conferenceSubPages(tag='cdesign', Nmax=40, Nstart=4, verbose=2, cache=True)
+generated_subpages = conferenceSubPages(tag='cdesign', Nmax=16, Nstart=4, verbose=2, cache=True)
 
 #%% Results table
 
+htmlsubdir=os.path.join(htmldir, 'conference')
+for N in [12,14,16]:
+    lst=oapackage.findfiles(htmlsubdir,'conference-N%d.*pickle' % N)
+    print('latex table: N %d: %d files' % (N, len(lst) ) )
+    table=None
+    
+    kk=[oapackage.scanf.sscanf(file, 'conference-N%dk%d')[1] for file in lst]
+    lst=[lst[idx] for idx in np.argsort(kk)]
+    
+    for file in (lst):
+        r=pickle.load(open(os.path.join(htmlsubdir, file), 'rb'))
 
-if platform.node() == 'woelmuis':
-
-    X = latexResults(outputdir)
-
-    lstr = oapackage.array2latex(X, header=1, tabchar='l', hlines=[1])
-
-    ss = r'\begin{table}' + os.linesep
-    ss += r'\begin{center}' + os.linesep
-    ss += lstr + os.linesep
-    ss += r'\end{center}' + os.linesep
-    ssx = 'The estimates have been obtained with the directed extension method.'
-    ss += r'\caption{Number of non-isomorphic conference designs. %s}' % ssx + \
-        os.linesep
-    ss += r'\label{table:numberconference}' + os.linesep
-    ss += r'\end{table}' + os.linesep
-
-    with open(os.path.join(paperdir, 'table-number-conference.tex'), 'w') as fid:
-        _ = fid.write(ss)
-
+        ncolumns=r['ncolumns']
+        rtable=r['rtable']
+        column=np.vstack((['k'], ncolumns*np.ones( (rtable.shape[0]-1,1), dtype=int ) ) )
+        rtable=np.hstack( (column, rtable) )
+        if table is None:
+            table=rtable
+        else:
+            rtable=rtable[1:]
+            table=np.vstack( (table, rtable))
+        #r['ncolumns']
+    print(table)
+    offset_columns=[1,2]
+    for row in range(1, table.shape[0]):
+        for col in offset_columns:
+            table[row, col]=str(int(table[row, col])+1)
+    latextable=oapackage.array2latex(table, hlines=[0], comment=['conference desgins N=%d' % (N), 'offset for indices is 1'])
+    print(latextable)
+    with open(os.path.join(htmlsubdir, 'conference-N%d-overview.tex' % (N, )), 'wt') as fid:
+            fid.write(latextable)
 
 #%%
 def cdesignTag(N, kk, page, outputdir, tdstyle='', tags=['cdesign', 'cdesign-diagonal', 'cdesign-diagonal-r'],
