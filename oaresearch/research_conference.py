@@ -14,6 +14,7 @@ import sys
 import numpy as np
 import time
 import itertools
+import collections
 
 try:
     import matplotlib.pyplot as plt
@@ -183,20 +184,23 @@ from oapackage.oahelper import create_pareto_element
 from collections import OrderedDict
 
 
-def createConferenceParetoElement(al, addFoldover=True, addProjectionStatistics=True, pareto=None):
+def createConferenceParetoElement(al, addFoldover=True, addProjectionStatistics=True, pareto=None, rounding_decimals=3):
     """ Create Pareto element from conference design """
     rr = oaresearch.research_conference.conferenceStatistics(al, verbose=0)
     [f4, b4, rankinteraction, ranksecondorder] = rr[0:4]
     f4minus = [-float(x) for x in f4]
     values = [[float(ranksecondorder)], [float(rankinteraction)], list(f4minus), [-float(b4)]]
-    data = OrderedDict(ranksecondorder=ranksecondorder, rankinteraction=rankinteraction, F4=f4, B4=b4)
+    data = OrderedDict(ranksecondorder=ranksecondorder)
+    data['rankinteraction'] = rankinteraction
+    data['F4'] = f4
+    data['B4'] = b4
 
     if addProjectionStatistics:
         proj_data = np.zeros((2, 3))
         proj_data[0] = oapackage.conference.conferenceProjectionStatistics(al, ncolumns=4)
         proj_data[1] = oapackage.conference.conferenceProjectionStatistics(al, ncolumns=5)
 
-        proj_data = np.around(proj_data, 10)
+        proj_data = np.around(proj_data, rounding_decimals)
 
         for tag_index, tag in enumerate(['PEC', 'PIC', 'PPC']):
             for ni, kk in enumerate([4, 5]):
@@ -238,7 +242,7 @@ def makePareto(presults, addFoldover=True):
     return pareto
 
 
-class designResults(dict):
+class designResults(collections.OrderedDict):
     pass
 
     def add_value(self, tag, value):
@@ -676,10 +680,14 @@ def createConferenceDesignsPageParetoTable(page, pareto_results, verbose=0, html
         page.br(clear='both')
         page.h2('Pareto optimal designs')
         page.p()
-        if pareto_results['npareto'] == 1:
-            page.add('There is %d Pareto optimal design in %d classes.' % (pareto_results['npareto'], pareto_results['nclasses']))
+        if pareto_results['nclasses'] == 1:
+            pareto_classes_text = 'in %d class' % pareto_results['nclasses']
         else:
-            page.add('There are %d Pareto optimal designs in %d classes.' % (pareto_results['npareto'], pareto_results['nclasses']))
+            pareto_classes_text = 'in %d classes' % pareto_results['nclasses']
+        if pareto_results['npareto'] == 1:
+            page.add('There is %d Pareto optimal design %s.' % (pareto_results['npareto'], pareto_classes_text))
+        else:
+            page.add('There are %d Pareto optimal designs %s.' % (pareto_results['npareto'], pareto_classes_text))
         pareto_type = pareto_results['pareto_type']
         if ',' in pareto_type:
             k = pareto_type.rfind(", ")

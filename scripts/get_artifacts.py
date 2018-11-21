@@ -9,7 +9,7 @@ import platform
 
 #%% Get information on latest build
 
-if platform.system()=='Windows':
+if platform.system() == 'Windows':
     targetdir = r'c:\\svn\\oapackage\\dist'
 else:
     targetdir = '/home/eendebakpt/misc/oa/oacode/dist/'
@@ -19,10 +19,10 @@ project_name = 'oapackage-4lws8'
 baseurl = 'https://ci.appveyor.com/api'
 
 client = Client()
-document = client.get(baseurl+'/projects/%s/%s/history?recordsNumber=10' % (username, project_name))
+document = client.get(baseurl + '/projects/%s/%s/history?recordsNumber=10' % (username, project_name))
 
 latest_build = document['builds'][0]
-build = client.get(baseurl+'/projects/%s/%s/builds/%d' % (username, project_name, latest_build['buildId']))
+build = client.get(baseurl + '/projects/%s/%s/builds/%d' % (username, project_name, latest_build['buildId']))
 
 print('latest build: %s: branch %s: %s: %s' % (build['build']['status'], build['build']['branch'], build['build']['message'], build['build']['created']))
 

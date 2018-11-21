@@ -1,4 +1,4 @@
-o# -*- coding: utf-8 -*-
+o  # -*- coding: utf-8 -*-
 """
 
 Example script for calculating conference designs
@@ -24,30 +24,30 @@ sys.path.append(os.path.join(oadir, 'pythondevelop'))
 from researchOA import job, createJobScript
 
 #%% Setup directories
-basedir=os.path.expanduser('~')
+basedir = os.path.expanduser('~')
 resultsdir = join(basedir, 'oatmp')
 outputdir = oapackage.mkdirc(
     os.path.join(os.path.expanduser('~'), 'oatmp', 'conf'))
 
-scriptdir = oapackage.mkdirc(join(os.path.expanduser('~'), 'confjobs') )
+scriptdir = oapackage.mkdirc(join(os.path.expanduser('~'), 'confjobs'))
 
 full_generation = False
-verbose=1
+verbose = 1
 
 
 def reportScriptFile(scriptfile, verbose=1):
-    nlines=0
-    ncommands=0
+    nlines = 0
+    ncommands = 0
     with open(scriptfile, 'rt') as fid:
         for line in fid:
-            if verbose>=2:
+            if verbose >= 2:
                 print(line.strip())
-            nlines=nlines+1
+            nlines = nlines + 1
             if not line.startswith('#'):
-                ncommands=ncommands+1
-    print('generated script file: %s with %d commands'  % (scriptfile, nlines))
-    
-        
+                ncommands = ncommands + 1
+    print('generated script file: %s with %d commands' % (scriptfile, nlines))
+
+
 #%%
 
 def generateConference(N, kmax=None, verbose=1, diagc=False, nmax=None, selectmethod='random', tag='cdesign', outputdir=None):
@@ -88,7 +88,7 @@ def generateConference(N, kmax=None, verbose=1, diagc=False, nmax=None, selectme
 
     for extcol in range(2, kmax):
         if verbose:
-            print('generateConference: N %d, extcol %d: %d designs' % (N, extcol, len(LL[extcol - 1])) )
+            print('generateConference: N %d, extcol %d: %d designs' % (N, extcol, len(LL[extcol - 1])))
             sys.stdout.flush()
         LL[extcol] = oapackage.extend_conference(
             LL[extcol - 1], ctype, verbose=verbose >= 2)
@@ -151,7 +151,7 @@ else:
     LL = generateConference(N=26, kmax=6, outputdir=outputdir)
     LL = generateConference(N=28, kmax=5, outputdir=outputdir)
     LL = generateConference(N=30, kmax=4, outputdir=outputdir)
-    for N in [30,32,34,36,38,40]:
+    for N in [30, 32, 34, 36, 38, 40]:
         LL = generateConference(N=N, kmax=5, outputdir=outputdir)
 
     LL = generateConference(22, diagc=True, outputdir=outputdir)
@@ -187,7 +187,7 @@ with open(scriptfile, 'wt') as fid:
 
         cmd = 'oaconference -N %d --ctype 2 --itype 3  --j1zero 1 --j3zero 0 -o dconferencej1' % N
         _ = fid.write('%s\n' % cmd)
-        
+
         # J3=0, J1 unrestricted
         cmd = 'oaconference -N %d --ctype 2 --itype 3  --j1zero 0 --j3zero 1  -o dconferencej3' % N
         _ = fid.write('%s\n' % cmd)
@@ -231,12 +231,12 @@ reportScriptFile(scriptfile, verbose=1)
 #%% Double conference matrices
 
 if 1:
-    scriptfile =os.path.join(scriptdir, 'jobfile.sh')
+    scriptfile = os.path.join(scriptdir, 'jobfile.sh')
     with open(scriptfile, 'wt') as fid:
         for n in range(2, 12, 2):
             cmd = 'oaconference -N %d --ctype 2 --itype 3  --j1zero 0  --j3zero 0 -o dconference2' % n
             _ = fid.write('%s\n' % cmd)
-        for (n, kmax) in [(14, 4), (12, 4), (16, 3), (18,3), (20,3)]:
+        for (n, kmax) in [(14, 4), (12, 4), (16, 3), (18, 3), (20, 3)]:
             cmd = 'oaconference -N %d -k %d --ctype 2 --itype 3  --j1zero 0 --j3zero 0 -o dconference2' % (n, kmax)
             _ = fid.write('%s\n' % cmd)
 
@@ -255,13 +255,12 @@ if 1:
             cmd = 'oaconference -N %d -k %d --ctype 2 --itype 3 --j1zero 1 --j3zero 1  -o dconferencej1j3' % (n, kmax)
             _ = fid.write('%s\n' % cmd)
     reportScriptFile(scriptfile)
-    
+
     cmd = 'oaconference -N 48 --ctype 2 --itype 3  --j1zero 1 --j3zero 1 -o dconferencej1j3-r --nmax 400'
     print(cmd)
 
     cmd = 'oaconference -N 20 --ctype 0 --itype 2 --j1zero 1 --j3zero 0 -o cdesign-r --nmax 40'
     print(cmd)
-
 
     # partial enumeration double conf
     # nmaxs are chosen such that a single-core job can run within a day
@@ -271,7 +270,7 @@ if 1:
     for i, N in enumerate(NN):
         nmax = nmaxs[i]
         cmd = 'oaconference -N %d --ctype 2 --itype 3 --j1zero 1 --j3zero 1 -o dconferencej1j3-r --nmax %d' % (N, nmax)
-        if verbose>=2:
+        if verbose >= 2:
             print(cmd)
         j = job(cmd, shorttag='N%d' % N)
         jj += [j]
@@ -280,7 +279,7 @@ if 1:
     for i, N in enumerate(NN):
         nmax = nmaxs[i]
         cmd = 'oaconference -N %d --ctype 2 --itype 3 --j1zero 1 --j3zero 1 -o dconferencej1j3-r --nmax %d' % (N, nmax)
-        if verbose>=2:
+        if verbose >= 2:
             print(cmd)
         j = job(cmd, shorttag='N%d' % N)
         jj += [j]
@@ -290,12 +289,12 @@ if 1:
     for i, N in enumerate(NN):
         nmax = nmaxs[i]
         cmd = 'oaconference -N %d --ctype 2 --itype 3 --j1zero 1 --j3zero 1 -o dconferencej1j3-r --nmax %d' % (N, nmax)
-        if verbose>=2:
+        if verbose >= 2:
             print(cmd)
         j = job(cmd, shorttag='N%d' % N)
         jj += [j]
 
-    jobfile=join(scriptdir, 'subs.sh')
+    jobfile = join(scriptdir, 'subs.sh')
     with open(jobfile, 'wt') as fid:
         for i, j in enumerate(jj):
             outfile, s = createJobScript(j, index=i, verbose=0, queue='q72h', scriptdir=scriptdir)
@@ -343,6 +342,3 @@ if platform.node() == 'marmot':
 
     mz1 = oapackage.maxz(ll[0])
     print('array 1: maxz %d' % mz1)
-    
-
-

@@ -26,7 +26,7 @@ reload(oaresearch.research_conference)
 from oaresearch.research_conference import calculateConferencePareto, conferenceResultsFile, generateConferenceResults, conferenceDesignsPage
 from oapackage.conference import conferenceProjectionStatistics
 
-generate_webpage=True
+generate_webpage = True
 
 #%% Setup directories
 resultsdir = join(os.path.expanduser('~'), 'oatmp')
@@ -50,29 +50,29 @@ if generate_webpage:
     cdir = oapackage.mkdirc(os.path.join(htmldir, 'conference'))
 
 
-
 #%%
 from oapackage import markup
 from oapackage.oahelper import create_pareto_element
-reload(oaresearch.research_conference )
-from oaresearch.research_conference import createConferenceParetoElement, calculateConferencePareto, generateConferenceResults,conferenceDesignsPage,createConferenceDesignsPageParetoTable
+reload(oaresearch.research_conference)
+from oaresearch.research_conference import createConferenceParetoElement, calculateConferencePareto, generateConferenceResults, conferenceDesignsPage, createConferenceDesignsPageParetoTable
 
-N=16; kk=6
+N = 16
+kk = 6
 #N=20; kk=13;
 #N=20; kk=8;
-#N=24;kk=22
-t0=time.time()
+# N=24;kk=22
+t0 = time.time()
 cfile, nn, mode = conferenceResultsFile(N, kk, outputdir, tags=['cdesign', 'cdesign-diagonal', 'cdesign-diagonal-r'], tagtype=['full', 'r', 'r'], verbose=1)
 
 ll = oapackage.readarrayfile(cfile)
-ll=ll[0:]
+ll = ll[0:]
 
 presults, pareto = calculateConferencePareto(ll, N=N, k=kk, verbose=1, addProjectionStatistics=True)
 pareto_results = generateConferenceResults(presults, ll, ct=None, full=mode == 'full')
 pareto_results['arrayfile'] = cfile
 
 page = conferenceDesignsPage(pareto_results, verbose=1, makeheader=True, htmlsubdir=cdir)
-dt=time.time()-t0
+dt = time.time() - t0
 print('processing time: %.1f [s]' % dt)
 
 oapackage.oahelper.testHtml(str(page))
@@ -80,32 +80,31 @@ oapackage.oahelper.testHtml(str(page))
 # 600 seconds for N=20, kk=13
 # with refactoring and mkl: 251 [s]
 
-  
+
 #%%
-if 0:    
+if 0:
     #designs = [oapackage.array_link(al) for al in pareto_results['pareto_designs']]
-    
-    #designs=ll[5168:5171]
-    #designs=ll[4347:4349]
-    
-    al1=ll[4347]
-    al2=ll[4506]
-    
+
+    # designs=ll[5168:5171]
+    # designs=ll[4347:4349]
+
+    al1 = ll[4347]
+    al2 = ll[4506]
+
     designs = ll[4000:]
     for jj, al in enumerate(designs):
         f4, b4, rank, rankq = oaresearch.research_conference.conferenceStatistics(al, verbose=0)
-        pec5, pic5, ppc5= conferenceProjectionStatistics(al, 5)
-        if np.abs(ppc5- 1.2130420253)<1e-4:
-            pec, pic, ppc= conferenceProjectionStatistics(al, 4)
+        pec5, pic5, ppc5 = conferenceProjectionStatistics(al, 5)
+        if np.abs(ppc5 - 1.2130420253) < 1e-4:
+            pec, pic, ppc = conferenceProjectionStatistics(al, 4)
             print('array %d: b4 %s f4 %s' % (jj, b4, f4))
-            print('  pec %s, pec5 %s, ppc %s, ppc5 %s' % (pec, pec5, ppc, ppc5) )
-        
-    
- 
+            print('  pec %s, pec5 %s, ppc %s, ppc5 %s' % (pec, pec5, ppc, ppc5))
+
+
 #%%
 if 0:
     rtable = createConferenceDesignsPageParetoTable(markup.page(), pareto_results, verbose=2, htmlsubdir=None)
-    latextable=oapackage.array2latex(rtable)
+    latextable = oapackage.array2latex(rtable)
     print(latextable)
 
 #%%
@@ -113,15 +112,16 @@ if 0:
 if 0:
     from oapackage.oahelper import create_pareto_element
     from oaresearch.research_conference import createConferenceParetoElement, calculateConferencePareto
-    
+
     presults = calculateConferencePareto(ll, N=None, k=None, verbose=1)
 
-    
+
 #%% Generate subpages for the designs
 import pickle
 
+
 def conferenceSubPages(tag='conference', Nmax=40, Nstart=4, kmax=None,
-                       verbose=1, specials={}, Nstep=2, NmaxPareto=40, cache=True):
+                       verbose=1, specials={}, Nstep=2, NmaxPareto=40, cache=True, cache_tag='results_cachev6'):
     """ Generate a table with matrices
 
     Arguments:
@@ -144,13 +144,13 @@ def conferenceSubPages(tag='conference', Nmax=40, Nstart=4, kmax=None,
 
     subpages = {}
     subpages[tag] = {}
-    cache_tag = 'results_cachev5'
+
     oapackage.mkdirc(os.path.join(outputdir, cache_tag))
     for ki, kk in enumerate(krange):
         for Ni, N in enumerate(Nrange):
             subpages[tag]['N%dk%d' % (N, kk)] = {}
-            cachefile = os.path.join(outputdir, cache_tag, tag+'-'+'N%dk%d' % (N, kk)+'.pickle')
-            
+            cachefile = os.path.join(outputdir, cache_tag, tag + '-' + 'N%dk%d' % (N, kk) + '.pickle')
+
             if cache and os.path.exists(cachefile):
                 with open(cachefile, 'rb') as fid:
                     print('loading results from cachefile %s' % cachefile)
@@ -159,10 +159,10 @@ def conferenceSubPages(tag='conference', Nmax=40, Nstart=4, kmax=None,
 
                 # get arrays
                 cfile, nn, mode = conferenceResultsFile(N, kk, outputdir, tags=['cdesign', 'cdesign-diagonal', 'cdesign-diagonal-r'], tagtype=['full', 'r', 'r'], verbose=1)
-    
+
                 if nn >= 10000 or N > NmaxPareto or mode != 'full':
                     continue
-    
+
                 ll = oapackage.readarrayfile(cfile)
                 if verbose:
                     print('conferenceSubPages: generate %s N %d k %d: %d designs' % (tag, N, kk, nn))
@@ -171,12 +171,12 @@ def conferenceSubPages(tag='conference', Nmax=40, Nstart=4, kmax=None,
                 pareto_results = generateConferenceResults(presults, ll, ct=None, full=mode == 'full')
                 pareto_results['arrayfile'] = cfile
                 pareto_results['datadir'] = ''
-    
+
                 print('storing results in cachefile %s' % cachefile)
 
                 with open(cachefile, 'wb') as fid:
-                    pareto_results['presults']=None
-                    pickle.dump( (pareto_results, cfile), fid)
+                    pareto_results['presults'] = None
+                    pickle.dump((pareto_results, cfile), fid)
 
             # create HTML page
             page = conferenceDesignsPage(pareto_results, verbose=1, makeheader=True, htmlsubdir=cdir)
@@ -202,39 +202,41 @@ generated_subpages = conferenceSubPages(tag='cdesign', Nmax=40, Nstart=4, verbos
 
 #%% Results table
 
-htmlsubdir=os.path.join(htmldir, 'conference')
-for N in [12,14,16]:
-    lst=oapackage.findfiles(htmlsubdir,'conference-N%d.*pickle' % N)
-    print('latex table: N %d: %d files' % (N, len(lst) ) )
-    table=None
-    
-    kk=[oapackage.scanf.sscanf(file, 'conference-N%dk%d')[1] for file in lst]
-    lst=[lst[idx] for idx in np.argsort(kk)]
-    
-    for file in (lst):
-        r=pickle.load(open(os.path.join(htmlsubdir, file), 'rb'))
+htmlsubdir = os.path.join(htmldir, 'conference')
+for N in [12, 14, 16]:
+    lst = oapackage.findfiles(htmlsubdir, 'conference-N%d.*pickle' % N)
+    print('latex table: N %d: %d files' % (N, len(lst)))
+    table = None
 
-        ncolumns=r['ncolumns']
-        rtable=r['rtable']
-        column=np.vstack((['k'], ncolumns*np.ones( (rtable.shape[0]-1,1), dtype=int ) ) )
-        rtable=np.hstack( (column, rtable) )
+    kk = [oapackage.scanf.sscanf(file, 'conference-N%dk%d')[1] for file in lst]
+    lst = [lst[idx] for idx in np.argsort(kk)]
+
+    for file in (lst):
+        r = pickle.load(open(os.path.join(htmlsubdir, file), 'rb'))
+
+        ncolumns = r['ncolumns']
+        rtable = r['rtable']
+        column = np.vstack((['k'], ncolumns * np.ones((rtable.shape[0] - 1, 1), dtype=int)))
+        rtable = np.hstack((column, rtable))
         if table is None:
-            table=rtable
+            table = rtable
         else:
-            rtable=rtable[1:]
-            table=np.vstack( (table, rtable))
-        #r['ncolumns']
+            rtable = rtable[1:]
+            table = np.vstack((table, rtable))
+        # r['ncolumns']
     print(table)
-    offset_columns=[1,2]
+    offset_columns = [1, 2]
     for row in range(1, table.shape[0]):
         for col in offset_columns:
-            table[row, col]=str(int(table[row, col])+1)
-    latextable=oapackage.array2latex(table, hlines=[0], comment=['conference desgins N=%d' % (N), 'offset for indices is 1'])
+            table[row, col] = str(int(table[row, col]) + 1)
+    latextable = oapackage.array2latex(table, hlines=[0], comment=['conference desgins N=%d' % (N), 'offset for indices is 1'])
     print(latextable)
     with open(os.path.join(htmlsubdir, 'conference-N%d-overview.tex' % (N, )), 'wt') as fid:
-            fid.write(latextable)
+        fid.write(latextable)
 
 #%%
+
+
 def cdesignTag(N, kk, page, outputdir, tdstyle='', tags=['cdesign', 'cdesign-diagonal', 'cdesign-diagonal-r'],
                tagtype=['full', 'r', 'r'], verbose=1, ncache=None, subpage=None):
     """ Create html tag for oa page
@@ -291,6 +293,7 @@ if 0:
                tags=[tag, tag + '-r'], tagtype=['full', 'r'], verbose=2, ncache=ncache)
 
 #%%
+
 
 def specialData():
     """ Special data """
@@ -659,5 +662,3 @@ if generate_webpage:
     with open(hfile, 'w') as fid:
         _ = fid.write(str(page))
     webbrowser.open_new_tab(hfile)
-
-
