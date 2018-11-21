@@ -29,10 +29,10 @@ class TestResearchConference(unittest.TestCase):
              ('B4', 2.48),
              ('PEC4', 1.0),
              ('PEC5', 1.0),
-             ('PIC4', 17.1051554812),
-             ('PIC5', 16.536564697),
-             ('PPC4', 1.7894608545),
-             ('PPC5', 1.2130420253),
+             ('PIC4', 17.105),
+             ('PIC5', 16.537),
+             ('PPC4', 1.789),
+             ('PPC5', 1.213),
              ('foldover', 0),
              ('notfoldover', 1)]))
     
