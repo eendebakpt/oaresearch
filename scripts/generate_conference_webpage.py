@@ -14,6 +14,7 @@ import numpy as np
 import time
 from imp import reload
 from os.path import join
+import pickle
 import pdb
 import shutil
 
@@ -56,8 +57,8 @@ from oapackage.oahelper import create_pareto_element
 reload(oaresearch.research_conference)
 from oaresearch.research_conference import createConferenceParetoElement, calculateConferencePareto, generateConferenceResults, conferenceDesignsPage, createConferenceDesignsPageParetoTable
 
-N = 16
-kk = 6
+N = 24
+kk = 16
 #N=20; kk=13;
 #N=20; kk=8;
 # N=24;kk=22
@@ -67,7 +68,7 @@ cfile, nn, mode = conferenceResultsFile(N, kk, outputdir, tags=['cdesign', 'cdes
 ll = oapackage.readarrayfile(cfile)
 ll = ll[0:]
 
-presults, pareto = calculateConferencePareto(ll, N=N, k=kk, verbose=1, addProjectionStatistics=True)
+presults, pareto = calculateConferencePareto(ll, N=N, k=kk, verbose=1, addProjectionStatistics=False)
 pareto_results = generateConferenceResults(presults, ll, ct=None, full=mode == 'full')
 pareto_results['arrayfile'] = cfile
 
@@ -79,6 +80,8 @@ oapackage.oahelper.testHtml(str(page))
 
 # 600 seconds for N=20, kk=13
 # with refactoring and mkl: 251 [s]
+
+# N24k17: 3 sec/array full, 
 
 
 #%%
@@ -117,7 +120,6 @@ if 0:
 
 
 #%% Generate subpages for the designs
-import pickle
 
 
 def conferenceSubPages(tag='conference', Nmax=40, Nstart=4, kmax=None,
@@ -200,10 +202,10 @@ def conferenceSubPages(tag='conference', Nmax=40, Nstart=4, kmax=None,
 #generated_subpages = conferenceSubPages(tag='cdesign', Nmax=40, Nstart=4, verbose=2, cache=False)
 generated_subpages = conferenceSubPages(tag='cdesign', Nmax=40, Nstart=4, verbose=2, cache=True)
 
-#%% Results table
+#%% Results table for latex
 
 htmlsubdir = os.path.join(htmldir, 'conference')
-for N in [12, 14, 16]:
+for N in range(8,25,2):
     lst = oapackage.findfiles(htmlsubdir, 'conference-N%d.*pickle' % N)
     print('latex table: N %d: %d files' % (N, len(lst)))
     table = None
@@ -216,6 +218,8 @@ for N in [12, 14, 16]:
 
         ncolumns = r['ncolumns']
         rtable = r['rtable']
+        if rtable.size==0:
+            continue
         column = np.vstack((['k'], ncolumns * np.ones((rtable.shape[0] - 1, 1), dtype=int)))
         rtable = np.hstack((column, rtable))
         if table is None:
@@ -225,6 +229,10 @@ for N in [12, 14, 16]:
             table = np.vstack((table, rtable))
         # r['ncolumns']
     print(table)
+    if len(lst)==0:
+        print('no results for N=%d'  % N)
+        continue
+
     offset_columns = [1, 2]
     for row in range(1, table.shape[0]):
         for col in offset_columns:

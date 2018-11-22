@@ -280,8 +280,9 @@ def calculateConferencePareto(ll, N=None, k=None, verbose=1, add_data=True, addP
 
     presults = designResults()
     data = None
+    t0=time.time()
     for ii, al in enumerate(ll):
-        oapackage.oahelper.tprint('calculateConferencePareto: N %s column %s: array %d/%d: %s' % (str(N), str(k), ii, len(ll), str(pareto).strip()), dt=2)
+        oapackage.oahelper.tprint('calculateConferencePareto: N %s column %s: array %d/%d (%.1f [s]): %s' % (str(N), str(k), ii, len(ll), time.time()-t0, str(pareto).strip()), dt=2)
         pareto_element, data = createConferenceParetoElement(al, addFoldover=False, addProjectionStatistics=addProjectionStatistics, pareto=pareto)
 
         pareto.addvalue(pareto_element, ii)
