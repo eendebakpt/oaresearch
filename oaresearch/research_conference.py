@@ -163,7 +163,7 @@ def conferenceStatistics(al, verbose=0):
     modelmatrix = oapackage.array2modelmatrix(al, 'i')[:, (1 + ncols):]
     rank = np.linalg.matrix_rank(modelmatrix)
 
-    modelmatrix_quadratic = oapackage.array2modelmatrix(al, 'q')
+    modelmatrix_quadratic = oapackage.array2modelmatrix(al, 'q')[:, (1 + ncols):]
     rankq = np.linalg.matrix_rank(modelmatrix_quadratic)
 
     if verbose:
@@ -173,7 +173,7 @@ def conferenceStatistics(al, verbose=0):
         print('rank X2+quadratics: %s' % (rankq,))
     return [f4, b4, rank, rankq]
 
-
+    
 def test_confJ4():
     al = oapackage.exampleArray(18)
     J = conferenceJ4(al)
@@ -186,7 +186,7 @@ from collections import OrderedDict
 
 def createConferenceParetoElement(al, addFoldover=True, addProjectionStatistics=True, pareto=None, rounding_decimals=3):
     """ Create Pareto element from conference design """
-    rr = oaresearch.research_conference.conferenceStatistics(al, verbose=0)
+    rr = conferenceStatistics(al, verbose=0)
     [f4, b4, rankinteraction, ranksecondorder] = rr[0:4]
     f4minus = [-float(x) for x in f4]
     values = [[float(ranksecondorder)], [float(rankinteraction)], list(f4minus), [-float(b4)]]
