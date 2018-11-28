@@ -26,6 +26,7 @@ import oaresearch.research_conference
 reload(oaresearch.research_conference)
 from oaresearch.research_conference import calculateConferencePareto, conferenceResultsFile, generateConferenceResults, conferenceDesignsPage
 from oapackage.conference import conferenceProjectionStatistics
+from oaresearch.research_conference import SingleConferenceParetoCombiner
 
 generate_webpage = True
 
@@ -60,17 +61,29 @@ from oaresearch.research_conference import createConferenceParetoElement, calcul
 N = 24
 kk = 16
 #N=20; kk=13;
-#N=20; kk=8;
-# N=24;kk=22
+#N=12; kk=4;
+N=16;kk=5
 t0 = time.time()
 cfile, nn, mode = conferenceResultsFile(N, kk, outputdir, tags=['cdesign', 'cdesign-diagonal', 'cdesign-diagonal-r'], tagtype=['full', 'r', 'r'], verbose=1)
 
 ll = oapackage.readarrayfile(cfile)
 ll = ll[0:]
 
-presults, pareto = calculateConferencePareto(ll, N=N, k=kk, verbose=1, addProjectionStatistics=False)
-pareto_results = generateConferenceResults(presults, ll, ct=None, full=mode == 'full')
-pareto_results['arrayfile'] = cfile
+from_double_conference = 1
+if from_double_conference:
+    dc_dir = os.path.join(resultsdir, 'doubleconference-%d' % (2*N))
+    cache_dir = oapackage.mkdirc(os.path.join(dc_dir, 'sc_pareto_cache'))
+    pareto_calculator = SingleConferenceParetoCombiner(dc_dir, cache_dir=cache_dir, cache=True)
+    pareto_results=pareto_calculator.load_combined_results(kk)
+    pareto_results['narrays']=pareto_results['combined_statistics']['number_conference_arrays']
+    pareto_results['idstr'] = 'cdesign-%d-%d' % (pareto_results['N'], pareto_results['ncolumns'])
+
+    pareto_results['full']=True
+    pareto_results['full_results']=True
+else:
+    presults, pareto = calculateConferencePareto(ll, N=N, k=kk, verbose=1, addProjectionStatistics=None)
+    pareto_results = generateConferenceResults(presults, ll, ct=None, full=mode == 'full')
+    pareto_results['arrayfile'] = cfile
 
 page = conferenceDesignsPage(pareto_results, verbose=1, makeheader=True, htmlsubdir=cdir)
 dt = time.time() - t0
@@ -84,6 +97,21 @@ oapackage.oahelper.testHtml(str(page))
 # N24k17: 3 sec/array full, 
 
 
+# TODO: generate data for C(24, k)
+# TODO: generate page for C(24, k)
+
+#%%
+reload(oaresearch.research_conference)
+from oaresearch.research_conference import SingleConferenceParetoCombiner
+
+cache_dir = oapackage.mkdirc(os.path.join(resultsdir, 'doubleconference-%d' % (2*N), 'sc_pareto_cache'))
+pareto_calculator = SingleConferenceParetoCombiner(outputdir, cache_dir=cache_dir, cache=True)
+presults=pareto_calculator.load_combined_results(5)
+print(presults)
+
+#%%
+
+dc48 = os.path.join('resultsdir', '')
 #%%
 if 0:
     #designs = [oapackage.array_link(al) for al in pareto_results['pareto_designs']]
