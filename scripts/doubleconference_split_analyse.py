@@ -37,7 +37,7 @@ if not os.path.isdir(resultsdir):
 
 
 import oapackage
-from oapackage import oahelper, splitDir, splitFile,splitTag  # reload(oahelper)
+from oapackage import oahelper, splitDir, splitFile, splitTag  # reload(oahelper)
 import oaresearch.research_conference
 
 r = oapackage.log_print(-oapackage.SYSTEM, '')
@@ -199,7 +199,7 @@ oapackage.oainfo(os.path.join(ll[0]))
 if 0:
     ll = listFiles(splitdata, 7, verbose=1)
     oapackage.oainfo(os.path.join(outputdir, ll[0]))
-    arrays=oapackage.readarrayfile(os.path.join(outputdir, ll[0]))
+    arrays = oapackage.readarrayfile(os.path.join(outputdir, ll[0]))
     ll = listFiles(splitdata, 8, verbose=1)
     oapackage.oainfo(os.path.join(outputdir, ll[0]))
 
@@ -239,7 +239,7 @@ from oaresearch.research_conference import SingleConferenceParetoCombiner
 cache_dir = oapackage.mkdirc(os.path.join(outputdir, 'sc_pareto_cache'))
 
 pareto_calculator = SingleConferenceParetoCombiner(outputdir, cache_dir=cache_dir, cache=True)
-self=pareto_calculator
+self = pareto_calculator
 
 
 def evenodd_count(lst):
@@ -256,7 +256,6 @@ if 1:
     for k in range(5, splitdata['kmax'] + 1):
         ll = listFiles(splitdata, k, verbose=verbose)
 
-
         if 0:
             r = calc_stats(ll, evenodd_count, outputdir, verbose=verbose >= 2)
             totals = np.sum(np.array(r), axis=0)
@@ -266,10 +265,10 @@ if 1:
         pareto_calculator.pre_calculate(ll)
         results = pareto_calculator.calculate(ll)
         pareto_calculator.write_combined_results(k, results)
-        
+
         if results['N'] is not None:
-            print(Fore.BLUE + 'k %d: Pareto arrays %d, Pareto classes %d'  % (k, results['npareto'], results['nclasses']) + Fore.RESET)
-        
+            print(Fore.BLUE + 'k %d: Pareto arrays %d, Pareto classes %d' % (k, results['npareto'], results['nclasses']) + Fore.RESET)
+
 
 #%%
 
