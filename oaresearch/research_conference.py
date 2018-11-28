@@ -93,7 +93,7 @@ class SingleConferenceParetoCombiner:
             if os.path.exists(outputfile) and self.cache:
                 continue
             
-            oapackage.oahelper.tprint('ParetoCalculator: pre_calculate %d: %s'  % (ii,afile) )
+            oapackage.oahelper.tprint('ParetoCalculator: pre_calculate file %d/%d: %s'  % (ii, len(arrayfiles), afile) )
             arrays = oapackage.readarrayfile(self.append_basepath(afile))
             number_arrays = len(arrays)
             arrays = reduce_single_conference(arrays, verbose=1)
