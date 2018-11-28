@@ -58,8 +58,8 @@ from oapackage.oahelper import create_pareto_element
 reload(oaresearch.research_conference)
 from oaresearch.research_conference import createConferenceParetoElement, calculateConferencePareto, generateConferenceResults, conferenceDesignsPage, createConferenceDesignsPageParetoTable
 
-N = 24
-kk = 16
+N = 24; kk = 16
+N = 12; kk = 4
 #N=20; kk=13;
 #N=12; kk=4;
 N=16;kk=5

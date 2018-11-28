@@ -49,6 +49,18 @@ class TestResearchConference(unittest.TestCase):
         presults, pareto = oaresearch.research_conference.calculateConferencePareto(arrays, N=None, k=None, verbose=1)
         self.assertEqual(presults['nclasses'], 2)
         self.assertEqual(presults['pareto_indices'], (0,3) )
+
+    def test_conferenceStatistics(self):
+        array = oapackage.exampleArray(51)
+        expected = [(0, 0, 1), 0.0, 6, 10]
+        results = oaresearch.research_conference.conferenceStatistics(array)
+        self.assertEqual(expected, results)
+
+        array = oapackage.exampleArray(52)
+        expected = [(0, 0, 1), 0.0, 6, 10]
+        results = oaresearch.research_conference.conferenceStatistics(array)
+        self.assertEqual(expected, results)
+
         
     def test_conference_statistics(self):
         arrays=[oapackage.exampleArray(idx,1 ) for idx in [45,46,47,48]]
