@@ -36,28 +36,28 @@ from oapackage.conference import momentMatrix, modelStatistics, conferenceProjec
 #%%
 
 
-
 import json
 import copy
 import json_tricks
 
+
 def reduce_single_conference(arrays, verbose=0):
     """ Reduce a list of double conference arrays to single conference arrays 
-    
+
     Arrays that are not foldover arrays are discarded.
     """
-    narrays=len(arrays)
+    narrays = len(arrays)
     arrays = [array for array in arrays if oapackage.isConferenceFoldover(array)]
     if verbose:
-        print('reduce_single_conference: reduce %d arrays to %d single conference designs' %( narrays, len(arrays)))
+        print('reduce_single_conference: reduce %d arrays to %d single conference designs' % (narrays, len(arrays)))
 
-       
     def reduce_single(array):
-        Nsingle = int(array.n_rows/2)
+        Nsingle = int(array.n_rows / 2)
         perm = oapackage.double_conference_foldover_permutation(array)
-        return oapackage.array_link(np.array(array)[perm[0:Nsingle],:])
+        return oapackage.array_link(np.array(array)[perm[0:Nsingle], :])
     arrays = [reduce_single(array) for array in arrays]
     return arrays
+
 
 class SingleConferenceParetoCombiner:
 
@@ -69,18 +69,19 @@ class SingleConferenceParetoCombiner:
 
     def append_basepath(self, afile):
         return os.path.join(self.outputdir, afile)
-    
+
     def pareto_file(self, filename):
-        pfile= os.path.join(self.cache_dir, filename)
+        pfile = os.path.join(self.cache_dir, filename)
         oapackage.mkdirc(os.path.split(pfile)[0])
         return pfile
+
     def stats_file(self, filename):
-        pfile= os.path.join(self.cache_dir, filename).replace('.oa', '.json')
+        pfile = os.path.join(self.cache_dir, filename).replace('.oa', '.json')
         oapackage.mkdirc(os.path.split(pfile)[0])
         return pfile
 
     def combined_results_file(self, number_columns):
-        pfile= os.path.join(self.cache_dir, 'combined-single-conference-pareto-results-k%d.json' % number_columns)
+        pfile = os.path.join(self.cache_dir, 'combined-single-conference-pareto-results-k%d.json' % number_columns)
         oapackage.mkdirc(os.path.split(pfile)[0])
         return pfile
 
@@ -92,69 +93,71 @@ class SingleConferenceParetoCombiner:
 
             if os.path.exists(outputfile) and self.cache:
                 continue
-            
-            oapackage.oahelper.tprint('ParetoCalculator: pre_calculate file %d/%d: %s'  % (ii, len(arrayfiles), afile) )
+
+            oapackage.oahelper.tprint('ParetoCalculator: pre_calculate file %d/%d: %s' % (ii, len(arrayfiles), afile))
             arrays = oapackage.readarrayfile(self.append_basepath(afile))
             number_arrays = len(arrays)
             arrays = reduce_single_conference(arrays, verbose=1)
-            
+
             presults, pareto = oaresearch.research_conference.calculateConferencePareto(arrays)
 
             pareto_designs = [oapackage.array_link(array) for array in presults['pareto_designs']]
-            print('generate %s: %d arrays'  % (outputfile, len(pareto_designs)) )
+            print('generate %s: %d arrays' % (outputfile, len(pareto_designs)))
             oapackage.writearrayfile(outputfile, oapackage.arraylist_t(pareto_designs), oapackage.ABINARY)
-            with open(outputfile_stats, 'wt') as fid:   
+            with open(outputfile_stats, 'wt') as fid:
                 json.dump({'number_arrays': number_arrays, 'number_conference_arrays': len(arrays)}, fid)
-            
+
     def combine_statistics(self, stats, extra_stats):
         if stats is None:
             return copy.copy(extra_stats)
         combined_stats = copy.copy(stats)
         for field in ['number_arrays', 'number_conference_arrays']:
-            combined_stats[field]=stats[field]+extra_stats[field]
-                      
+            combined_stats[field] = stats[field] + extra_stats[field]
+
         return combined_stats
-    
+
     def write_combined_results(self, number_columns, results):
-        results['pareto_designs']=[np.array(array) for array in results['pareto_designs']]
-        with open(self.combined_results_file(number_columns), 'wt') as fid:   
-                json_tricks.dump(results, fid, indent=4)
+        results['pareto_designs'] = [np.array(array) for array in results['pareto_designs']]
+        with open(self.combined_results_file(number_columns), 'wt') as fid:
+            json_tricks.dump(results, fid, indent=4)
 
     def load_combined_results(self, number_columns):
-        with open(self.combined_results_file(number_columns), 'rt') as fid:   
-                results = json_tricks.load(fid)
+        with open(self.combined_results_file(number_columns), 'rt') as fid:
+            results = json_tricks.load(fid)
         return results
-        
+
     def calculate(self, arrayfiles):
         """ Calculate statistics over generated designs
-    
+
         Args:
             lst (list): list of files with designs
         """
 
-        pareto_arrays=[]      
-        combined_stats=None
+        pareto_arrays = []
+        combined_stats = None
         for afile in arrayfiles:
-            oapackage.oahelper.tprint('ParetoCalculator: calculate %s'  % afile)
+            oapackage.oahelper.tprint('ParetoCalculator: calculate %s' % afile)
             outputfile = self.pareto_file(afile)
             outputfile_stats = self.stats_file(afile)
 
             arrays = oapackage.readarrayfile(outputfile)
             pareto_arrays += list(arrays)
-            
-            stats=json.load(open(outputfile_stats, 'rt'))
+
+            stats = json.load(open(outputfile_stats, 'rt'))
             combined_stats = self.combine_statistics(combined_stats, stats)
-                    
+
         presults, pareto = oaresearch.research_conference.calculateConferencePareto(pareto_arrays)
         # remove invalid fields
         for tag in ['B4', 'F4']:
-            presults.pop(tag+'_max')
+            presults.pop(tag + '_max')
         for tag in ['rankinteraction', 'ranksecondorder']:
-            presults.pop(tag+'_min')
-        presults['combined_statistics']=combined_stats
+            presults.pop(tag + '_min')
+        presults['combined_statistics'] = combined_stats
         return presults
 
 #%%
+
+
 def generateConference(N, kmax=None, verbose=1, diagc=False, nmax=None, selectmethod='random', tag='cdesign', outputdir=None):
     """ Generate sequece of conference designs
 
@@ -292,7 +295,7 @@ def conferenceStatistics(al, verbose=0):
         print('rank X2+quadratics: %s' % (rankq,))
     return [f4, b4, rank, rankq]
 
-    
+
 def test_confJ4():
     al = oapackage.exampleArray(18)
     J = conferenceJ4(al)
@@ -384,23 +387,24 @@ def calculateConferencePareto(ll, N=None, k=None, verbose=1, add_data=True, addP
         N = ll[0].n_rows
         k = ll[0].n_columns
 
-    presults = pareto_results_structure({'pareto_designs':[]})
+    presults = pareto_results_structure({'pareto_designs': []})
     pareto = oapackage.ParetoMultiDoubleLong()
     if N is None:
-        presults['N']=None
-        #pareto['nclasses=']=0
+        presults['N'] = None
+        # pareto['nclasses=']=0
         return presults, pareto
-    
+
     if addProjectionStatistics is None:
-        if (N<=20):
-                addProjectionStatistics = True
+        if (N <= 20):
+            addProjectionStatistics = True
         else:
-                addProjectionStatistics = False
+            addProjectionStatistics = False
 
     data = None
-    t0=time.time()
+    t0 = time.time()
     for ii, al in enumerate(ll):
-        oapackage.oahelper.tprint('calculateConferencePareto: N %s column %s: array %d/%d (%.1f [s]): %s' % (str(N), str(k), ii, len(ll), time.time()-t0, str(pareto).strip()), dt=2)
+        oapackage.oahelper.tprint('calculateConferencePareto: N %s column %s: array %d/%d (%.1f [s]): %s' %
+                                  (str(N), str(k), ii, len(ll), time.time() - t0, str(pareto).strip()), dt=2)
         pareto_element, data = createConferenceParetoElement(al, addFoldover=False, addProjectionStatistics=addProjectionStatistics, pareto=pareto)
 
         pareto.addvalue(pareto_element, ii)
@@ -686,15 +690,15 @@ def createConferenceDesignsPageResultsTable(page, pareto_results, verbose=0):
             simpleRow('Minimum/Maximum rank of model matrix with 2FI and QE', '%d/%d' % (pareto_results['ranksecondorder_min'], pareto_results['ranksecondorder_max']))
             simpleRow('Minimum/Maximum rank of model matrix for 2FI', '%d/%d' % (pareto_results['rankinteraction_min'], pareto_results['rankinteraction_max']))
         else:
-            simpleRow('Maximum rank of model matrix with 2FI and QE', '%d' % ( pareto_results['ranksecondorder_max']))
+            simpleRow('Maximum rank of model matrix with 2FI and QE', '%d' % (pareto_results['ranksecondorder_max']))
             simpleRow('Maximum rank of model matrix for 2FI', '%d' % (pareto_results['rankinteraction_max']))
-        if 'B4_min'  in pareto_results:
+        if 'B4_min' in pareto_results:
             simpleRow('Minimum B4', '%.4f' % pareto_results['B4_min'])
-        if 'B4_max'  in pareto_results:
+        if 'B4_max' in pareto_results:
             simpleRow('Maximum B4', '%.4f' % pareto_results['B4_max'])
-        if 'F4_min'  in pareto_results:
+        if 'F4_min' in pareto_results:
             simpleRow('Minimum F4', '%s' % (pareto_results['F4_min'],))
-        if 'F4_max'  in pareto_results:
+        if 'F4_max' in pareto_results:
             simpleRow('Maximum F4', '%s' % (pareto_results['F4_max'],))
     if 'totaltime' in list(pareto_results.keys()):
         simpleRow('Processing time', str(pareto_results['totaltime']) + 's')
