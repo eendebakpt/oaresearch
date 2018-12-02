@@ -12,7 +12,7 @@ import sys
 import platform
 import numpy as np
 import time
-from imp import reload
+from importlib import reload
 from os.path import join
 import pickle
 import pdb
@@ -26,9 +26,17 @@ import oaresearch.research_conference
 from oaresearch.research_conference import calculateConferencePareto, conferenceResultsFile, generateConferenceResults, \
     conferenceDesignsPage
 from oapackage.conference import conferenceProjectionStatistics
-from oaresearch.research_conference import SingleConferenceParetoCombiner
+from oaresearch.research_conference import SingleConferenceParetoCombiner, generate_conference_latex_tables
+from oapackage import markup
+from oapackage.oahelper import create_pareto_element
+from oaresearch.research_conference import generate_or_load_conference_results, createConferenceParetoElement, \
+    calculateConferencePareto, generateConferenceResults, conferenceDesignsPage, createConferenceDesignsPageParetoTable
 
 generate_webpage = True
+
+print('TODO: test pycharm')
+print('FIX: links from main site: only for small oa files')
+print('REFACTOR: functions')
 
 # %% Setup directories
 resultsdir = join(os.path.expanduser('~'), 'oatmp')
@@ -51,10 +59,6 @@ if generate_webpage:
     cdir = oapackage.mkdirc(os.path.join(htmldir, 'conference'))
 
 # %%
-from oapackage import markup
-from oapackage.oahelper import create_pareto_element
-from oaresearch.research_conference import generate_or_load_conference_results, createConferenceParetoElement, \
-    calculateConferencePareto, generateConferenceResults, conferenceDesignsPage, createConferenceDesignsPageParetoTable
 
 N = 24
 kk = 16
@@ -211,50 +215,14 @@ def conferenceSubPages(tag='conference', Nmax=40, Nstart=4, kmax=None,
 
 
 # generated_subpages = conferenceSubPages(tag='cdesign', Nmax=40, Nstart=4, verbose=2, cache=False)
-# generated_subpages = conferenceSubPages(tag='cdesign', Nmax=40, Nstart=4, verbose=2, cache=True)
-generated_subpages = conferenceSubPages(tag='cdesign', Nmax=25, Nstart=24, verbose=2, cache=False)
+generated_subpages = conferenceSubPages(tag='cdesign', Nmax=40, Nstart=4, verbose=2, cache=True)
+#generated_subpages = conferenceSubPages(tag='cdesign', Nmax=25, Nstart=24, verbose=2, cache=False)
 
 # %% Results table for latex
 
 htmlsubdir = os.path.join(htmldir, 'conference')
-for N in range(8, 25, 2):
-    lst = oapackage.findfiles(htmlsubdir, 'conference-N%d.*pickle' % N)
-    print('latex table: N %d: %d files' % (N, len(lst)))
-    table = None
 
-    kk = [oapackage.scanf.sscanf(file, 'conference-N%dk%d')[1] for file in lst]
-    lst = [lst[idx] for idx in np.argsort(kk)]
-
-    for file in (lst):
-        r = pickle.load(open(os.path.join(htmlsubdir, file), 'rb'))
-
-        ncolumns = r['ncolumns']
-        rtable = r['rtable']
-        if rtable.size == 0:
-            continue
-        column = np.vstack((['k'], ncolumns * np.ones((rtable.shape[0] - 1, 1), dtype=int)))
-        rtable = np.hstack((column, rtable))
-        if table is None:
-            table = rtable
-        else:
-            rtable = rtable[1:]
-            table = np.vstack((table, rtable))
-        # r['ncolumns']
-    print(table)
-    if len(lst) == 0:
-        print('no results for N=%d' % N)
-        continue
-
-    offset_columns = [1, 2]
-    for row in range(1, table.shape[0]):
-        for col in offset_columns:
-            table[row, col] = str(int(table[row, col]) + 1)
-    latextable = oapackage.array2latex(table, hlines=[0],
-                                       comment=['conference desgins N=%d' % (N), 'offset for indices is 1'])
-    print(latextable)
-    with open(os.path.join(htmlsubdir, 'conference-N%d-overview.tex' % (N,)), 'wt') as fid:
-        fid.write(latextable)
-
+generate_conference_latex_tables(htmlsubdir, verbose=1)
 
 # %%
 
@@ -288,7 +256,7 @@ def cdesignTag(N, kk, page, outputdir, tdstyle='', tags=['cdesign', 'cdesign-dia
     else:
         cfilebase = None
 
-    if generated_result is not None:
+    if generated_result is not None and not len(generated_result)==0:
         if generated_result['pareto_results']['full_results']:
             nn = generated_result['pareto_results']['narrays']
             cfile = None
@@ -304,8 +272,11 @@ def cdesignTag(N, kk, page, outputdir, tdstyle='', tags=['cdesign', 'cdesign-dia
         txt, link = htmlTag(nn, kk, N, mode=mode,
                             href=hreflink, ncache=ncache, verbose=verbose >= 2)
         if verbose >= 2:
-            print('cdesignTag: txt %s' % (txt,))
-        if link:
+            print('cdesignTag: html txt %s' % (txt,))
+        if link and (hreflink is None):
+            # no html page, just copy OA file
+            if verbose>=2:
+                print('cdesignTag: N %d, ncols %d: copy OA file' % (NN, kk))
             shutil.copyfile(cfilex, os.path.join(cdir, cfilebase))
         page.td(txt, style=tdstyle)
     else:
@@ -315,12 +286,30 @@ def cdesignTag(N, kk, page, outputdir, tdstyle='', tags=['cdesign', 'cdesign-dia
 
 
 # %% Testing
-if 0:
+if 1:
+    #subpage='xxx.html'
+
     tag = 'cdesign'
     page = markup.page()
+    N=22; kk=9
+    generated_result = generated_subpages['cdesign'].get('N%dk%d' % (N, kk), None)
+    subpage = generated_result['htmlpage0']
     cdesignTag(N, kk, page, outputdir, '',
                ['cdesign', 'cdesign-diagonal', 'cdesign-diagonal-r'],
                ['full', 'r', 'r'], verbose=2, subpage=subpage, generated_result=generated_result)
+
+    generated_result = generated_subpages['cdesign'].get('N%dk%d' % (28, 4), None)
+    cdesignTag(28, 4, page, outputdir, '',
+               ['cdesign', 'cdesign-diagonal', 'cdesign-diagonal-r'],
+               ['full', 'r', 'r'], verbose=2, subpage=subpage, generated_result=generated_result)
+    
+    
+    tag='dconferencej1j3'
+    N=80
+    kk=8
+    
+    cdesignTag(N, kk, page, outputdir, tdstyle='', tags=[tag, tag + '-r'], 
+               tagtype=['full', 'r'], verbose=2, ncache=None, subpage=None, generated_result=None)
     # tag = 'dconferencej1'
     # cdesignTag(N=N, kk=kk, page=page, outputdir=outputdir,
     #           tags=[tag, tag + '-r'], tagtype=['full', 'r'], verbose=2, ncache=ncache)
@@ -476,11 +465,12 @@ def DconferencePage(page, tag='dconference', Nmax=26, Nstart=4, kmax=None,
     page.tr.close()
 
     ncache = {}
-    subpage = None
     for ki, kk in enumerate(krange):
         page.tr()
         page.td('%s' % str(kk), style=tdstyle)
         for Ni, N in enumerate(Nrange):
+            subpage = None
+            generated_result=None
             if subpages is not None:
                 generated_result = subpages.get('N%dk%d' % (N, kk), None)
                 if generated_result is not None and len(generated_result) != 0:

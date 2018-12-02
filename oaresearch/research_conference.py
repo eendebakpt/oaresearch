@@ -9,12 +9,14 @@ Pieter Eendebak <pieter.eendebak@gmail.com>
 
 from __future__ import print_function
 
+import collections
+import itertools
 import os
 import sys
-import numpy as np
 import time
-import itertools
-import collections
+import pickle
+
+import numpy as np
 
 try:
     import matplotlib.pyplot as plt
@@ -45,13 +47,18 @@ def reduce_single_conference(arrays, verbose=0):
     """ Reduce a list of double conference arrays to single conference arrays
 
     Arrays that are not foldover arrays are discarded.
+    
+    Args:
+        arrays (list): list of dobule conference designs
+    Returns:
+        list: list containing the corresponding single conference designs
     """
     narrays = len(arrays)
     arrays = [array for array in arrays if oapackage.isConferenceFoldover(array)]
     if verbose:
         print('reduce_single_conference: reduce %d arrays to %d single conference designs' % (narrays, len(arrays)))
 
-    def reduce_single(array):
+    def reduce_single(array):        
         Nsingle = int(array.n_rows / 2)
         perm = oapackage.double_conference_foldover_permutation(array)
         return oapackage.array_link(np.array(array)[perm[0:Nsingle], :])
@@ -63,6 +70,7 @@ def reduce_single_conference(arrays, verbose=0):
 class SingleConferenceParetoCombiner:
 
     def __init__(self, outputdir, cache_dir, cache=False, verbose=1):
+        """ Class to generate statistics and Pareto optimality results for a conference design class from double conference designs """
         self.outputdir = outputdir
         self.cache_dir = cache_dir
         self.cache = cache
@@ -163,7 +171,10 @@ class SingleConferenceParetoCombiner:
 
 
 def generate_or_load_conference_results(N, number_of_columns, outputdir, dc_outputdir, double_conference_cases=[]):
-    """ 
+    """ Calculate results for conference designs class
+    
+    In data is either calculated directly, or loaded from pre-generated data gathered from double conference designs.
+    
     """
     pareto_results = OrderedDict({'N': N, 'ncolumns': number_of_columns, 'full_results': 0, 'no_results': True})
 
@@ -227,7 +238,7 @@ def generateConference(N, kmax=None, verbose=1, diagc=False, nmax=None, selectme
     if diagc:
         ctype.ctype = oapackage.conference_t.CONFERENCE_DIAGONAL
         tag += '-diagonal'
-    if not nmax is None:
+    if nmax is not None:
         tag += '-r'
 
     al = ctype.create_root()
@@ -523,6 +534,47 @@ def showMaxZ(LL):
         print('%d cols: maxz seq %s' % (k, list(mm)))
 
 
+def generate_conference_latex_tables(htmlsubdir, verbose=1):
+    for N in range(8, 25, 2):
+        lst = oapackage.findfiles(htmlsubdir, 'conference-N%d.*pickle' % N)
+        if verbose:
+            print('latex table: N %d: %d files' % (N, len(lst)))
+        table = None
+
+        kk = [oapackage.scanf.sscanf(file, 'conference-N%dk%d')[1] for file in lst]
+        lst = [lst[idx] for idx in np.argsort(kk)]
+
+        for file in (lst):
+            r = pickle.load(open(os.path.join(htmlsubdir, file), 'rb'))
+
+            ncolumns = r['ncolumns']
+            rtable = r['rtable']
+            if rtable.size == 0:
+                continue
+            column = np.vstack((['k'], ncolumns * np.ones((rtable.shape[0] - 1, 1), dtype=int)))
+            rtable = np.hstack((column, rtable))
+            if table is None:
+                table = rtable
+            else:
+                rtable = rtable[1:]
+                table = np.vstack((table, rtable))
+            # r['ncolumns']
+        print(table)
+        if len(lst) == 0:
+            print('no results for N=%d' % N)
+            continue
+    
+        offset_columns = [1, 2]
+        for row in range(1, table.shape[0]):
+            for col in offset_columns:
+                table[row, col] = str(int(table[row, col]) + 1)
+        latextable = oapackage.array2latex(table, hlines=[0],
+                                           comment=['conference desgins N=%d' % (N), 'offset for indices is 1'])
+        if verbose:
+            print(latextable)
+        with open(os.path.join(htmlsubdir, 'conference-N%d-overview.tex' % (N,)), 'wt') as fid:
+            fid.write(latextable)
+            
 def conferenceResultsFile(N, kk, outputdir, tags=['cdesign', 'cdesign-diagonal', 'cdesign-diagonal-r'],
                           tagtype=['full', 'r', 'r'], verbose=1):
     """ Create html tag for oa page
@@ -626,8 +678,8 @@ def htmlTag(nn, kk, N, mode='full', href=None, ncache=None, verbose=0):
                 txt = '?'
             else:
                 txt = '&ge; %d' % nn
-        if nn < 10000 and nn > 0:
-            if href is not None:
+        if href is not None:
+            if nn < 10000 and nn > 0 or (href.endswith('html')):
                 ss = e.a(txt, href=href, style='text-decoration: none;')
                 link = True
                 txt = ss
