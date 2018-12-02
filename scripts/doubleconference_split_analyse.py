@@ -19,6 +19,8 @@ import argparse
 import tempfile
 from colorama import Fore
 import itertools
+import copy
+import json_tricks as json
 
 # setup data locations
 resultsdir = join(os.path.expanduser('~'), 'oatmp')
@@ -230,9 +232,7 @@ import oaresearch
 
 
 reload(oaresearch.research_conference)
-import json
-import copy
-import json_tricks
+
 from oaresearch.research_conference import SingleConferenceParetoCombiner
 
 
@@ -253,7 +253,7 @@ if 1:
 
     verbose = 2
     rr = {}
-    for k in range(5, splitdata['kmax'] + 1):
+    for k in range(2, splitdata['kmax'] + 1):
         ll = listFiles(splitdata, k, verbose=verbose)
 
         if 0:

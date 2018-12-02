@@ -63,7 +63,7 @@ r = oapackage.log_print(-oapackage.SYSTEM, '')
 
 
 #%%
-dobigcase = 32  # by default run a small case to test the scripts
+dobigcase = 20  # by default run a small case to test the scripts
 
 parser = argparse.ArgumentParser()
 parser.add_argument("-v", "--verbose", help="output level", default=1)
