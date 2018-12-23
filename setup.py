@@ -47,7 +47,7 @@ setup(name='oaresearch',
       packages=packages,
       tests_require=['numpy', 'nose>=1.3', 'coverage>=4.0', 'mock'],
       zip_safe=False,
-      install_requires=['numpy>=1.13', 'scanf', 'OApackage'],
+      install_requires=['numpy>=1.13', 'scanf', 'OApackage', 'json_tricks'],
       extras_require={
           'GUI':  ["qtpy", 'matplotlib'],
       },
