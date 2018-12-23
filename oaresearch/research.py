@@ -107,7 +107,7 @@ def citation(paper, style='brief'):
     """
     if paper == 'complete':
         return markup.oneliner.a('Complete Enumeration of Pure-Level and Mixed-Level Orthogonal Arrays',
-                                 href='http://dx.doi.org/10.1002/jcd.20236')
+                                 href='https://doi.org/10.1002/jcd.20236')
     elif paper == 'conference' or paper == 'cisomorphism':
         if style == 'full':
             return '<em>A Classification Criterion for Definitive Screening Designs</em>, E.D. Schoen, P.T. Eendebak, P. Goos, Annals of Statistics, 2018'
