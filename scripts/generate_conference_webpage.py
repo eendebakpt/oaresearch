@@ -34,8 +34,7 @@ from oaresearch.research_conference import generate_or_load_conference_results, 
 
 generate_webpage = True
 
-print('TODO: test pycharm')
-print('FIX: links from main site: only for small oa files')
+print('FIX: direct links from main site for non-conf designs: only for small oa files')
 print('REFACTOR: functions')
 
 # %% Setup directories
@@ -66,8 +65,7 @@ N = 12;
 kk = 4
 # N=20; kk=13;
 # N=12; kk=4;
-N = 24;
-kk = 12
+#N = 28;kk = 8
 # N = 4; kk = 2
 # N=30;kk=6
 t0 = time.time()
@@ -272,11 +270,11 @@ def cdesignTag(N, kk, page, outputdir, tdstyle='', tags=['cdesign', 'cdesign-dia
         txt, link = htmlTag(nn, kk, N, mode=mode,
                             href=hreflink, ncache=ncache, verbose=verbose >= 2)
         if verbose >= 2:
-            print('cdesignTag: html txt %s' % (txt,))
-        if link and (hreflink is None):
+            print('cdesignTag: N %d, k %d, html txt %s' % (N, kk, txt,))
+        if link and (cfilex is not None):
             # no html page, just copy OA file
             if verbose>=2:
-                print('cdesignTag: N %d, ncols %d: copy OA file' % (NN, kk))
+                print('cdesignTag: N %d, ncols %d: copy OA file' % (N, kk))
             shutil.copyfile(cfilex, os.path.join(cdir, cfilebase))
         page.td(txt, style=tdstyle)
     else:
@@ -496,7 +494,7 @@ def DconferencePage(page, tag='dconference', Nmax=26, Nstart=4, kmax=None,
                            ['full', 'r', 'r'], subpage=subpage, generated_result=generated_result)
             else:
                 cdesignTag(N, kk, page, outputdir, tdstyle,
-                           [tag, tag + '-r'], ['full', 'r'], ncache=ncache)
+                           tags=[tag, tag + '-r'], tagtype=['full', 'r'], ncache=ncache)
 
         page.tr.close()
     page.table.close()
@@ -506,7 +504,10 @@ def DconferencePage(page, tag='dconference', Nmax=26, Nstart=4, kmax=None,
 
 
 # %% Get even-odd designs
-if 0:
+
+from oaresearch.research_conference import select_even_odd_conference_designs
+        
+def generate_even_odd_conference_designs():
     Nrange = range(0, 82, 2)  # full range
     # Nrange=range(44, 45, 2)
     # Nrange=range(4, 48, 2)
@@ -519,31 +520,8 @@ if 0:
 
             cfile = cdesignTag(N, kk, page=None, outputdir=outputdir, tags=[
                 tag, tag + '-r'], tagtype=['full', 'r'])
-            na = oapackage.nArrayFile(cfile)
-
-            eolist = []
-            if na > 100000:
-                af = oapackage.arrayfile_t(cfile)
-                for ii in range(na):
-                    if ii % (200 * 1e3) == 0 or ii == na - 1:
-                        print('N %d, k %d: %d/%d' % (N, kk, ii, af.narrays))
-                    al = af.readnext()
-                    if ii == 0:
-                        if al.min() > -1:
-                            raise Exception('not a conference matrix?!')
-                    if not oapackage.isConferenceFoldover(al):
-                        eolist += [al]
-                af.closefile()
-            else:
-                ll = oapackage.readarrayfile(cfile)
-                na = len(ll)
-                if len(ll) > 0:
-                    if ll[0].min() > -1:
-                        raise Exception('not a conference matrix?!')
-
-                # fixme: make streaming
-                eolist = [
-                    al for al in ll if not oapackage.isConferenceFoldover(al)]
+                    
+            na, eolist = select_even_odd_conference_designs(cfile)
 
             cfileout = cfile.replace(tag, tag + '-eo')
             print('  out: %s: %d -> %d' % (cfileout, na, len(eolist)))
@@ -559,7 +537,8 @@ if 0:
                         cmd = 'gzip -f %s' % cfileout
                         os.system(cmd)
 
-# DconferencePage(page, tag='dconferencej1j3-eo', Nstart=44, Nmax=45, kmax=28)
+if 0:
+    generate_even_odd_conference_designs()
 
 
 # %%
@@ -627,7 +606,6 @@ if generate_webpage:
         page.p.close()
         DconferencePage(page, tag='dconferencej1j3-eo',
                         Nstart=4, Nmax=81, kmax=24, Nstep=4, specials=specialdata, tableclass='conftable conftable2')
-        # DconferencePage(page, tag='dconferencej1j3-eo', Nstart=58, Nmax=81, kmax=20)
 
         if 1:
             subheader('DCDs with level balance')  # J1 values are zero

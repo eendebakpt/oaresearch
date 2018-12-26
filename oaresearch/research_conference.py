@@ -42,7 +42,33 @@ import json
 import copy
 import json_tricks
 
+def select_even_odd_conference_designs(cfile):
+        """ Select the even-odd conference designs from a file with designs """
+        na = oapackage.nArrayFile(cfile)
 
+        eolist = []
+        if na > 100000:
+            af = oapackage.arrayfile_t(cfile)
+            for ii in range(na):
+                if ii % (200 * 1e3) == 0 or ii == na - 1:
+                    print('select_even_odd_conference_designs: %d/%d' % (cfile, ii, af.narrays))
+                al = af.readnext()
+                if ii == 0:
+                    if al.min() > -1:
+                        raise Exception('not a conference matrix?!')
+                if not oapackage.isConferenceFoldover(al):
+                    eolist += [al]
+            af.closefile()
+        else:
+            ll = oapackage.readarrayfile(cfile)
+            na = len(ll)
+            if len(ll) > 0:
+                if ll[0].min() > -1:
+                    raise Exception('not a conference matrix?!')
+
+            eolist = [al for al in ll if not oapackage.isConferenceFoldover(al)]
+        return na, eolist
+    
 def reduce_single_conference(arrays, verbose=0):
     """ Reduce a list of double conference arrays to single conference arrays
 
@@ -535,6 +561,7 @@ def showMaxZ(LL):
 
 
 def generate_conference_latex_tables(htmlsubdir, verbose=1):
+    """ Generate LaTeX results tables from pre-generated result files """
     for N in range(8, 25, 2):
         lst = oapackage.findfiles(htmlsubdir, 'conference-N%d.*pickle' % N)
         if verbose:
