@@ -13,7 +13,8 @@ before_install:
 install:
     - ls
     - which swig3.0
-    - python setup.py develop
+    - python setup.py install
+    - python -c "import oapackage; print(oapackage.compile_information())"
     - pip install pytest
 
 script: 
