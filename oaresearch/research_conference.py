@@ -42,38 +42,40 @@ import json
 import copy
 import json_tricks
 
+
 def select_even_odd_conference_designs(cfile):
-        """ Select the even-odd conference designs from a file with designs """
-        na = oapackage.nArrayFile(cfile)
+    """ Select the even-odd conference designs from a file with designs """
+    na = oapackage.nArrayFile(cfile)
 
-        eolist = []
-        if na > 100000:
-            af = oapackage.arrayfile_t(cfile)
-            for ii in range(na):
-                if ii % (200 * 1e3) == 0 or ii == na - 1:
-                    print('select_even_odd_conference_designs: %d/%d' % (cfile, ii, af.narrays))
-                al = af.readnext()
-                if ii == 0:
-                    if al.min() > -1:
-                        raise Exception('not a conference matrix?!')
-                if not oapackage.isConferenceFoldover(al):
-                    eolist += [al]
-            af.closefile()
-        else:
-            ll = oapackage.readarrayfile(cfile)
-            na = len(ll)
-            if len(ll) > 0:
-                if ll[0].min() > -1:
+    eolist = []
+    if na > 100000:
+        af = oapackage.arrayfile_t(cfile)
+        for ii in range(na):
+            if ii % (200 * 1e3) == 0 or ii == na - 1:
+                print('select_even_odd_conference_designs: %d/%d' % (cfile, ii, af.narrays))
+            al = af.readnext()
+            if ii == 0:
+                if al.min() > -1:
                     raise Exception('not a conference matrix?!')
+            if not oapackage.isConferenceFoldover(al):
+                eolist += [al]
+        af.closefile()
+    else:
+        ll = oapackage.readarrayfile(cfile)
+        na = len(ll)
+        if len(ll) > 0:
+            if ll[0].min() > -1:
+                raise Exception('not a conference matrix?!')
 
-            eolist = [al for al in ll if not oapackage.isConferenceFoldover(al)]
-        return na, eolist
-    
+        eolist = [al for al in ll if not oapackage.isConferenceFoldover(al)]
+    return na, eolist
+
+
 def reduce_single_conference(arrays, verbose=0):
     """ Reduce a list of double conference arrays to single conference arrays
 
     Arrays that are not foldover arrays are discarded.
-    
+
     Args:
         arrays (list): list of dobule conference designs
     Returns:
@@ -84,7 +86,7 @@ def reduce_single_conference(arrays, verbose=0):
     if verbose:
         print('reduce_single_conference: reduce %d arrays to %d single conference designs' % (narrays, len(arrays)))
 
-    def reduce_single(array):        
+    def reduce_single(array):
         Nsingle = int(array.n_rows / 2)
         perm = oapackage.double_conference_foldover_permutation(array)
         return oapackage.array_link(np.array(array)[perm[0:Nsingle], :])
@@ -198,9 +200,9 @@ class SingleConferenceParetoCombiner:
 
 def generate_or_load_conference_results(N, number_of_columns, outputdir, dc_outputdir, double_conference_cases=[]):
     """ Calculate results for conference designs class
-    
+
     In data is either calculated directly, or loaded from pre-generated data gathered from double conference designs.
-    
+
     """
     pareto_results = OrderedDict({'N': N, 'ncolumns': number_of_columns, 'full_results': 0, 'no_results': True})
 
@@ -285,7 +287,7 @@ def generateConference(N, kmax=None, verbose=1, diagc=False, nmax=None, selectme
         LL[extcol] = oapackage.extend_conference(
             LL[extcol - 1], ctype, verbose=verbose >= 2)
 
-        LL[extcol] = oapackage.selectConferenceIsomorpismClasses(LL[extcol], 1)
+        LL[extcol] = oapackage.selectConferenceIsomorpismClasses(LL[extcol], verbose >= 1)
 
         LL[extcol] = oapackage.sortLMC0(LL[extcol])
 
@@ -298,7 +300,7 @@ def generateConference(N, kmax=None, verbose=1, diagc=False, nmax=None, selectme
                 elif selectmethod == 'first':
                     LL[extcol] = [LL[extcol][i] for i in range(na)]
                 else:
-                    # mixed
+                    # mixed case
                     raise Exception('not implemented')
         afmode = oapackage.ATEXT
         if (len(LL[extcol]) > 1000):
@@ -466,7 +468,7 @@ def calculateConferencePareto(ll, N=None, k=None, verbose=1, add_data=True, addP
     """ Calculate Pareto optimal designs from a list of designs """
     if verbose:
         print('calculateConferencePareto: analysing %d arrays, addProjectionStatistics %s' % (
-        len(ll), addProjectionStatistics))
+            len(ll), addProjectionStatistics))
 
     if len(ll) > 0:
         N = ll[0].n_rows
@@ -590,7 +592,7 @@ def generate_conference_latex_tables(htmlsubdir, verbose=1):
         if len(lst) == 0:
             print('no results for N=%d' % N)
             continue
-    
+
         offset_columns = [1, 2]
         for row in range(1, table.shape[0]):
             for col in offset_columns:
@@ -601,7 +603,8 @@ def generate_conference_latex_tables(htmlsubdir, verbose=1):
             print(latextable)
         with open(os.path.join(htmlsubdir, 'conference-N%d-overview.tex' % (N,)), 'wt') as fid:
             fid.write(latextable)
-            
+
+
 def conferenceResultsFile(N, kk, outputdir, tags=['cdesign', 'cdesign-diagonal', 'cdesign-diagonal-r'],
                           tagtype=['full', 'r', 'r'], verbose=1):
     """ Create html tag for oa page
