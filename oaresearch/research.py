@@ -119,8 +119,9 @@ def citation(paper, style='brief'):
     elif paper == 'conference enumeration' or paper == 'cenumeration':
         if style == 'full':
             return markup.oneliner.a('Enumeration and Classification of Definitive Screening Designs',
-                                 href='') + ', Eric D. Schoen, Pieter T. Eendebak, Alan Vazquez-Alcocer, Peter Goos, Annals of Statistics, 2019'
+                                 href='') + ', Eric D. Schoen, Pieter T. Eendebak, Alan Vazquez-Alcocer, Peter Goos, in preparation'
         else:
+            return 'Enumeration and Classification of Definitive Screening Designs, in preparation'
             return markup.oneliner.a('Enumeration and Classification of Definitive Screening Designs',
                                  href='')
     else:

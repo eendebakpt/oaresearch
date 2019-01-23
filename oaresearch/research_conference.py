@@ -697,9 +697,13 @@ def htmlTag(nn, kk, N, mode='full', href=None, ncache=None, verbose=0):
         kk (int): number of columns
         N (int): number of rows
         mode (str)
+        href (None or str): hyperlink to subpage
 
+    Returns:
+        txt (str): link text
+        hyper_link (bool): True if the txt is a hyperlink
     """
-    link = False
+    hyper_link = False
     if nn >= 0:
         if mode == 'full':
             txt = '%d' % nn
@@ -709,10 +713,10 @@ def htmlTag(nn, kk, N, mode='full', href=None, ncache=None, verbose=0):
             else:
                 txt = '&ge; %d' % nn
         if href is not None:
-            if nn < 10000 and nn > 0 or (href.endswith('html')):
+            if nn < 6000 and nn > 0 or (href.endswith('html')):
                 ss = e.a(txt, href=href, style='text-decoration: none;')
-                link = True
-                txt = ss
+                hyper_link = True
+                txt = ss               
         else:
             pass
     else:
@@ -732,7 +736,7 @@ def htmlTag(nn, kk, N, mode='full', href=None, ncache=None, verbose=0):
                     txt = '?'
         else:
             txt = ''
-    return txt, link
+    return txt, hyper_link
 
 
 def latexResults(outputdir):
@@ -914,7 +918,8 @@ def createConferenceDesignsPageParetoTable(page, pareto_results, verbose=0, html
 
     if pareto_results['narrays'] > 0 and pareto_results.get('full_results'):
         add_extra = True
-        print('do statistics2htmltable')
+        if verbose:
+            print('createConferenceDesignsPageParetoTable: do statistics2htmltable')
 
         header = ['Index Pareto file', 'Index design file', 'Rank 2FI and QE', 'Rank 2FI', 'F4', 'B4']
         if add_extra:

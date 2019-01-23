@@ -24,11 +24,11 @@ def formatArrayHyperlink(txt, lnk, filename):
 
 def minifyJS(javascript_code):
     """ Minify Javascript code """
-    minified = jsmin(javascript_code)
+    minified = jsmin.jsmin(javascript_code)
     return minified
 
 
-def minify(htmlcode, verbose=0):
+def minifyHTML(htmlcode, verbose=0):
     """ Minify html code """
     htmlcode_minified = htmlmin.minify(htmlcode)
     if verbose:
