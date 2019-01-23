@@ -17,6 +17,7 @@ from os.path import join
 import pickle
 import pdb
 import shutil
+import webbrowser
 
 import oapackage
 import oapackage.graphtools
@@ -49,13 +50,13 @@ if platform.node() == 'woelmuis':
 
 if generate_webpage:
     htmldir = os.path.join(os.path.expanduser('~'), 'misc', 'oapage2')
-    htemplate = True
-    if 1:
+    html_template = True
+    if 0:
         # for testing...
         htmldir = os.path.join(os.path.expanduser('~'), 'oatmp', 'confpage_dc')
-        htemplate = False
+        html_template = False
     oapackage.mkdirc(os.path.join(htmldir))
-    cdir = oapackage.mkdirc(os.path.join(htmldir, 'conference'))
+    conference_html_dir = oapackage.mkdirc(os.path.join(htmldir, 'conference'))
 
 # %%
 
@@ -77,7 +78,7 @@ ll = ll[0:]
 
 pareto_results, cfile = generate_or_load_conference_results(N, kk, outputdir, dc_outputdir=resultsdir,
                                                             double_conference_cases=[10, 16, 24])
-page = conferenceDesignsPage(pareto_results, verbose=1, makeheader=True, htmlsubdir=cdir)
+page = conferenceDesignsPage(pareto_results, verbose=1, makeheader=True, htmlsubdir=conference_html_dir, html_template=html_template)
 dt = time.time() - t0
 print('processing time: %.1f [s]' % dt)
 
@@ -142,12 +143,12 @@ if 0:
 # %% Generate subpages for the designs
 
 
-def conferenceSubPages(tag='conference', Nmax=40, Nstart=4, kmax=None,
+def conferenceSubPages(tag='conference', Nmax=40, Nstart=4, kmax=None, outputdir=None, conference_html_dir = None,
                        verbose=1, specials={}, Nstep=2, NmaxPareto=40, cache=True, cache_tag='results_cachev7',
-                       double_conference_cases=[10, 16, 24]):
+                       double_conference_cases=[10, 16, 24], html_template=False):
     """ Generate subpages for single conference results
 
-    Arguments:
+    Args:
         page (markup object)
         tag (str): type of data
         Nmax, Nstart, kmax (int)
@@ -193,11 +194,15 @@ def conferenceSubPages(tag='conference', Nmax=40, Nstart=4, kmax=None,
                 continue
 
             # create HTML page
-            page = conferenceDesignsPage(pareto_results, verbose=1, makeheader=True, htmlsubdir=cdir)
+            page = conferenceDesignsPage(pareto_results, verbose=1, makeheader=True, htmlsubdir=conference_html_dir, html_template=html_template)
 
             # write results               
             htmlfile0 = tag + '-%d-%d.html' % (N, kk)
-            htmlfile = os.path.join(cdir, htmlfile0)
+            if html_template:
+                oapackage.mkdirc( os.path.join(conference_html_dir, 'templates') )
+                htmlfile = os.path.join(conference_html_dir, 'templates', htmlfile0 + '.template')
+            else:
+                htmlfile = os.path.join(conference_html_dir, htmlfile0)
 
             sx = subpages[tag]['N%dk%d' % (N, kk)]
             sx['htmlpage0'] = htmlfile0
@@ -212,9 +217,9 @@ def conferenceSubPages(tag='conference', Nmax=40, Nstart=4, kmax=None,
     return subpages
 
 
-# generated_subpages = conferenceSubPages(tag='cdesign', Nmax=40, Nstart=4, verbose=2, cache=False)
-generated_subpages = conferenceSubPages(tag='cdesign', Nmax=40, Nstart=4, verbose=2, cache=True)
-#generated_subpages = conferenceSubPages(tag='cdesign', Nmax=25, Nstart=24, verbose=2, cache=False)
+# generated_subpages = conferenceSubPages(tag='cdesign', Nmax=40, Nstart=4, verbose=2, cache=False, outputdir=outputdir)
+generated_subpages = conferenceSubPages(tag='cdesign', Nmax=40, Nstart=4, verbose=2, cache=True, outputdir=outputdir, conference_html_dir = conference_html_dir, html_template = html_template)
+#generated_subpages = conferenceSubPages(tag='cdesign', Nmax=25, Nstart=24, verbose=2, cache=False, outputdir=outputdir)
 
 # %% Results table for latex
 
@@ -275,7 +280,7 @@ def cdesignTag(N, kk, page, outputdir, tdstyle='', tags=['cdesign', 'cdesign-dia
             # no html page, just copy OA file
             if verbose>=2:
                 print('cdesignTag: N %d, ncols %d: copy OA file' % (N, kk))
-            shutil.copyfile(cfilex, os.path.join(cdir, cfilebase))
+            shutil.copyfile(cfilex, os.path.join(conference_html_dir, cfilebase))
         page.td(txt, style=tdstyle)
     else:
         if verbose >= 2:
@@ -550,7 +555,7 @@ if generate_webpage:
     citation = oaresearch.research.citation('cenumeration', style='brief')
     page = oapackage.markup.page()
 
-    if not htemplate:
+    if not html_template:
         page.init(title="Conference designs",
                   css=('oastyle.css'),
                   lang='en',
@@ -653,26 +658,24 @@ if generate_webpage:
         ss += 'The algorithm used to generate the results is described in %s.' % citation
         page.p(ss)
 
-    if 1:
+    if 0:
         page.h1('Obsolete results')
         subheader('DCDs with level balance and orthogonal interaction columns.')
         page.p(
             'These designs have N &equiv; 2 mod 4. In double conference designs with level balance and orthogonal interaction columns, the elements of each column sums to zero. In addition, for any set of three columns, the vector formed by the element-wise product of the columns has elements that sum to zero too. A definitive screening design can be constructed by appending a double conference design with a row of zeroes.')
         DconferencePage(page, tag='dconferencej1j3', Nstart=6, Nmax=81, kmax=28, Nstep=4)
 
-        if 0:
-            subheader('Double conference matrices (no restrictions on J1 and J3)')
-            page.p()
-            page.add(
-                'Double conference matrices are matrixes of size 2m x k. Each columns contains exactly two zeros and an arbitrary number of values +1 or -1. The columns are orthogonal to each other.')
-            page.add(
-                'The square double conference matrices are weighing matrices of type W(N, N-2).')
-            page.p.close()
-            DconferencePage(page, tag='dconference2')
+        subheader('Double conference matrices (no restrictions on J1 and J3)')
+        page.p()
+        page.add(
+            'Double conference matrices are matrixes of size 2m x k. Each columns contains exactly two zeros and an arbitrary number of values +1 or -1. The columns are orthogonal to each other.')
+        page.add(
+            'The square double conference matrices are weighing matrices of type W(N, N-2).')
+        page.p.close()
+        DconferencePage(page, tag='dconference2')
 
-    import webbrowser
 
-    if htemplate:
+    if html_template:
         hfile = os.path.join(htmldir, 'templates', 'conference.html')
     else:
         hfile = os.path.join(htmldir, 'conference.html')

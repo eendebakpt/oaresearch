@@ -110,14 +110,19 @@ def citation(paper, style='brief'):
                                  href='https://doi.org/10.1002/jcd.20236')
     elif paper == 'conference' or paper == 'cisomorphism':
         if style == 'full':
-            return '<em>A Classification Criterion for Definitive Screening Designs</em>, E.D. Schoen, P.T. Eendebak, P. Goos, Annals of Statistics, 2018'
+            hyperlink = markup.oneliner.a('A Classification Criterion for Definitive Screening Designs',
+                                     href='https://doi.org/10.1214/18-AOS1723')
+            return hyperlink + ', E.D. Schoen, P.T. Eendebak, P. Goos, Annals of Statistics, 2019'
         else:
             return markup.oneliner.a('A Classification Criterion for Definitive Screening Designs',
-                                     href='...')
+                                     href='https://doi.org/10.1214/18-AOS1723')
     elif paper == 'conference enumeration' or paper == 'cenumeration':
-        return '<em>Enumeration and Classification of Definitive Screening Designs</em> (in preparation)'
-        return markup.oneliner.a('Enumeration and Classification of Definitive Screening Designs',
-                                 href='...')
+        if style == 'full':
+            return markup.oneliner.a('Enumeration and Classification of Definitive Screening Designs',
+                                 href='') + ', Eric D. Schoen, Pieter T. Eendebak, Alan Vazquez-Alcocer, Peter Goos, Annals of Statistics, 2019'
+        else:
+            return markup.oneliner.a('Enumeration and Classification of Definitive Screening Designs',
+                                 href='')
     else:
         raise Exception('paper not known')
 

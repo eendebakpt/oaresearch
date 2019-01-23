@@ -50,6 +50,7 @@ class TestResearchConference(unittest.TestCase):
         self.assertEqual(presults['nclasses'], 2)
         self.assertEqual(presults['pareto_indices'], (0, 3))
 
+
     def test_conferenceStatistics(self):
         array = oapackage.exampleArray(51)
         expected = [(0, 1, 0), 0.1111111111111111, 6, 9]

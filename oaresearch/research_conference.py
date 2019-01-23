@@ -795,8 +795,8 @@ def createConferenceDesignsPageHeader(page, makeheader, conference_class, ncolum
         page.h1('Conference designs %s (<b>partial results</b>) ' % xstr)
     oap = e.a('Orthogonal Array package', href='../../software.html')
     pstr = 'This page contains information about conference designs. '
-    pstr += 'The results have been generated with the %s package.' % oap
-    pstr += ' If you use these data, please cite the paper ' + \
+    pstr += 'The results have been generated with the %s.' % oap
+    pstr += ' If you use these results, please cite the paper ' + \
             citation('conference', style='full') + '.'
     page.p(pstr)
 
@@ -898,6 +898,14 @@ def createConferenceDesignsPageLoadDesignsFile(pareto_results, htmlsubdir=None, 
 
 
 def createConferenceDesignsPageParetoTable(page, pareto_results, verbose=0, htmlsubdir=None):
+    """ Create table with Pareto results and add to the markup object
+    
+    Args:
+        page (markup.page): html page to add table to
+        
+    Returns:
+        rtable (array): generated table
+    """
     if verbose:
         print('createConferenceDesignsPageParetoTable: start')
 
@@ -988,8 +996,13 @@ def _convert_to_latex_table(rtable, N, ncolumns, offset_columns=[0, 1]):
     return latextable
 
 
-def conferenceDesignsPage(pareto_results, verbose=1, makeheader=True, htmlsubdir=None, generate_latex=True):
-    """ Generate html page for class conference designs """
+def conferenceDesignsPage(pareto_results, verbose=1, makeheader=True, htmlsubdir=None, generate_latex=True, html_template=False):
+    """ Generate html page for class conference designs
+    
+    Args:
+        pareto_results (dict): structure with results for Pareto optimal designs
+        html_template (bool): If True then place html files in subfolder templates/
+    """
 
     N = pareto_results['N']
     ncolumns = pareto_results['ncolumns']

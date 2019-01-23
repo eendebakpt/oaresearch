@@ -1,4 +1,4 @@
-o  # -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 """
 
 Example script for calculating conference designs
@@ -12,7 +12,6 @@ import platform
 import sys
 import numpy as np
 from os.path import join
-import itertools
 
 import oapackage
 from oapackage import oahelper
@@ -121,7 +120,7 @@ def generateConference(N, kmax=None, verbose=1, diagc=False, nmax=None, selectme
     return LL
 
 
-LL = generateConference(12, outputdir=None)
+LL = generateConference(4, outputdir=None)
 
 
 #%% Test maxz values
@@ -137,6 +136,9 @@ if not full_generation:
     # only do small cases
     for NN in range(4, 18, 2):
         _ = generateConference(N=NN, outputdir=outputdir)
+
+    for NN in range(4, 42, 2):
+        _ = generateConference(N=NN, outputdir=outputdir, kmax=2)
 
 else:
     for NN in range(4, 18, 2):

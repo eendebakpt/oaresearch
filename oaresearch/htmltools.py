@@ -1,3 +1,6 @@
+import jsmin
+import htmlmin
+
 import oapackage
 from oapackage.markup import oneliner as e
 
@@ -18,3 +21,16 @@ def formatArrayHyperlink(txt, lnk, filename):
     else:
         ss = e.a(txt, href=lnk, class_='normal')
     return ss
+
+def minifyJS(javascript_code):
+    """ Minify Javascript code """
+    minified = jsmin(javascript_code)
+    return minified
+
+
+def minify(htmlcode, verbose=0):
+    """ Minify html code """
+    htmlcode_minified = htmlmin.minify(htmlcode)
+    if verbose:
+        print('minify: length %d -> %d' % (len(htmlcode), len(htmlcode_minified)))
+    return htmlcode_minified
