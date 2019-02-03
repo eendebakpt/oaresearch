@@ -35,8 +35,6 @@ from oaresearch.research_conference import generate_or_load_conference_results, 
 
 generate_webpage = True
 
-print('FIX: direct links from main site for non-conf designs: only for small oa files')
-print('REFACTOR: functions')
 
 # %% Setup directories
 resultsdir = join(os.path.expanduser('~'), 'oatmp')
@@ -51,7 +49,7 @@ if platform.node() == 'woelmuis':
 if generate_webpage:
     htmldir = os.path.join(os.path.expanduser('~'), 'misc', 'oapage2')
     html_template = True
-    if 0:
+    if 1:
         # for testing...
         htmldir = os.path.join(os.path.expanduser('~'), 'oatmp', 'confpage_dc')
         html_template = False
@@ -144,7 +142,7 @@ if 0:
 
 def conferenceSubPages(tag='conference', Nmax=40, Nstart=4, kmax=None, outputdir=None, conference_html_dir = None,
                        verbose=1, specials={}, Nstep=2, NmaxPareto=40, cache=True, cache_tag='results_cachev7',
-                       double_conference_cases=[10, 16, 24], html_template=False):
+                       double_conference_cases=[24], html_template=False):
     """ Generate subpages for single conference results
 
     Args:
