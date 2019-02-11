@@ -320,7 +320,7 @@ def conferenceJ4(al, jj=4):
     """ Calculate J4 values for a conference matrix """
 
     al = oapackage.makearraylink(al)
-    return oapackage.Jcharacteristics_conference(al, jj=jj)
+    return oapackage.Jcharacteristics_conference(al, number_of_columns=jj)
 
     al = np.array(al)
     nc = al.shape[1]
