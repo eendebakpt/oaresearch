@@ -72,7 +72,7 @@ class TestResearchConference(unittest.TestCase):
         b4s = [np.sum(np.array(j4)**2) / N**2 for j4 in j4s]
         self.assertEqual(b4s, [3.16, 3.72, 3.4, 6.0])
 
-        F4_values = [al.FvaluesConference(jj=4) for al in arrays]
+        F4_values = [al.FvaluesConference(number_of_columns=4) for al in arrays]
         self.assertEqual(F4_values, [(0, 1, 4, 54, 11), (0, 1, 8, 52, 9), (0, 2, 4, 51, 13), (0, 0, 27, 42, 1)])
 
 
