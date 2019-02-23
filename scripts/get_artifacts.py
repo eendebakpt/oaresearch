@@ -7,10 +7,16 @@ import urllib.request
 import os
 import platform
 
+def mkdirc(directory_name):
+    """ Create directory """
+    if not os.path.exists(directory_name):
+        os.mkdir(directory_name)
+    return directory_name
+
 #%% Get information on latest build
 
 if platform.system() == 'Windows':
-    targetdir = r'c:\\svn\\oapackage\\dist'
+    targetdir = mkdirc(r'c:\\projects\\oapackage\\dist')
 else:
     targetdir = '/home/eendebakpt/misc/oa/oacode/dist/'
 
