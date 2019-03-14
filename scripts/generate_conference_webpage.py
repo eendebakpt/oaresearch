@@ -141,7 +141,7 @@ if 0:
 
 
 def conferenceSubPages(tag='conference', Nmax=40, Nstart=4, kmax=None, outputdir=None, conference_html_dir = None,
-                       verbose=1, specials={}, Nstep=2, NmaxPareto=40, cache=True, cache_tag='results_cachev7',
+                       verbose=1, specials={}, Nstep=2, NmaxPareto=40, cache=True, cache_tag='results_cachev8',
                        double_conference_cases=[24], html_template=False):
     """ Generate subpages for single conference results
 

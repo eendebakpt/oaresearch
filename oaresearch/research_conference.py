@@ -474,7 +474,7 @@ def conferece_design_has_extensions(array, verbose=0):
     zero_index=-1
     filterj2=1
     filterj3=0
-    filter_symmetry=0
+    filter_symmetry=1 # we can use symmetry reduction, since any the other filtering is not related to the symmetry of the design
     extensions = oapackage.generateSingleConferenceExtensions(array, conference_type, zero_index, verbose>=2, filter_symmetry, filterj2, filterj3, filter_symmetry)
     
     
@@ -511,8 +511,8 @@ def calculateConferencePareto(ll, N=None, k=None, verbose=1, add_data=True, addP
         presults, pareto
     """
     if verbose:
-        print('calculateConferencePareto: analysing %d arrays, addProjectionStatistics %s' % (
-            len(ll), addProjectionStatistics))
+        print('calculateConferencePareto: analysing %d arrays, addProjectionStatistics %s, addExtensions %s' % (
+            len(ll), addProjectionStatistics, addExtensions))
 
     if len(ll) > 0:
         N = ll[0].n_rows
@@ -574,7 +574,7 @@ def calculateConferencePareto(ll, N=None, k=None, verbose=1, add_data=True, addP
     presults['pareto_indices'] = pareto.allindices()
     presults['nclasses'] = pareto.number()
     presults['npareto'] = pareto.numberindices()
-    presults['_version'] = '0.2'
+    presults['_version'] = '0.21'
 
     presults['pareto_designs'] = [ll[ii] for ii in presults['pareto_indices']]
     presults['pareto_data'] = []
@@ -964,8 +964,9 @@ def createConferenceDesignsPageParetoTable(page, pareto_results, verbose=0, html
 
     
     add_extension_information = False
-    if pareto_data[0].get('has_extensions', None) is not None:
-        add_extension_information = True
+    if len(pareto_data)>0:
+        if pareto_data[0].get('has_extensions', None) is not None:
+            add_extension_information = True
     
     if pareto_results['narrays'] > 0 and pareto_results.get('full_results'):
         add_extra = True
