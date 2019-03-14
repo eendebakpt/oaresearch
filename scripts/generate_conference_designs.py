@@ -18,13 +18,13 @@ from oapackage import oahelper
 
 import oapackage.graphtools
 
-oadir = os.path.join(os.path.expanduser('~'), 'misc/oa/oacode/')
+oadir = os.path.join(os.path.split(oapackage.__file__)[0], '..' )
 sys.path.append(os.path.join(oadir, 'pythondevelop'))
 from researchOA import job, createJobScript
 
 #%% Setup directories
 basedir = os.path.expanduser('~')
-resultsdir = join(basedir, 'oatmp')
+resultsdir = oapackage.mkdirc(join(basedir, 'oatmp'))
 outputdir = oapackage.mkdirc(
     os.path.join(os.path.expanduser('~'), 'oatmp', 'conf'))
 
