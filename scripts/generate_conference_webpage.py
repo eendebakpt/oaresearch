@@ -22,7 +22,7 @@ import webbrowser
 import oapackage
 import oapackage.graphtools
 from oapackage.markup import oneliner as e
-from oaresearch.research_conference import htmlTag, nprevzero
+from oaresearch.research_conference import htmlTag
 import oaresearch.research_conference
 from oaresearch.research_conference import calculateConferencePareto, conferenceResultsFile, generateConferenceResults, \
     conferenceDesignsPage
@@ -31,7 +31,7 @@ from oaresearch.research_conference import SingleConferenceParetoCombiner, gener
 from oapackage import markup
 from oapackage.oahelper import create_pareto_element
 from oaresearch.research_conference import generate_or_load_conference_results, createConferenceParetoElement, \
-    calculateConferencePareto, generateConferenceResults, conferenceDesignsPage, createConferenceDesignsPageParetoTable
+    calculateConferencePareto, createConferenceDesignsPageParetoTable
 
 generate_webpage = True
 
@@ -143,7 +143,7 @@ if 0:
 
 def conferenceSubPages(tag='conference', Nmax=40, Nstart=4, kmax=None, outputdir=None, conference_html_dir=None,
                        verbose=1, specials={}, Nstep=2, NmaxPareto=40, cache=True, cache_tag='results_cachev8',
-                       double_conference_cases=[24], html_template=False):
+                       double_conference_cases=(24,), html_template=False):
     """ Generate subpages for single conference results
 
     Args:

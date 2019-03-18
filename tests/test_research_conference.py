@@ -21,8 +21,10 @@ class TestResearchConference(unittest.TestCase):
     def test_createConferenceParetoElement(self):
         al1 = oapackage.exampleArray(49)
         pareto1, data1 = oaresearch.research_conference.createConferenceParetoElement(al1)
+        self.assertEqual(pareto1[0], [20.])
         al2 = oapackage.exampleArray(50)
         pareto2, data2 = oaresearch.research_conference.createConferenceParetoElement(al2)
+        self.assertEqual(pareto1[0], [20.])
 
         self.assertEqual(data1, collections.OrderedDict([('ranksecondorder', 20),
                                                          ('rankinteraction', 19),

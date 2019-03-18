@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
-""" Module to generate D-optimal designs
-
-For more information see: https://doi.org/10.1080/00401706.2016.1142903
+""" Misc functions
 
 Pieter Eendebak <pieter.eendebak@gmail.com>
 
@@ -9,10 +7,7 @@ Pieter Eendebak <pieter.eendebak@gmail.com>
 
 from __future__ import print_function
 
-import os
 import numpy as np
-import time
-import itertools
 
 try:
     import matplotlib
