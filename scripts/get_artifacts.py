@@ -7,13 +7,15 @@ import urllib.request
 import os
 import platform
 
+
 def mkdirc(directory_name):
     """ Create directory """
     if not os.path.exists(directory_name):
         os.mkdir(directory_name)
     return directory_name
 
-#%% Get information on latest build
+# %% Get information on latest build
+
 
 if platform.system() == 'Windows':
     targetdir = mkdirc(r'c:\\projects\\oapackage\\dist')
@@ -32,12 +34,13 @@ builds = [build for build in document['builds'] if build['branch'] == 'master']
 latest_build = builds[0]
 build = client.get(baseurl + '/projects/%s/%s/builds/%d' % (username, project_name, latest_build['buildId']))
 
-print('latest build: %s: branch %s: %s: %s' % (build['build']['status'], build['build']['branch'], build['build']['message'], build['build']['created']))
+print('latest build: %s: branch %s: %s: %s' %
+      (build['build']['status'], build['build']['branch'], build['build']['message'], build['build']['created']))
 
-if not latest_build['status']=='success':
+if not latest_build['status'] == 'success':
     raise Exception('need succesfull build!')
-    
-#%% Get artifacts
+
+# %% Get artifacts
 
 for jobtag, job in enumerate(build['build']['jobs']):
     print('job %s: %s' % (job['jobId'], job['name']))

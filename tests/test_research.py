@@ -4,17 +4,14 @@ Pieter Eendebak <pieter.eendebak@gmail.com>
 
 """
 
-#%%
-import os
+# %%
 import numpy as np
-import time
-import itertools
 import unittest
 
 import oapackage
 import oaresearch.research
 
-#%%
+# %%
 
 
 def array2cpp(array, padding='   '):

@@ -4,14 +4,14 @@ Pieter Eendebak <pieter.eendebak@gmail.com>
 
 """
 
-#%%
+# %%
 import unittest
 from unittest.mock import patch
 import io
 
 import oaresearch.htmltools
 
-#%%
+# %%
 
 
 class TestHTMLtools(unittest.TestCase):
@@ -24,6 +24,7 @@ class TestHTMLtools(unittest.TestCase):
             self.assertTrue(html.startswith('<a '))
             self.assertTrue(txt in html)
             self.assertTrue(url in html)
+
 
 if __name__ == '__main__':
     unittest.main()

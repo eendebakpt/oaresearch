@@ -10,7 +10,7 @@ import tempfile
 import oapackage
 import oaresearch.filetools
 
-#%%
+# %%
 
 
 def create_oa_file(example_arrays=[1]):

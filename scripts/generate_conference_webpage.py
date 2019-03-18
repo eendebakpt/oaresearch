@@ -60,33 +60,34 @@ if generate_webpage:
 if 0:
     N = 24
     kk = 16
-    N = 22; kk = 8
+    N = 22
+    kk = 8
     # N=20; kk=13;
     # N=12; kk=4;
     #N = 28;kk = 8
     # N = 4; kk = 2
     # N=30;kk=6
     t0 = time.time()
-    
+
     cfile, nn, mode = conferenceResultsFile(N, kk, outputdir, tags=['cdesign', 'cdesign-diagonal', 'cdesign-diagonal-r'],
                                             tagtype=['full', 'r', 'r'], verbose=1)
     ll = oapackage.readarrayfile(cfile)
     ll = ll[0:]
-    
+
     pareto_results, cfile = generate_or_load_conference_results(N, kk, outputdir, dc_outputdir=resultsdir,
                                                                 double_conference_cases=[10, 16, 24])
-    page = conferenceDesignsPage(pareto_results, verbose=1, makeheader=True, htmlsubdir=conference_html_dir, html_template=html_template)
+    page = conferenceDesignsPage(pareto_results, verbose=1, makeheader=True,
+                                 htmlsubdir=conference_html_dir, html_template=html_template)
     dt = time.time() - t0
     print('processing time: %.1f [s]' % dt)
-    
+
     oapackage.oahelper.testHtml(str(page))
-    
+
     # 600 seconds for N=20, kk=13
     # with refactoring and mkl: 251 [s]
-    
+
     # N24k17: 3 sec/array full,
-    
-    
+
     # TODO: generate data for C(24, k)
     # TODO: generate page for C(24, k)
 
@@ -140,7 +141,7 @@ if 0:
 # %% Generate subpages for the designs
 
 
-def conferenceSubPages(tag='conference', Nmax=40, Nstart=4, kmax=None, outputdir=None, conference_html_dir = None,
+def conferenceSubPages(tag='conference', Nmax=40, Nstart=4, kmax=None, outputdir=None, conference_html_dir=None,
                        verbose=1, specials={}, Nstep=2, NmaxPareto=40, cache=True, cache_tag='results_cachev8',
                        double_conference_cases=[24], html_template=False):
     """ Generate subpages for single conference results
@@ -155,7 +156,7 @@ def conferenceSubPages(tag='conference', Nmax=40, Nstart=4, kmax=None, outputdir
     """
 
     debugdata = {}
-    
+
     Nrange = range(Nstart, Nmax + 1, Nstep)
     if kmax == -2:
         kmax = int(np.ceil(Nmax / 2) + 1)
@@ -177,7 +178,7 @@ def conferenceSubPages(tag='conference', Nmax=40, Nstart=4, kmax=None, outputdir
 
             if cache and os.path.exists(cachefile):
                 with open(cachefile, 'rb') as fid:
-                    if verbose>=2:
+                    if verbose >= 2:
                         print('loading results from cachefile %s' % cachefile)
                     pareto_results, cfile = pickle.load(fid)
                 if verbose:
@@ -187,7 +188,7 @@ def conferenceSubPages(tag='conference', Nmax=40, Nstart=4, kmax=None, outputdir
                 pareto_results, cfile = generate_or_load_conference_results(N, kk, outputdir, dc_outputdir=resultsdir,
                                                                             double_conference_cases=double_conference_cases)
 
-                if verbose>=2:
+                if verbose >= 2:
                     print('storing results in cachefile %s' % cachefile)
 
                 with open(cachefile, 'wb') as fid:
@@ -198,12 +199,13 @@ def conferenceSubPages(tag='conference', Nmax=40, Nstart=4, kmax=None, outputdir
                 continue
 
             # create HTML page
-            page = conferenceDesignsPage(pareto_results, verbose=verbose>=2, makeheader=True, htmlsubdir=conference_html_dir, html_template=html_template)
+            page = conferenceDesignsPage(pareto_results, verbose=verbose >= 2, makeheader=True,
+                                         htmlsubdir=conference_html_dir, html_template=html_template)
 
-            # write results               
+            # write results
             htmlfile0 = tag + '-%d-%d.html' % (N, kk)
             if html_template:
-                oapackage.mkdirc( os.path.join(conference_html_dir, 'templates') )
+                oapackage.mkdirc(os.path.join(conference_html_dir, 'templates'))
                 htmlfile = os.path.join(conference_html_dir, 'templates', htmlfile0 + '.template')
             else:
                 htmlfile = os.path.join(conference_html_dir, htmlfile0)
@@ -214,18 +216,18 @@ def conferenceSubPages(tag='conference', Nmax=40, Nstart=4, kmax=None, outputdir
             sx['pareto_results'] = pareto_results
             sx['arrayfile'] = cfile
 
-            if verbose>=2:
+            if verbose >= 2:
                 print('writing to %s' % htmlfile)
             with open(htmlfile, 'wt') as fid:
                 fid.write(page)
-            
 
     conferenceSubPages._debugdata = debugdata
     return subpages
 
 
 # generated_subpages = conferenceSubPages(tag='cdesign', Nmax=40, Nstart=4, verbose=2, cache=False, outputdir=outputdir)
-generated_subpages = conferenceSubPages(tag='cdesign', Nmax=40, Nstart=4, verbose=1, cache=True, outputdir=outputdir, conference_html_dir = conference_html_dir, html_template = html_template)
+generated_subpages = conferenceSubPages(tag='cdesign', Nmax=40, Nstart=4, verbose=1, cache=True,
+                                        outputdir=outputdir, conference_html_dir=conference_html_dir, html_template=html_template)
 #generated_subpages = conferenceSubPages(tag='cdesign', Nmax=24, Nstart=4, verbose=1, kmax=9, cache=True, outputdir=outputdir, conference_html_dir = conference_html_dir, html_template = html_template)
 
 # %% Results table for latex
@@ -266,7 +268,7 @@ def cdesignTag(N, kk, page, outputdir, tdstyle='', tags=['cdesign', 'cdesign-dia
     else:
         cfilebase = None
 
-    if generated_result is not None and not len(generated_result)==0:
+    if generated_result is not None and not len(generated_result) == 0:
         if generated_result['pareto_results']['full_results']:
             nn = generated_result['pareto_results']['narrays']
             cfile = None
@@ -281,12 +283,12 @@ def cdesignTag(N, kk, page, outputdir, tdstyle='', tags=['cdesign', 'cdesign-dia
             hreflink = 'conference/%s' % cfilebase
 
         txt, hyper_link = htmlTag(nn, kk, N, mode=mode,
-                            href=hreflink, ncache=ncache, verbose=verbose >= 2)
+                                  href=hreflink, ncache=ncache, verbose=verbose >= 2)
         if verbose >= 2:
             print('cdesignTag: N %d, k %d, html txt %s' % (N, kk, txt,))
         if hyper_link and (cfilex is not None) and not hreflink.endswith('html'):
             # no html page, just copy OA file
-            if verbose>=2:
+            if verbose >= 2:
                 print('cdesignTag: N %d, ncols %d: copy OA file' % (N, kk))
             shutil.copyfile(cfilex, os.path.join(conference_html_dir, cfilebase))
         page.td(txt, style=tdstyle)
@@ -298,11 +300,12 @@ def cdesignTag(N, kk, page, outputdir, tdstyle='', tags=['cdesign', 'cdesign-dia
 
 # %% Testing
 if 1:
-    #subpage='xxx.html'
+    # subpage='xxx.html'
 
     tag = 'cdesign'
     page = markup.page()
-    N=22; kk=9
+    N = 22
+    kk = 9
     generated_result = generated_subpages['cdesign'].get('N%dk%d' % (N, kk), None)
     subpage = generated_result['htmlpage0']
     cdesignTag(N, kk, page, outputdir, '',
@@ -313,13 +316,12 @@ if 1:
     cdesignTag(28, 4, page, outputdir, '',
                ['cdesign', 'cdesign-diagonal', 'cdesign-diagonal-r'],
                ['full', 'r', 'r'], verbose=2, subpage=subpage, generated_result=generated_result)
-    
-    
-    tag='dconferencej1j3'
-    N=80
-    kk=8
-    
-    cdesignTag(N, kk, page, outputdir, tdstyle='', tags=[tag, tag + '-r'], 
+
+    tag = 'dconferencej1j3'
+    N = 80
+    kk = 8
+
+    cdesignTag(N, kk, page, outputdir, tdstyle='', tags=[tag, tag + '-r'],
                tagtype=['full', 'r'], verbose=2, ncache=None, subpage=None, generated_result=None)
     # tag = 'dconferencej1'
     # cdesignTag(N=N, kk=kk, page=page, outputdir=outputdir,
@@ -481,7 +483,7 @@ def DconferencePage(page, tag='dconference', Nmax=26, Nstart=4, kmax=None,
         page.td('%s' % str(kk), style=tdstyle)
         for Ni, N in enumerate(Nrange):
             subpage = None
-            generated_result=None
+            generated_result = None
             if subpages is not None:
                 generated_result = subpages.get('N%dk%d' % (N, kk), None)
                 if generated_result is not None and len(generated_result) != 0:
@@ -519,7 +521,8 @@ def DconferencePage(page, tag='dconference', Nmax=26, Nstart=4, kmax=None,
 # %% Get even-odd designs
 
 from oaresearch.research_conference import select_even_odd_conference_designs
-        
+
+
 def generate_even_odd_conference_designs():
     Nrange = range(0, 82, 2)  # full range
     # Nrange=range(44, 45, 2)
@@ -533,7 +536,7 @@ def generate_even_odd_conference_designs():
 
             cfile = cdesignTag(N, kk, page=None, outputdir=outputdir, tags=[
                 tag, tag + '-r'], tagtype=['full', 'r'])
-                    
+
             na, eolist = select_even_odd_conference_designs(cfile)
 
             cfileout = cfile.replace(tag, tag + '-eo')
@@ -549,6 +552,7 @@ def generate_even_odd_conference_designs():
                     if len(eolist) > 100:
                         cmd = 'gzip -f %s' % cfileout
                         os.system(cmd)
+
 
 if 0:
     generate_even_odd_conference_designs()
@@ -578,7 +582,8 @@ if generate_webpage:
     page.h1('Non-isomorphic conference designs', style='margin-bottom: 0.1em;')
     page.p('<em style="color:darkblue;">pieter.eendebak@gmail.com</em>', style='margin-top: 0px;')
     ss = 'On this page we present numbers of isomorphism classes for conference designs with a specified number of runs (or rows) and factors (or columns). '
-    ss+='For all the cases a set of representatives for the isomorphism classes is available. The algorithm used to generate the results is described in %s and %s. ' % (citation, citation_enumeration)
+    ss += 'For all the cases a set of representatives for the isomorphism classes is available. The algorithm used to generate the results is described in %s and %s. ' % (
+        citation, citation_enumeration)
     page.p(ss)
 
     if 1:
@@ -603,11 +608,9 @@ if generate_webpage:
             'Double conference designs are matrices of size 4m x k with values 0, +1 or -1, where m &ge;2 and k &le; 2m. Each column contains exactly two zeros and each row contains at most one zero. The columns are orthogonal to each other.')
         page.p.close()
 
-
         def subheader(s):
             """ Create subheader in html page """
             page.h3(s)
-
 
         subheader('DCDs with level balance and orthogonal interaction columns.')
         page.p(
@@ -616,7 +619,7 @@ if generate_webpage:
         DconferencePage(page, tag='dconferencej1j3', specials=specialdata,
                         Nstart=4, Nmax=81, kmax=27, Nstep=4, tableclass='conftable conftable2')
         page.p()
-        
+
         if 0:
             page.add('Only the even-odd designs')
             page.p.close()
@@ -677,7 +680,6 @@ if generate_webpage:
             'The square double conference matrices are weighing matrices of type W(N, N-2).')
         page.p.close()
         DconferencePage(page, tag='dconference2')
-
 
     if html_template:
         hfile = os.path.join(htmldir, 'templates', 'conference.html')
