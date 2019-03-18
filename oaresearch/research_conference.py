@@ -466,7 +466,7 @@ class pareto_results_structure(collections.OrderedDict):
         self[maxtag] = max(value, self[maxtag])
 
 
-def conferece_design_has_extensions(array, verbose=0):
+def conference_design_has_extensions(array, verbose=0):
     """ Return True if a single conference design has extensions """
     j1zero = 0
     conference_type=oapackage.conference_t(array.n_rows, array.n_columns, j1zero)
@@ -480,27 +480,40 @@ def conferece_design_has_extensions(array, verbose=0):
     
     result = len(extensions) > 0
     if verbose:
-        print('conferece_design_has_extensions: %s, found %d extensions' % (result, len(extensions)) )
+        print('conference_design_has_extensions: %s, found %d extensions' % (result, len(extensions)) )
         if verbose>=2:
             oapackage.showCandidates(extensions)
     
     return result
 
-def test_conferece_design_has_extensions():
+def test_conference_design_has_extensions():
     array=oapackage.exampleArray(42,0)
-    result = conferece_design_has_extensions(array)
+    result = conference_design_has_extensions(array)
     assert(result==True)
     
     array=oapackage.exampleArray(55,0)
-    result = conferece_design_has_extensions(array)
+    result = conference_design_has_extensions(array)
     assert(result==False)
     
+    array=oapackage.exampleArray(55,0)    
+    array=array.selectColumns([10,11])
+    result = conference_design_has_extensions(array)
+    assert(result==True)
+
+    array=oapackage.exampleArray(55,0)    
+    array=array.selectColumns([0,1,2,3,4,5,6,7,8,10,11])
+    result = conference_design_has_extensions(array)
+    assert(result==True)
+
     
-def calculateConferencePareto(ll, N=None, k=None, verbose=1, add_data=True, addProjectionStatistics=None, addExtensions = False):
+test_conference_design_has_extensions()
+    
+def calculateConferencePareto(ll, N=None, k=None, verbose=1, add_data=True, addProjectionStatistics=None,
+                          addExtensions = False):
     """ Calculate Pareto optimal designs from a list of designs
     
     Args:
-        ll (list)
+        ll (list): list of designs
         N (int)
         k (int)
         verbose (int)
@@ -581,7 +594,7 @@ def calculateConferencePareto(ll, N=None, k=None, verbose=1, add_data=True, addP
     for ii, al in enumerate(presults['pareto_designs']):
         pareto_element, data = createConferenceParetoElement(al, addFoldover=True)
         if addExtensions:
-            data['has_extensions'] = conferece_design_has_extensions(al)
+            data['has_extensions'] = conference_design_has_extensions(al)
         presults['pareto_data'].append(data)
 
     presults = OrderedDict(presults)
