@@ -486,28 +486,6 @@ def conference_design_has_extensions(array, verbose=0):
     
     return result
 
-def test_conference_design_has_extensions():
-    array=oapackage.exampleArray(42,0)
-    result = conference_design_has_extensions(array)
-    assert(result==True)
-    
-    array=oapackage.exampleArray(55,0)
-    result = conference_design_has_extensions(array)
-    assert(result==False)
-    
-    array=oapackage.exampleArray(55,0)    
-    array=array.selectColumns([10,11])
-    result = conference_design_has_extensions(array)
-    assert(result==True)
-
-    array=oapackage.exampleArray(55,0)    
-    array=array.selectColumns([0,1,2,3,4,5,6,7,8,10,11])
-    result = conference_design_has_extensions(array)
-    assert(result==True)
-
-    
-test_conference_design_has_extensions()
-    
 def calculateConferencePareto(ll, N=None, k=None, verbose=1, add_data=True, addProjectionStatistics=None,
                           addExtensions = False):
     """ Calculate Pareto optimal designs from a list of designs
