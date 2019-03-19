@@ -74,8 +74,7 @@ parser.add_argument("-s", "--statistics", type=int, default=0,
                     help="calculate statistics of generation")
 parser.add_argument("-N", "--N", type=int, default=dobigcase,
                     help="number of splitting")
-parser.add_argument("-ii", "--ii", type=int, default=
-                    - 1, help="only run part of top level")
+parser.add_argument("-ii", "--ii", type=int, default=- 1, help="only run part of top level")
 parser.add_argument("-jj", "--jj", type=int, default=-1,
                     help="only run part of top+1 level")
 parser.add_argument(
