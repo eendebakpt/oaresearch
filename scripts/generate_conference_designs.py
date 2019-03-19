@@ -2,7 +2,7 @@
 """
 
 Example script for calculating conference designs
-    
+
 Pieter Eendebak <pieter.eendebak@gmail.com>
 """
 
@@ -50,7 +50,7 @@ def reportScriptFile(scriptfile, verbose=1):
 # %%
 
 def generateConference(N, kmax=None, verbose=1, diagc=False, nmax=None, selectmethod='random', tag='cdesign', outputdir=None):
-    """ General function to compute conference matrices 
+    """ General function to compute conference matrices
 
     Arguments:
         N : integer

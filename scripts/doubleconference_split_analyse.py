@@ -2,7 +2,7 @@
 """
 
 Example script for calculating double conference matrices with split jobs
-    
+
 Pieter Eendebak <pieter.eendebak@gmail.com>
 """
 

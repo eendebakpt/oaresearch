@@ -127,7 +127,7 @@ def oaCssStyle(addframe=False):
     ss = """
     /* Style file for Orthognal Arrays page
  * Pieter Eendebak <pieter.eendebak@gmail.com>
- * 
+ *
  */
 
 body {font-family: Helvetica,Arial,sans-serif; }
@@ -140,7 +140,7 @@ a.binarylink { color: #7722FF; }
 .top th {padding-bottom: .4em; }
 tr.odd {}
 //tr.block{ background-color: red; }
-tr.block { border-top: 1px #000 solid; /* top border only */ 
+tr.block { border-top: 1px #000 solid; /* top border only */
 border-color: #e0e0e0; }
 .block td { padding-top: .4em;}
 //tr.even {background-color: #fefefe; }
