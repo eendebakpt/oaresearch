@@ -1,4 +1,3 @@
-import sys
 import os
 import oapackage
 import shutil
@@ -53,8 +52,7 @@ def copyOAfile(source, targetdir, target0, convert=None, zipfile=None, verbose=1
         else:
             target0final = target0
             if target0final.endswith('.gz'):
-                print('error: target file ends with .gz')
-                raise
+                raise Exception('error: target file ends with .gz')
             targetfile = os.path.join(targetdir, target0)
             targetfilefinal = os.path.join(targetdir, target0)
         if verbose:

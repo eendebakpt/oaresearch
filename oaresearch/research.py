@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
-""" Module to generate D-optimal designs
-
-For more information see: https://doi.org/10.1080/00401706.2016.1142903
+""" Misc functions
 
 Pieter Eendebak <pieter.eendebak@gmail.com>
 
@@ -9,10 +7,7 @@ Pieter Eendebak <pieter.eendebak@gmail.com>
 
 from __future__ import print_function
 
-import os
 import numpy as np
-import time
-import itertools
 
 try:
     import matplotlib
@@ -27,7 +22,7 @@ import oapackage.oahelper as oahelper
 
 from oapackage.markup import oneliner as e
 
-#%%
+# %%
 
 
 def array2cpp(array, padding='   '):
@@ -70,8 +65,8 @@ def array2html(X, header=1, tablestyle='border-collapse: collapse;', trclass='',
 
     ri = 0
     if header:
-        page.tr(style='font-weight: bold; border-bottom: solid 1px black;' +
-                trstyle[ri], class_=trclass[ri])
+        page.tr(style='font-weight: bold; border-bottom: solid 1px black;'
+                + trstyle[ri], class_=trclass[ri])
         ri = ri + 1
         for ii in range(nc):
             if isinstance(X[offset, ii], tuple):
@@ -96,7 +91,7 @@ def array2html(X, header=1, tablestyle='border-collapse: collapse;', trclass='',
         ri = ri + 1
     page.table.close()
     return page
-#%%
+# %%
 
 
 def citation(paper, style='brief'):
@@ -111,7 +106,7 @@ def citation(paper, style='brief'):
     elif paper == 'conference' or paper == 'cisomorphism':
         if style == 'full':
             hyperlink = markup.oneliner.a('A Classification Criterion for Definitive Screening Designs',
-                                     href='https://doi.org/10.1214/18-AOS1723')
+                                          href='https://doi.org/10.1214/18-AOS1723')
             return hyperlink + ', E.D. Schoen, P.T. Eendebak, P. Goos, Annals of Statistics, 2019'
         else:
             return markup.oneliner.a('A Classification Criterion for Definitive Screening Designs',
@@ -119,11 +114,11 @@ def citation(paper, style='brief'):
     elif paper == 'conference enumeration' or paper == 'cenumeration':
         if style == 'full':
             return markup.oneliner.a('Enumeration and Classification of Definitive Screening Designs',
-                                 href='') + ', Eric D. Schoen, Pieter T. Eendebak, Alan Vazquez-Alcocer, Peter Goos, in preparation'
+                                     href='') + ', Eric D. Schoen, Pieter T. Eendebak, Alan Vazquez-Alcocer, Peter Goos, in preparation'
         else:
             return 'Enumeration and Classification of Definitive Screening Designs, in preparation'
             return markup.oneliner.a('Enumeration and Classification of Definitive Screening Designs',
-                                 href='')
+                                     href='')
     else:
         raise Exception('paper not known')
 
@@ -132,7 +127,7 @@ def oaCssStyle(addframe=False):
     ss = """
     /* Style file for Orthognal Arrays page
  * Pieter Eendebak <pieter.eendebak@gmail.com>
- * 
+ *
  */
 
 body {font-family: Helvetica,Arial,sans-serif; }
@@ -145,7 +140,7 @@ a.binarylink { color: #7722FF; }
 .top th {padding-bottom: .4em; }
 tr.odd {}
 //tr.block{ background-color: red; }
-tr.block { border-top: 1px #000 solid; /* top border only */ 
+tr.block { border-top: 1px #000 solid; /* top border only */
 border-color: #e0e0e0; }
 .block td { padding-top: .4em;}
 //tr.even {background-color: #fefefe; }

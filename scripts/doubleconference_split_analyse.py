@@ -2,11 +2,11 @@
 """
 
 Example script for calculating double conference matrices with split jobs
-    
+
 Pieter Eendebak <pieter.eendebak@gmail.com>
 """
 
-#%% Load necessary packages
+# %% Load necessary packages
 import os
 import platform
 import sys
@@ -44,10 +44,10 @@ import oaresearch.research_conference
 
 r = oapackage.log_print(-oapackage.SYSTEM, '')
 
-#%% Helper functions
+# %% Helper functions
 
 
-#%%
+# %%
 dobigcase = 48  # by default run a small case to test the scripts
 
 parser = argparse.ArgumentParser()
@@ -85,7 +85,7 @@ if args.basedir is not None:
 N = args.N
 print('double conference: case: %d, resultsdir %s' % (N, resultsdir))
 
-#%%
+# %%
 
 
 def rfile(lvls, N, k, basetag='dconference'):
@@ -95,7 +95,7 @@ def rfile(lvls, N, k, basetag='dconference'):
         return basetag + '-%d-%d' % (N, k) + '.oa'
 
 
-#%%
+# %%
 cache = 1
 verbose = args.verbose
 time.sleep(.1)
@@ -114,7 +114,7 @@ else:
     raise Exception('splitdata not yet defined for N %d' % N)
 
 
-#%%
+# %%
 homedir = os.getenv('HOME')
 if args.scriptdir is None:
     if vsccluster:
@@ -138,7 +138,7 @@ outputdir = oapackage.mkdirc(os.path.join(
 print('--- Starting: case %d, outputdir %s' % (N, outputdir))
 
 
-#%%
+# %%
 
 def paretofunction(al):
     j4 = conferenceInvariant(al)
@@ -170,11 +170,12 @@ def gather_results(lvls, splitdata, paretofunction, verbose=1):
         print('gather_results: level %s: getting %d subresults' % (lvls, k))
     splitdata[level]
 
+
 if 0:
     print('TODO: gather results: maybe in C for efficiency??')
     gather_results([1], splitdata, None, verbose=1)
 
-#%%
+# %%
 
 
 def listFiles(splitdata, k, verbose=1):
@@ -194,6 +195,7 @@ def listFiles(splitdata, k, verbose=1):
     print('listFiles: k %d, level is %d, splits %s: %d file(s)' % (k, level, nn, len(ll)))
     return ll
 
+
 ll = listFiles(splitdata, args.ii, verbose=1)
 os.chdir(outputdir)
 oapackage.oainfo(os.path.join(ll[0]))
@@ -208,7 +210,7 @@ if 0:
     ll = listFiles(splitdata, 12, verbose=1)
     oapackage.oainfo(os.path.join(outputdir, ll[0]))
 
-#%% Generic Pareto/counting scheme
+# %% Generic Pareto/counting scheme
 
 
 def calc_stats(ll, func, outputdir, verbose=1):
@@ -228,6 +230,7 @@ def calc_stats(ll, func, outputdir, verbose=1):
             print('count_stats: %s' % (rr[-1]))
     return rr
 
+
 import oaresearch
 
 
@@ -246,6 +249,7 @@ def evenodd_count(lst):
     """ Return number of foldover and number of even-odd designs """
     v = np.array([oapackage.isConferenceFoldover(al) for al in lst])
     return np.array([np.sum(v == True), np.sum(v == False)])
+
 
 if 1:
     # ii=0
@@ -267,10 +271,11 @@ if 1:
         pareto_calculator.write_combined_results(k, results)
 
         if results['N'] is not None:
-            print(Fore.BLUE + 'k %d: Pareto arrays %d, Pareto classes %d' % (k, results['npareto'], results['nclasses']) + Fore.RESET)
+            print(Fore.BLUE + 'k %d: Pareto arrays %d, Pareto classes %d' %
+                  (k, results['npareto'], results['nclasses']) + Fore.RESET)
 
 
-#%%
+# %%
 
 k = 7
 

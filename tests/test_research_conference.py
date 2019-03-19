@@ -4,15 +4,16 @@ Pieter Eendebak <pieter.eendebak@gmail.com>
 
 """
 
-#%%
+# %%
 import numpy as np
 import unittest
 import collections
 
 import oapackage
 import oaresearch.research_conference
+from oaresearch.research_conference import conference_design_has_extensions
 
-#%%
+# %%
 
 
 class TestResearchConference(unittest.TestCase):
@@ -20,8 +21,10 @@ class TestResearchConference(unittest.TestCase):
     def test_createConferenceParetoElement(self):
         al1 = oapackage.exampleArray(49)
         pareto1, data1 = oaresearch.research_conference.createConferenceParetoElement(al1)
+        self.assertEqual(pareto1[0], [20.])
         al2 = oapackage.exampleArray(50)
         pareto2, data2 = oaresearch.research_conference.createConferenceParetoElement(al2)
+        self.assertEqual(pareto1[0], [20.])
 
         self.assertEqual(data1, collections.OrderedDict([('ranksecondorder', 20),
                                                          ('rankinteraction', 19),
@@ -50,7 +53,6 @@ class TestResearchConference(unittest.TestCase):
         self.assertEqual(presults['nclasses'], 2)
         self.assertEqual(presults['pareto_indices'], (0, 3))
 
-
     def test_conferenceStatistics(self):
         array = oapackage.exampleArray(51)
         expected = [(0, 1, 0), 0.1111111111111111, 6, 9]
@@ -74,6 +76,25 @@ class TestResearchConference(unittest.TestCase):
 
         F4_values = [al.FvaluesConference(number_of_columns=4) for al in arrays]
         self.assertEqual(F4_values, [(0, 1, 4, 54, 11), (0, 1, 8, 52, 9), (0, 2, 4, 51, 13), (0, 0, 27, 42, 1)])
+
+    def test_conference_design_has_extensions(self):
+        array = oapackage.exampleArray(42, 0)
+        result = conference_design_has_extensions(array)
+        self.assertEqual(result, True)
+
+        array = oapackage.exampleArray(55, 0)
+        result = conference_design_has_extensions(array)
+        self.assertEqual(result, False)
+
+        array = oapackage.exampleArray(55, 0)
+        array = array.selectColumns([10, 11])
+        result = conference_design_has_extensions(array)
+        self.assertEqual(result, True)
+
+        array = oapackage.exampleArray(55, 0)
+        array = array.selectColumns([0, 1, 2, 3, 4, 5, 6, 7, 8, 10, 11])
+        result = conference_design_has_extensions(array)
+        self.assertEqual(result, True)
 
 
 if __name__ == '__main__':

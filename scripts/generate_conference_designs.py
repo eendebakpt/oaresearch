@@ -2,11 +2,11 @@
 """
 
 Example script for calculating conference designs
-    
+
 Pieter Eendebak <pieter.eendebak@gmail.com>
 """
 
-#%% Load necessary packages
+# %% Load necessary packages
 import os
 import platform
 import sys
@@ -18,11 +18,11 @@ from oapackage import oahelper
 
 import oapackage.graphtools
 
-oadir = os.path.join(os.path.split(oapackage.__file__)[0], '..' )
+oadir = os.path.join(os.path.split(oapackage.__file__)[0], '..')
 sys.path.append(os.path.join(oadir, 'pythondevelop'))
 from researchOA import job, createJobScript
 
-#%% Setup directories
+# %% Setup directories
 basedir = os.path.expanduser('~')
 resultsdir = oapackage.mkdirc(join(basedir, 'oatmp'))
 outputdir = oapackage.mkdirc(
@@ -47,10 +47,10 @@ def reportScriptFile(scriptfile, verbose=1):
     print('generated script file: %s with %d commands' % (scriptfile, nlines))
 
 
-#%%
+# %%
 
 def generateConference(N, kmax=None, verbose=1, diagc=False, nmax=None, selectmethod='random', tag='cdesign', outputdir=None):
-    """ General function to compute conference matrices 
+    """ General function to compute conference matrices
 
     Arguments:
         N : integer
@@ -123,7 +123,7 @@ def generateConference(N, kmax=None, verbose=1, diagc=False, nmax=None, selectme
 LL = generateConference(4, outputdir=None)
 
 
-#%% Test maxz values
+# %% Test maxz values
 
 
 from oaresearch.research_conference import showMaxZ
@@ -131,7 +131,7 @@ from oaresearch.research_conference import showMaxZ
 showMaxZ(LL)
 
 
-#%%
+# %%
 if not full_generation:
     # only do small cases
     for NN in range(4, 18, 2):
@@ -171,7 +171,7 @@ else:
     print('do manually: %s (exceeds memory for next column)' % cmd)
 
 
-#%%
+# %%
 scriptfile = os.path.join(scriptdir, 'jobfile-small.sh')
 with open(scriptfile, 'wt') as fid:
     for N in range(2, 18, 2):
@@ -230,7 +230,7 @@ with open(scriptfile, 'wt') as fid:
 
 reportScriptFile(scriptfile, verbose=1)
 
-#%% Double conference matrices
+# %% Double conference matrices
 
 if 1:
     scriptfile = os.path.join(scriptdir, 'jobfile.sh')
@@ -304,7 +304,7 @@ if 1:
     print('generated job file %s' % jobfile)
 
 
-#%% Check
+# %% Check
 
 N = 26
 kk = N - 1
@@ -316,7 +316,7 @@ for ii, al in enumerate(ee):
     x = oapackage.extend_conference_matrix(al, ct, N - 1, 1, maxzpos)
     print('array %d: %d extensions' % (ii, x.nExtensions()))
 
-#%% Generate example for C(8, 4)
+# %% Generate example for C(8, 4)
 
 if platform.node() == 'marmot':
     paperdir = '/home/eendebakpt/misc/oa/article-conference/'

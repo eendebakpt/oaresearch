@@ -2,11 +2,11 @@
 """
 
 Example script for calculating double conference matrices with split jobs
-    
+
 Pieter Eendebak <pieter.eendebak@gmail.com>
 """
 
-#%% Load necessary packages
+# %% Load necessary packages
 import os
 import platform
 import sys
@@ -59,10 +59,10 @@ from researchOA import makeJobList
 
 r = oapackage.log_print(-oapackage.SYSTEM, '')
 
-#%% Helper functions
+# %% Helper functions
 
 
-#%%
+# %%
 dobigcase = 20  # by default run a small case to test the scripts
 
 parser = argparse.ArgumentParser()
@@ -74,8 +74,7 @@ parser.add_argument("-s", "--statistics", type=int, default=0,
                     help="calculate statistics of generation")
 parser.add_argument("-N", "--N", type=int, default=dobigcase,
                     help="number of splitting")
-parser.add_argument("-ii", "--ii", type=int, default=-
-                    1, help="only run part of top level")
+parser.add_argument("-ii", "--ii", type=int, default=- 1, help="only run part of top level")
 parser.add_argument("-jj", "--jj", type=int, default=-1,
                     help="only run part of top+1 level")
 parser.add_argument(
@@ -99,7 +98,7 @@ if args.basedir is not None:
 N = args.N
 print('double conference: case: %d, resultsdir %s' % (N, resultsdir))
 
-#%%
+# %%
 
 
 def compressOA(directory):
@@ -169,6 +168,7 @@ def make_extend(lvls, splitdata, dosplit=False, verbose=1, makelog=True):
         checkfile = os.path.join(outputdir, splitdirx, splitFile(lvls) + '.oa')
     return cmd, checkfile, startfile, {'basecmd': basecmd, 'checkfileZ': checkfileZ}
 
+
 if 0:
     lvls = [19]
     # lvls=[]
@@ -195,17 +195,18 @@ def split_file(lvls, splitdata, verbose=1):
         nsplit, splitfile, os.path.join(sdir, basetag + '-' + spl + '-sp%d' % level))
     if verbose:
         print('split_file: split %s into %d files' % (splitfile0, nsplit))
-    checkfile = os.path.join(outputdir, sdir, basetag +
-                             '-' + splitFile(lvls + [nsplit - 1]) + '.oa')
+    checkfile = os.path.join(outputdir, sdir, basetag
+                             + '-' + splitFile(lvls + [nsplit - 1]) + '.oa')
     return splitcmd, checkfile, splitfile, {'splitfile': splitfile}
 
+
 if 0:
-    splitcmd, checkfile,  startfile, r = split_file([0], splitdata)
+    splitcmd, checkfile, startfile, r = split_file([0], splitdata)
     print(splitcmd)
     print(checkfile)
     # oapackage.runcommand(splitcmd)
 
-#%%
+# %%
 cache = 1
 verbose = args.verbose
 time.sleep(.1)
@@ -224,7 +225,7 @@ else:
     raise Exception('splitdata not yet defined for N %d' % N)
 
 
-#%%
+# %%
 homedir = os.getenv('HOME')
 if args.scriptdir is None:
     if vsccluster:
@@ -245,7 +246,7 @@ verbose = 1
 basetag = 'dconference'
 
 
-#%% """ Step 1: extend to 5 columns, Even-odd """
+# %% """ Step 1: extend to 5 columns, Even-odd """
 
 print('--- Step 1 (sequential) ---')
 sys.stdout.flush()
@@ -258,7 +259,7 @@ outputdir = oapackage.mkdirc(os.path.join(
 allcmdlogfile = os.path.join(outputdir, 'cluster-command-log.txt')
 job.logfile = allcmdlogfile
 
-#%% Initial stage
+# %% Initial stage
 
 km = splitdata[0]['k']
 basecmd = 'cd %s; ' % outputdir + \
@@ -274,7 +275,7 @@ if verbose >= 2:
     print(splitcmd)
 
 
-#%%
+# %%
 print(Fore.BLUE + 'compute level 1' + Fore.RESET)
 
 if not oapackage.file_exists(checkfile) and cache:
@@ -302,7 +303,7 @@ if 0:
     exit(0)
 
 
-#%%
+# %%
 print(Fore.BLUE + 'compute level 1' + Fore.RESET)
 
 for ii in range(splitdata[0]['n']):
@@ -316,7 +317,7 @@ for ii in range(splitdata[0]['n']):
             checkfile], checkfilesstart=[startfile])
     alljobs += [j]
 
-    splitcmd,  checkfile, startfile, r = split_file([ii], splitdata, verbose=0)
+    splitcmd, checkfile, startfile, r = split_file([ii], splitdata, verbose=0)
     j = job(splitcmd, jobtype='split %s' %
             tag, checkfiles=[checkfile], checkfilesstart=[startfile])
     if j.canrun() and not j.complete():
@@ -330,7 +331,7 @@ for ii in range(splitdata[0]['n']):
 
     alljobs += [jc]
 
-#%%
+# %%
 print(Fore.BLUE + 'compute level 2' + Fore.RESET)
 
 for ii in range(splitdata[0]['n']):
@@ -362,13 +363,13 @@ for ii in range(splitdata[0]['n']):
         # compressOA(os.path.join())
 
         if level in splitdata:
-            splitcmd,  checkfile, startfile, r = split_file(lvls, splitdata)
+            splitcmd, checkfile, startfile, r = split_file(lvls, splitdata)
             j = job(splitcmd, jobtype='split %s' %
                     tag, checkfiles=[checkfile], checkfilesstart=[startfile])
             alljobs += [j]
 
 
-#%%
+# %%
 if 0 and not vsccluster:
     for j in alljobs:
         j.execute = True
@@ -376,7 +377,7 @@ if 0 and not vsccluster:
         j.runjob(cache=True)
 
 
-#%%
+# %%
 
 def paretofunction(al):
     j4 = conferenceInvariant(al)
@@ -410,7 +411,7 @@ def gather_results(lvls, splitdata, paretofunction, verbose=1):
     splitdata[level]
 
 
-#%%
+# %%
 
 def listFiles(splitdata, k, verbose=1):
     """ List all results files for a specified number of columns """
@@ -432,13 +433,14 @@ def listFiles(splitdata, k, verbose=1):
 #ll=listFiles(splitdata, 4, verbose=1)
 #oapackage.oainfo(os.path.join(outputdir, ll[0]) )
 
+
 if 0:
     ll = listFiles(splitdata, 7, verbose=1)
     oapackage.oainfo(os.path.join(outputdir, ll[0]))
     ll = listFiles(splitdata, 8, verbose=1)
     oapackage.oainfo(os.path.join(outputdir, ll[0]))
 
-#%% Generic Pareto/counting scheme
+# %% Generic Pareto/counting scheme
 
 
 def calc_stats(ll, func, verbose=1):
@@ -457,6 +459,7 @@ def evenodd_count(lst):
     v = np.array([oapackage.isConferenceFoldover(al) for al in lst])
     return np.array([np.sum(v == True), np.sum(v == False)])
 
+
 if 0:
     # ii=0
     #lst=oapackage.readarrayfile(os.path.join(outputdir, ll[ii]))
@@ -467,7 +470,7 @@ if 0:
     totals = np.sum(np.array(r), axis=0)
     print(totals)
 
-#%% Load packages
+# %% Load packages
 
 
 jobs = alljobs

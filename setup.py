@@ -7,7 +7,6 @@ setup.py file for OApackage
 # %% Load packages
 from setuptools import setup, find_packages
 
-import os
 import re
 
 def readme():
@@ -49,12 +48,11 @@ setup(name='oaresearch',
       zip_safe=False,
       install_requires=['numpy>=1.13', 'scanf', 'OApackage', 'json_tricks', 'jsmin', 'htmlmin'],
       extras_require={
-          'GUI':  ["qtpy", 'matplotlib'],
+          'GUI': ["qtpy", 'matplotlib'],
       },
       requires=['numpy', 'matplotlib'],
       classifiers=['Development Status :: 4 - Beta', 'Intended Audience :: Science/Research',
                    'Programming Language :: Python :: 3',
-                   'Programming Language :: Python :: 3.4',
                    'Programming Language :: Python :: 3.5',
                    'Programming Language :: Python :: 3.6',
                    'Programming Language :: Python :: 3.7',

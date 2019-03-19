@@ -22,6 +22,7 @@ def formatArrayHyperlink(txt, lnk, filename):
         ss = e.a(txt, href=lnk, class_='normal')
     return ss
 
+
 def minifyJS(javascript_code):
     """ Minify Javascript code """
     minified = jsmin.jsmin(javascript_code)
