@@ -15,6 +15,7 @@ import os
 import sys
 import time
 import pickle
+import shutil
 
 import numpy as np
 
@@ -71,6 +72,100 @@ def select_even_odd_conference_designs(cfile):
     return na, eolist
 
 
+#%%
+
+
+def cdesignTag(N, kk, page, outputdir, tdstyle='', tags=['cdesign', 'cdesign-diagonal', 'cdesign-diagonal-r'],
+               tagtype=['full', 'r', 'r'], verbose=1, ncache=None, subpage=None, generated_result=None, conference_html_dir = None):
+    """ Create html tag for oa page
+
+    Args:
+        N (int): number of rows
+        kk (int): number of columns
+        page (object):
+        outputdir (str):
+        tdstyle (str):
+        tags (list):
+        tagtype (list):
+        verbose (int):
+        ncache (dict): store results
+
+    """
+    cfile, nn, mode = conferenceResultsFile(N, kk, outputdir, tags=tags, tagtype=tagtype, verbose=1)
+
+    if ncache is not None:
+        if 'full' not in ncache:
+            ncache['full'] = {}
+        ncache['full']['N%dk%d' % (N, kk)] = nn
+
+    cfilex = oapackage.oahelper.checkOAfile(cfile)
+    if cfilex is not None:
+        cfilebase = os.path.basename(cfilex)
+    else:
+        cfilebase = None
+
+    if generated_result is not None and not len(generated_result) == 0:
+        if generated_result['pareto_results']['full_results']:
+            nn = generated_result['pareto_results']['narrays']
+            cfile = None
+            mode = 'full'
+
+    if page is not None:
+        if subpage:
+            hreflink = os.path.join('conference', subpage)
+            if verbose:
+                print('cdesignTag: hreflink: %s' % subpage)
+        else:
+            hreflink = 'conference/%s' % cfilebase
+
+        txt, hyper_link = htmlTag(nn, kk, N, mode=mode,
+                                  href=hreflink, ncache=ncache, verbose=verbose >= 2)
+        if verbose >= 2:
+            print('cdesignTag: N %d, k %d, html txt %s' % (N, kk, txt,))
+        if hyper_link and (cfilex is not None) and not hreflink.endswith('html'):
+            # no html page, just copy OA file
+            if verbose >= 2:
+                print('cdesignTag: N %d, ncols %d: copy OA file' % (N, kk))
+            shutil.copyfile(cfilex, os.path.join(conference_html_dir, cfilebase))
+        page.td(txt, style=tdstyle)
+    else:
+        if verbose >= 2:
+            print(cfile)
+    return cfile
+
+def generate_even_odd_conference_designs(outputdir):
+    """ Select even-odd conference designs from generated double conference designs """
+    Nrange = range(0, 82, 2)  # full range
+    # Nrange=range(44, 45, 2)
+    # Nrange=range(4, 48, 2)
+    Nrange = range(74, 82, 2)
+    tag = 'dconferencej1j3'
+    for Ni, N in enumerate(Nrange):
+        kmax = int(np.ceil(N / 2) + 1)
+        krange = range(2, kmax)
+        for ki, kk in enumerate(krange):
+
+            cfile = cdesignTag(N, kk, page=None, outputdir=outputdir, tags=[
+                tag, tag + '-r'], tagtype=['full', 'r'], conference_html_dir = None)
+
+            na, eolist = select_even_odd_conference_designs(cfile)
+
+            cfileout = cfile.replace(tag, tag + '-eo')
+            print('  out: %s: %d -> %d' % (cfileout, na, len(eolist)))
+            if 1:
+                oapackage.writearrayfile(
+                    cfileout, eolist, oapackage.ABINARY_DIFF, N, kk)
+                xfile = cfileout + '.gz'
+                if os.path.exists(xfile):
+                    print('removing file %s' % (xfile))
+                    os.remove(xfile)
+                if 1:
+                    if len(eolist) > 100:
+                        cmd = 'gzip -f %s' % cfileout
+                        os.system(cmd)
+                        
+#%%
+
 def reduce_single_conference(arrays, verbose=0):
     """ Reduce a list of double conference arrays to single conference arrays
 
@@ -97,12 +192,13 @@ def reduce_single_conference(arrays, verbose=0):
 
 class SingleConferenceParetoCombiner:
 
-    def __init__(self, outputdir, cache_dir, cache=False, verbose=1):
+    def __init__(self, outputdir, cache_dir, cache=False, verbose=1, pareto_method_options = {}):
         """ Class to generate statistics and Pareto optimality results for a conference design class from double conference designs """
         self.outputdir = outputdir
         self.cache_dir = cache_dir
         self.cache = cache
         self.verbose = verbose
+        self._pareto_method_options = pareto_method_options
 
     def append_basepath(self, afile):
         return os.path.join(self.outputdir, afile)
@@ -136,7 +232,7 @@ class SingleConferenceParetoCombiner:
             number_arrays = len(arrays)
             arrays = reduce_single_conference(arrays, verbose=1)
 
-            presults, _ = oaresearch.research_conference.calculateConferencePareto(arrays)
+            presults, _ = oaresearch.research_conference.calculateConferencePareto(arrays, **self._pareto_method_options)
 
             pareto_designs = [oapackage.array_link(array) for array in presults['pareto_designs']]
             print('generate %s: %d arrays' % (outputfile, len(pareto_designs)))
@@ -184,7 +280,7 @@ class SingleConferenceParetoCombiner:
             stats = json.load(open(outputfile_stats, 'rt'))
             combined_stats = self.combine_statistics(combined_stats, stats)
 
-        presults, pareto = oaresearch.research_conference.calculateConferencePareto(pareto_arrays)
+        presults, pareto = oaresearch.research_conference.calculateConferencePareto(pareto_arrays, **self._pareto_method_options)
         # remove invalid fields
         for tag in ['B4', 'F4']:
             if tag + '_max' in presults:
@@ -193,13 +289,16 @@ class SingleConferenceParetoCombiner:
             if tag + '_min' in presults:
                 presults.pop(tag + '_min')
         presults['combined_statistics'] = combined_stats
+
+        presults['_pareto_method_options'] = self._pareto_method_options
+
         return presults
 
 
 # %%
 
 
-def generate_or_load_conference_results(N, number_of_columns, outputdir, dc_outputdir, double_conference_cases=(), addExtensions=True):
+def generate_or_load_conference_results(N, number_of_columns, outputdir, dc_outputdir, double_conference_cases=()):
     """ Calculate results for conference designs class
 
     In data is either calculated directly, or loaded from pre-generated data gathered from double conference designs.
@@ -208,6 +307,10 @@ def generate_or_load_conference_results(N, number_of_columns, outputdir, dc_outp
     pareto_results = OrderedDict({'N': N, 'ncolumns': number_of_columns, 'full_results': 0, 'no_results': True})
 
     from_double_conference = N in double_conference_cases
+
+    addExtensions = N <= 26
+    pareto_method_options = {'verbose': 1, 'addProjectionStatistics': None, 'addExtensions': addExtensions}
+
     if from_double_conference:
         if number_of_columns > N:
             return pareto_results, None
@@ -217,7 +320,7 @@ def generate_or_load_conference_results(N, number_of_columns, outputdir, dc_outp
         if not os.path.exists(dc_dir):
             return {}, None
         cache_dir = oapackage.mkdirc(os.path.join(dc_dir, 'sc_pareto_cache'))
-        pareto_calculator = SingleConferenceParetoCombiner(dc_dir, cache_dir=cache_dir, cache=True)
+        pareto_calculator = SingleConferenceParetoCombiner(dc_dir, cache_dir=cache_dir, cache=True, pareto_method_options = None)
         pareto_results = pareto_calculator.load_combined_results(number_of_columns)
         pareto_results['narrays'] = pareto_results['combined_statistics']['number_conference_arrays']
         pareto_results['idstr'] = 'cdesign-%d-%d' % (pareto_results['N'], pareto_results['ncolumns'])
@@ -234,8 +337,7 @@ def generate_or_load_conference_results(N, number_of_columns, outputdir, dc_outp
         narrays = len(ll)
 
         if mode == 'full' or narrays < 1000:
-            presults, pareto = calculateConferencePareto(ll, N=N, k=number_of_columns, verbose=1,
-                                                         addProjectionStatistics=None, addExtensions=addExtensions)
+            presults, pareto = calculateConferencePareto(ll, N=N, k=number_of_columns, **pareto_method_options)
             pareto_results = generateConferenceResults(presults, ll, ct=None, full=(mode == 'full'))
             pareto_results['arrayfile'] = cfile
         else:

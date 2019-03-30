@@ -31,7 +31,7 @@ from oaresearch.research_conference import SingleConferenceParetoCombiner, gener
 from oapackage import markup
 from oapackage.oahelper import create_pareto_element
 from oaresearch.research_conference import generate_or_load_conference_results, createConferenceParetoElement, \
-    calculateConferencePareto, createConferenceDesignsPageParetoTable
+    calculateConferencePareto, createConferenceDesignsPageParetoTable, cdesignTag, conference_design_has_extensions
 
 generate_webpage = True
 
@@ -64,9 +64,10 @@ if 0:
     kk = 8
     # N=20; kk=13;
     # N=12; kk=4;
-    #N = 28;kk = 8
+    N = 28;kk = 4
     # N = 4; kk = 2
     # N=30;kk=6
+    
     t0 = time.time()
 
     cfile, nn, mode = conferenceResultsFile(N, kk, outputdir, tags=['cdesign', 'cdesign-diagonal', 'cdesign-diagonal-r'],
@@ -91,6 +92,10 @@ if 0:
     # TODO: generate data for C(24, k)
     # TODO: generate page for C(24, k)
 
+
+    for ii, al in enumerate(ll):
+        print('design %d' % ii); sys.stdout.flush()
+        conference_design_has_extensions(al, verbose=1)
 
 # %%
 if 0:
@@ -141,8 +146,8 @@ if 0:
 # %% Generate subpages for the designs
 
 
-def conferenceSubPages(tag='conference', Nmax=40, Nstart=4, kmax=None, outputdir=None, conference_html_dir=None,
-                       verbose=1, specials={}, Nstep=2, NmaxPareto=40, cache=True, cache_tag='results_cachev8',
+def conferenceSubPages(tag='cdesign', Nmax=40, Nstart=4, kmax=None, outputdir=None, conference_html_dir=None,
+                       verbose=1, specials={}, Nstep=2, NmaxPareto=40, cache=True, cache_tag='results_cachev11',
                        double_conference_cases=(24,), html_template=False):
     """ Generate subpages for single conference results
 
@@ -236,66 +241,7 @@ htmlsubdir = os.path.join(htmldir, 'conference')
 
 generate_conference_latex_tables(htmlsubdir, verbose=1)
 
-# %%
 
-
-def cdesignTag(N, kk, page, outputdir, tdstyle='', tags=['cdesign', 'cdesign-diagonal', 'cdesign-diagonal-r'],
-               tagtype=['full', 'r', 'r'], verbose=1, ncache=None, subpage=None, generated_result=None):
-    """ Create html tag for oa page
-
-    Args:
-        N (int): number of rows
-        kk (int): number of columns
-        page (object):
-        outputdir (str):
-        tdstyle (str):
-        tags (list):
-        tagtype (list):
-        verbose (int):
-        ncache (dict): store results
-
-    """
-    cfile, nn, mode = conferenceResultsFile(N, kk, outputdir, tags=tags, tagtype=tagtype, verbose=1)
-
-    if ncache is not None:
-        if 'full' not in ncache:
-            ncache['full'] = {}
-        ncache['full']['N%dk%d' % (N, kk)] = nn
-
-    cfilex = oapackage.oahelper.checkOAfile(cfile)
-    if cfilex is not None:
-        cfilebase = os.path.basename(cfilex)
-    else:
-        cfilebase = None
-
-    if generated_result is not None and not len(generated_result) == 0:
-        if generated_result['pareto_results']['full_results']:
-            nn = generated_result['pareto_results']['narrays']
-            cfile = None
-            mode = 'full'
-
-    if page is not None:
-        if subpage:
-            hreflink = os.path.join('conference', subpage)
-            if verbose:
-                print('cdesignTag: hreflink: %s' % subpage)
-        else:
-            hreflink = 'conference/%s' % cfilebase
-
-        txt, hyper_link = htmlTag(nn, kk, N, mode=mode,
-                                  href=hreflink, ncache=ncache, verbose=verbose >= 2)
-        if verbose >= 2:
-            print('cdesignTag: N %d, k %d, html txt %s' % (N, kk, txt,))
-        if hyper_link and (cfilex is not None) and not hreflink.endswith('html'):
-            # no html page, just copy OA file
-            if verbose >= 2:
-                print('cdesignTag: N %d, ncols %d: copy OA file' % (N, kk))
-            shutil.copyfile(cfilex, os.path.join(conference_html_dir, cfilebase))
-        page.td(txt, style=tdstyle)
-    else:
-        if verbose >= 2:
-            print(cfile)
-    return cfile
 
 
 # %% Testing
@@ -310,19 +256,19 @@ if 1:
     subpage = generated_result['htmlpage0']
     cdesignTag(N, kk, page, outputdir, '',
                ['cdesign', 'cdesign-diagonal', 'cdesign-diagonal-r'],
-               ['full', 'r', 'r'], verbose=2, subpage=subpage, generated_result=generated_result)
+               ['full', 'r', 'r'], verbose=2, subpage=subpage, generated_result=generated_result, conference_html_dir=conference_html_dir)
 
     generated_result = generated_subpages['cdesign'].get('N%dk%d' % (28, 4), None)
     cdesignTag(28, 4, page, outputdir, '',
                ['cdesign', 'cdesign-diagonal', 'cdesign-diagonal-r'],
-               ['full', 'r', 'r'], verbose=2, subpage=subpage, generated_result=generated_result)
+               ['full', 'r', 'r'], verbose=2, subpage=subpage, generated_result=generated_result, conference_html_dir=conference_html_dir)
 
     tag = 'dconferencej1j3'
     N = 80
     kk = 8
 
     cdesignTag(N, kk, page, outputdir, tdstyle='', tags=[tag, tag + '-r'],
-               tagtype=['full', 'r'], verbose=2, ncache=None, subpage=None, generated_result=None)
+               tagtype=['full', 'r'], verbose=2, ncache=None, subpage=None, generated_result=None, conference_html_dir=conference_html_dir)
     # tag = 'dconferencej1'
     # cdesignTag(N=N, kk=kk, page=page, outputdir=outputdir,
     #           tags=[tag, tag + '-r'], tagtype=['full', 'r'], verbose=2, ncache=ncache)
@@ -435,7 +381,7 @@ specialdataDC = specialdata
 
 def DconferencePage(page, tag='dconference', Nmax=26, Nstart=4, kmax=None,
                     ta='left', verbose=1, specials={}, Nstep=2,
-                    tableclass='conftable', tdstyle=None, subpages=None):
+                    tableclass='conftable', tdstyle=None, subpages=None, conference_html_dir=None):
     """ Generate a table with matrices
 
     Arguments:
@@ -506,10 +452,10 @@ def DconferencePage(page, tag='dconference', Nmax=26, Nstart=4, kmax=None,
             if tag == 'cdesign':
                 cdesignTag(N, kk, page, outputdir, tdstyle,
                            ['cdesign', 'cdesign-diagonal', 'cdesign-diagonal-r'],
-                           ['full', 'r', 'r'], subpage=subpage, generated_result=generated_result)
+                           ['full', 'r', 'r'], subpage=subpage, generated_result=generated_result, conference_html_dir=conference_html_dir)
             else:
                 cdesignTag(N, kk, page, outputdir, tdstyle,
-                           tags=[tag, tag + '-r'], tagtype=['full', 'r'], ncache=ncache)
+                           tags=[tag, tag + '-r'], tagtype=['full', 'r'], ncache=ncache, conference_html_dir=conference_html_dir)
 
         page.tr.close()
     page.table.close()
@@ -520,42 +466,11 @@ def DconferencePage(page, tag='dconference', Nmax=26, Nstart=4, kmax=None,
 
 # %% Get even-odd designs
 
-from oaresearch.research_conference import select_even_odd_conference_designs
-
-
-def generate_even_odd_conference_designs():
-    Nrange = range(0, 82, 2)  # full range
-    # Nrange=range(44, 45, 2)
-    # Nrange=range(4, 48, 2)
-    Nrange = range(74, 82, 2)
-    tag = 'dconferencej1j3'
-    for Ni, N in enumerate(Nrange):
-        kmax = int(np.ceil(N / 2) + 1)
-        krange = range(2, kmax)
-        for ki, kk in enumerate(krange):
-
-            cfile = cdesignTag(N, kk, page=None, outputdir=outputdir, tags=[
-                tag, tag + '-r'], tagtype=['full', 'r'])
-
-            na, eolist = select_even_odd_conference_designs(cfile)
-
-            cfileout = cfile.replace(tag, tag + '-eo')
-            print('  out: %s: %d -> %d' % (cfileout, na, len(eolist)))
-            if 1:
-                oapackage.writearrayfile(
-                    cfileout, eolist, oapackage.ABINARY_DIFF, N, kk)
-                xfile = cfileout + '.gz'
-                if os.path.exists(xfile):
-                    print('removing file %s' % (xfile))
-                    os.remove(xfile)
-                if 1:
-                    if len(eolist) > 100:
-                        cmd = 'gzip -f %s' % cfileout
-                        os.system(cmd)
+from oaresearch.research_conference import select_even_odd_conference_designs, generate_even_odd_conference_designs
 
 
 if 0:
-    generate_even_odd_conference_designs()
+    generate_even_odd_conference_designs(outputdir=outputdir)
 
 
 # %%
@@ -599,7 +514,7 @@ if generate_webpage:
             'A definitive screening design can be constructed by appending a conference design with both its fold-over and a row of zeroes.')
         DconferencePage(page, tag='cdesign', Nmax=41,
                         kmax=32, specials=specialdata, tdstyle=tdstyle,
-                        tableclass='conftable conftable1', subpages=generated_subpages['cdesign'])
+                        tableclass='conftable conftable1', subpages=generated_subpages['cdesign'], conference_html_dir=conference_html_dir)
 
     if 1:
         page.h2('Double conference designs (DCDs)')
@@ -617,31 +532,31 @@ if generate_webpage:
             'In double conference designs with level balance and orthogonal interaction columns, the elements of each column sums to zero. In addition, for any set of three columns, the vector formed by the element-wise product of the columns has elements that sum to zero too. A definitive screening design can be constructed by appending a double conference design with a row of zeroes.')
         # page.p('All J1 and J3 values are zero.')
         DconferencePage(page, tag='dconferencej1j3', specials=specialdata,
-                        Nstart=4, Nmax=81, kmax=27, Nstep=4, tableclass='conftable conftable2')
+                        Nstart=4, Nmax=81, kmax=27, Nstep=4, tableclass='conftable conftable2', conference_html_dir=conference_html_dir)
         page.p()
 
         if 0:
             page.add('Only the even-odd designs')
             page.p.close()
             DconferencePage(page, tag='dconferencej1j3-eo',
-                            Nstart=4, Nmax=81, kmax=21, Nstep=4, specials=specialdata, tableclass='conftable conftable2')
+                            Nstart=4, Nmax=81, kmax=21, Nstep=4, specials=specialdata, tableclass='conftable conftable2', conference_html_dir=conference_html_dir)
 
         if 1:
             subheader('DCDs with level balance')  # J1 values are zero
             page.p('In double conference designs with level balance, the elements of each column sum to zero.')
-            r = DconferencePage(page, tag='dconferencej1', kmax=14, tableclass='conftable conftable3')
+            r = DconferencePage(page, tag='dconferencej1', kmax=14, tableclass='conftable conftable3', conference_html_dir=conference_html_dir)
 
         if 1:
             subheader('DCDs with orthogonality of interaction columns')  # J3=0
             page.p(
                 'In double conference designs with orthogonal interaction columns, for any set of three columns, the vector formed by the element-wise product of the columns has elements that sum to zero.')
-            DconferencePage(page, tag='dconferencej3', kmax=14, Nmax=24, tableclass='conftable conftable4')
+            DconferencePage(page, tag='dconferencej3', kmax=14, Nmax=24, tableclass='conftable conftable4', conference_html_dir=conference_html_dir)
 
         if 1:
             subheader('Plain DCDs')  # no restrictions on J1 and J3
             page.p(
                 'In double conference designs with orthogonal interaction columns, for any set of three columns, the vector formed by the element-wise product of the columns has elements that sum to zero.')
-            DconferencePage(page, tag='dconference2', Nmax=20, kmax=13, tableclass='conftable conftable5')
+            DconferencePage(page, tag='dconference2', Nmax=20, kmax=13, tableclass='conftable conftable5', conference_html_dir=conference_html_dir)
 
         page.h2('Weighing matrices')
 
@@ -657,7 +572,7 @@ if generate_webpage:
             page.add(
                 'The square double conference matrices are a complete non-isomorphic set of weighing matrices of type W(N, N-2).')
             page.p.close()
-            DconferencePage(page, tag='weighing2', kmax=15, Nmax=25)
+            DconferencePage(page, tag='weighing2', kmax=15, Nmax=25, conference_html_dir=conference_html_dir)
 
     ss = 'If you make use of these results, please cite the paper %s.' % citation
     page.p(ss)
@@ -670,7 +585,7 @@ if generate_webpage:
         subheader('DCDs with level balance and orthogonal interaction columns.')
         page.p(
             'These designs have N &equiv; 2 mod 4. In double conference designs with level balance and orthogonal interaction columns, the elements of each column sums to zero. In addition, for any set of three columns, the vector formed by the element-wise product of the columns has elements that sum to zero too. A definitive screening design can be constructed by appending a double conference design with a row of zeroes.')
-        DconferencePage(page, tag='dconferencej1j3', Nstart=6, Nmax=81, kmax=28, Nstep=4)
+        DconferencePage(page, tag='dconferencej1j3', Nstart=6, Nmax=81, kmax=28, Nstep=4, conference_html_dir=conference_html_dir)
 
         subheader('Double conference matrices (no restrictions on J1 and J3)')
         page.p()
@@ -679,7 +594,7 @@ if generate_webpage:
         page.add(
             'The square double conference matrices are weighing matrices of type W(N, N-2).')
         page.p.close()
-        DconferencePage(page, tag='dconference2')
+        DconferencePage(page, tag='dconference2', conference_html_dir=conference_html_dir)
 
     if html_template:
         hfile = os.path.join(htmldir, 'templates', 'conference.html')

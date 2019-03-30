@@ -19,8 +19,6 @@ import argparse
 import tempfile
 from colorama import Fore
 import itertools
-import copy
-import json_tricks as json
 
 # setup data locations
 resultsdir = join(os.path.expanduser('~'), 'oatmp')
@@ -42,12 +40,12 @@ import oapackage
 from oapackage import oahelper, splitDir, splitFile, splitTag  # reload(oahelper)
 import oaresearch.research_conference
 
-r = oapackage.log_print(-oapackage.SYSTEM, '')
+import oaresearch
+reload(oaresearch.research_conference)
+from oaresearch.research_conference import SingleConferenceParetoCombiner
 
-# %% Helper functions
 
-
-# %%
+# %% Parse arguments
 dobigcase = 48  # by default run a small case to test the scripts
 
 parser = argparse.ArgumentParser()
@@ -89,6 +87,7 @@ print('double conference: case: %d, resultsdir %s' % (N, resultsdir))
 
 
 def rfile(lvls, N, k, basetag='dconference'):
+    """ Return filename for split file """
     if len(lvls) > 0:
         return basetag + '-' + splitFile(lvls[:]) + '-%d-%d' % (N, k) + '.oa'
     else:
@@ -139,41 +138,40 @@ print('--- Starting: case %d, outputdir %s' % (N, outputdir))
 
 
 # %%
-
-def paretofunction(al):
-    j4 = conferenceInvariant(al)
-    f4 = al.FvaluesConference(jj=4)
-
-    N = al.n_rows
-    b4 = np.sum(np.array(j4)**2) / N**2
-    #X2 = oapackage.array2secondorder(al)
-    X2 = al.getModelMatrix(2)[:, (1 + al.n_columns):]
-
-    r = np.linalg.matrix_rank(X2)
-
-    if verbose >= 2:
-        print('design %d: rank %d, b4 %.3f, F4 %s' % (ii, r, b4, f4))
-    Q = np.array(al) * np.array(al)
-    rx2q = np.linalg.matrix_rank(np.hstack((X2, Q)))
-
-    presults.f4s += [f4]
-    presults.ranks += [r]
-    presults.b4s += [b4]
-
-    presults.ranksX2Q += [rx2q]
-
-
-def gather_results(lvls, splitdata, paretofunction, verbose=1):
-    level = len(lvls)
-    k = splitdata[level]['n']
-    if verbose:
-        print('gather_results: level %s: getting %d subresults' % (lvls, k))
-    splitdata[level]
-
-
-if 0:
-    print('TODO: gather results: maybe in C for efficiency??')
-    gather_results([1], splitdata, None, verbose=1)
+#
+#def paretofunction(al):
+#    j4 = conferenceInvariant(al)
+#    f4 = al.FvaluesConference(jj=4)
+#
+#    N = al.n_rows
+#    b4 = np.sum(np.array(j4)**2) / N**2
+#    X2 = al.getModelMatrix(2)[:, (1 + al.n_columns):]
+#
+#    r = np.linalg.matrix_rank(X2)
+#
+#    if verbose >= 2:
+#        print('design %d: rank %d, b4 %.3f, F4 %s' % (ii, r, b4, f4))
+#    Q = np.array(al) * np.array(al)
+#    rx2q = np.linalg.matrix_rank(np.hstack((X2, Q)))
+#
+#    presults.f4s += [f4]
+#    presults.ranks += [r]
+#    presults.b4s += [b4]
+#
+#    presults.ranksX2Q += [rx2q]
+#
+#
+#def gather_results(lvls, splitdata, paretofunction, verbose=1):
+#    level = len(lvls)
+#    k = splitdata[level]['n']
+#    if verbose:
+#        print('gather_results: level %s: getting %d subresults' % (lvls, k))
+#    splitdata[level]
+#
+#
+#if 0:
+#    print('TODO: gather results: maybe in C for efficiency??')
+#    gather_results([1], splitdata, None, verbose=1)
 
 # %%
 
@@ -212,6 +210,10 @@ if 0:
 
 # %% Generic Pareto/counting scheme
 
+def evenodd_count(lst):
+    """ Return number of foldover and number of even-odd designs """
+    v = np.array([oapackage.isConferenceFoldover(al) for al in lst])
+    return np.array([np.sum(v == True), np.sum(v == False)])
 
 def calc_stats(ll, func, outputdir, verbose=1):
     """ Calculate statistics over generated designs
@@ -231,24 +233,13 @@ def calc_stats(ll, func, outputdir, verbose=1):
     return rr
 
 
-import oaresearch
-
-
-reload(oaresearch.research_conference)
-
-from oaresearch.research_conference import SingleConferenceParetoCombiner
-
-
 cache_dir = oapackage.mkdirc(os.path.join(outputdir, 'sc_pareto_cache'))
 
-pareto_calculator = SingleConferenceParetoCombiner(outputdir, cache_dir=cache_dir, cache=True)
-self = pareto_calculator
+pareto_method_options = {'verbose': 1, 'addProjectionStatistics': None, 'addExtensions': True}
+
+pareto_calculator = SingleConferenceParetoCombiner(outputdir, cache_dir=cache_dir, cache=True, pareto_method_options = pareto_method_options)
 
 
-def evenodd_count(lst):
-    """ Return number of foldover and number of even-odd designs """
-    v = np.array([oapackage.isConferenceFoldover(al) for al in lst])
-    return np.array([np.sum(v == True), np.sum(v == False)])
 
 
 if 1:
