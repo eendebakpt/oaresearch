@@ -40,6 +40,8 @@ print('latest build: %s: branch %s: %s: %s' %
 if not latest_build['status'] == 'success':
     raise Exception('need succesfull build!')
 
+print(f'download to {targetdir}')
+
 # %% Get artifacts
 
 for jobtag, job in enumerate(build['build']['jobs']):
@@ -47,7 +49,7 @@ for jobtag, job in enumerate(build['build']['jobs']):
 
     url = '/buildjobs/{0}/artifacts'.format(job['jobId'])
     artifacts = client.get(baseurl + url)
-    print('found %d artifacts' % len(artifacts))
+    print('  found %d artifacts' % len(artifacts))
     for artifact in artifacts:
         filename0 = artifact['fileName'].split('/')[-1]
         url = '/buildjobs/{0}/artifacts/{1}'.format(job['jobId'], artifact['fileName'])
