@@ -58,13 +58,19 @@ if generate_webpage:
 
 # %%
 if 0:
+    addMaximumExtensionColumns=True
     N = 24
     kk = 16
     N = 22
     kk = 8
     # N=20; kk=13;
+<<<<<<< HEAD
     # N=12; kk=4;
     N = 28;kk = 4
+=======
+    N=12; kk=4;
+    #N = 28;kk = 8
+>>>>>>> 1073a3f... add code to determine maximal number of columns in extension
     # N = 4; kk = 2
     # N=30;kk=6
     
@@ -76,7 +82,7 @@ if 0:
     ll = ll[0:]
 
     pareto_results, cfile = generate_or_load_conference_results(N, kk, outputdir, dc_outputdir=resultsdir,
-                                                                double_conference_cases=[10, 16, 24])
+                                                                double_conference_cases=[10, 16, 24], addMaximumExtensionColumns=addMaximumExtensionColumns)
     page = conferenceDesignsPage(pareto_results, verbose=1, makeheader=True,
                                  htmlsubdir=conference_html_dir, html_template=html_template)
     dt = time.time() - t0
@@ -146,9 +152,15 @@ if 0:
 # %% Generate subpages for the designs
 
 
+<<<<<<< HEAD
 def conferenceSubPages(tag='cdesign', Nmax=40, Nstart=4, kmax=None, outputdir=None, conference_html_dir=None,
                        verbose=1, specials={}, Nstep=2, NmaxPareto=40, cache=True, cache_tag='results_cachev11',
                        double_conference_cases=(24,), html_template=False):
+=======
+def conferenceSubPages(tag='conference', Nmax=40, Nstart=4, kmax=None, outputdir=None, conference_html_dir=None,
+                       verbose=1, specials={}, Nstep=2, NmaxPareto=40, cache=True,
+                       double_conference_cases=(24,), html_template=False, addMaximumExtensionColumns=False):
+>>>>>>> 1073a3f... add code to determine maximal number of columns in extension
     """ Generate subpages for single conference results
 
     Args:
@@ -162,6 +174,8 @@ def conferenceSubPages(tag='cdesign', Nmax=40, Nstart=4, kmax=None, outputdir=No
 
     debugdata = {}
 
+    cache_tag = f'result-pareto-{oaresearch.research_conference.conferenceParetoIdentifier()}'
+    
     Nrange = range(Nstart, Nmax + 1, Nstep)
     if kmax == -2:
         kmax = int(np.ceil(Nmax / 2) + 1)
@@ -178,6 +192,10 @@ def conferenceSubPages(tag='cdesign', Nmax=40, Nstart=4, kmax=None, outputdir=No
     for ki, kk in enumerate(krange):
         for Ni, N in enumerate(Nrange):
 
+            if tag == 'conference':
+                if kk>N:
+                    continue
+                
             subpages[tag]['N%dk%d' % (N, kk)] = {}
             cachefile = os.path.join(outputdir, cache_tag, tag + '-' + 'N%dk%d' % (N, kk) + '.pickle')
 
@@ -188,11 +206,13 @@ def conferenceSubPages(tag='cdesign', Nmax=40, Nstart=4, kmax=None, outputdir=No
                     pareto_results, cfile = pickle.load(fid)
                 if verbose:
                     print('conferenceSubPages %s: from cache: N %d, columns %d' % (tag, N, kk))
+                if pareto_results['_version']!=oaresearch.research_conference.conferenceParetoIdentifier():
+                    raise Exception('conference Pareto definition was updated!')
 
             else:
                 pareto_results, cfile = generate_or_load_conference_results(N, kk, outputdir, dc_outputdir=resultsdir,
-                                                                            double_conference_cases=double_conference_cases)
-
+                                                                            double_conference_cases=double_conference_cases, addMaximumExtensionColumns=N<=12)
+                    
                 if verbose >= 2:
                     print('storing results in cachefile %s' % cachefile)
 
@@ -250,7 +270,7 @@ if 1:
 
     tag = 'cdesign'
     page = markup.page()
-    N = 22
+    N = 12
     kk = 9
     generated_result = generated_subpages['cdesign'].get('N%dk%d' % (N, kk), None)
     subpage = generated_result['htmlpage0']
