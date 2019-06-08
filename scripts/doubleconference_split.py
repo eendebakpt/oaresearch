@@ -1,4 +1,11 @@
 # -*- coding: utf-8 -*-
+from researchOA import makeJobList
+from researchOA import jobStatus, createJobScript
+from researchOA import splitBase, job, numbersFile, gatherFilesList, gatherResults, checkLevel, gzipOA, doSplitFile
+import researchOA
+from oapackage import splitTag, splitDir, splitFile
+from oapackage import oahelper, splitDir, splitFile  # reload(oahelper)
+import oapackage
 """
 
 Example script for calculating double conference matrices with split jobs
@@ -46,15 +53,7 @@ if not os.path.isdir(resultsdir):
     sys.exit()
 
 
-import oapackage
 print('oapackage: %s: %s' % (oapackage, oapackage.version()))
-
-from oapackage import oahelper, splitDir, splitFile  # reload(oahelper)
-from oapackage import splitTag, splitDir, splitFile
-import researchOA
-from researchOA import splitBase, job, numbersFile, gatherFilesList, gatherResults, checkLevel, gzipOA, doSplitFile
-from researchOA import jobStatus, createJobScript
-from researchOA import makeJobList
 
 
 r = oapackage.log_print(-oapackage.SYSTEM, '')
@@ -287,7 +286,7 @@ if not oapackage.file_exists(checkfile) and cache:
 else:
     print(Fore.BLUE + 'initial extension is complete' + Fore.RESET)
 
-#checkfile = ...
+# checkfile = ...
 
 if not oapackage.file_exists(checkfile):
     raise Exception('base extention did not work')
