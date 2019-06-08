@@ -687,7 +687,7 @@ def conference_design_has_extensions(array, verbose=0):
 
 
 def conferenceParetoIdentifier():
-    return '0.3'
+    return '0.4'
 
 
 def calculateConferencePareto(ll, N=None, k=None, verbose=1, add_data=True, addProjectionStatistics=None,
@@ -705,6 +705,8 @@ def calculateConferencePareto(ll, N=None, k=None, verbose=1, add_data=True, addP
     Returns:
         presults, pareto
     """
+    t0=time.time()
+    
     if verbose:
         print('calculateConferencePareto: analysing %d arrays, addProjectionStatistics %s, addExtensions %s' % (
             len(ll), addProjectionStatistics, addExtensions))
@@ -773,6 +775,7 @@ def calculateConferencePareto(ll, N=None, k=None, verbose=1, add_data=True, addP
             al, addFoldover=True, addMaximality=addExtensions, addMaximumExtensionColumns=addMaximumExtensionColumns)
         presults['pareto_data'].append(data)
 
+    presults['_pareto_processing_time']=time.time()-t0
     presults = OrderedDict(presults)
     return presults, pareto
 

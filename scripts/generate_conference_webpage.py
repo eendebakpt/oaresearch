@@ -211,7 +211,7 @@ def conferenceSubPages(tag='conference', Nmax=40, Nstart=4, kmax=None, outputdir
 
             else:
                 pareto_results, cfile = generate_or_load_conference_results(N, kk, outputdir, dc_outputdir=resultsdir,
-                                                                            double_conference_cases=double_conference_cases, addMaximumExtensionColumns=N<=12)
+                                                                            double_conference_cases=double_conference_cases, addMaximumExtensionColumns=N<=20)
                     
                 if verbose >= 2:
                     print('storing results in cachefile %s' % cachefile)
