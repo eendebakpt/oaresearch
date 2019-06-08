@@ -1,19 +1,14 @@
 # -*- coding: utf-8 -*-
-from collections import OrderedDict
-from oapackage.oahelper import create_pareto_element
-import json_tricks
-import copy
-import json
-""" Module to generate D-optimal designs
-
-For more information see: https://doi.org/10.1080/00401706.2016.1142903
+""" Research topics related to conference designs
 
 Pieter Eendebak <pieter.eendebak@gmail.com>
 
 """
 
-from __future__ import print_function
-
+from collections import OrderedDict
+import json_tricks
+import copy
+import json
 import collections
 import itertools
 import os
@@ -34,6 +29,7 @@ except BaseException:
     pass
 
 import oapackage
+from oapackage.oahelper import create_pareto_element
 import oapackage.conference
 import oapackage.markup as markup
 import oapackage.oahelper as oahelper
