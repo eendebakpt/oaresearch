@@ -12,7 +12,7 @@ import numpy as np
 try:
     import matplotlib
     import matplotlib.pyplot as plt
-except:
+except BaseException:
     pass
 
 import oapackage
@@ -33,7 +33,8 @@ def array2cpp(array, padding='   '):
     return ss
 
 
-def array2html(X, header=1, tablestyle='border-collapse: collapse;', trclass='', tdstyle='', trstyle='', thstyle='', comment=None):
+def array2html(X, header=1, tablestyle='border-collapse: collapse;',
+               trclass='', tdstyle='', trstyle='', thstyle='', comment=None):
     """ Convert Numpy array to HTML table
 
     Arguments

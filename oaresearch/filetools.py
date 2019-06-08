@@ -35,7 +35,8 @@ def copyOAfile(source, targetdir, target0, convert=None, zipfile=None, verbose=1
         else:
             if not zipfile == False:
                 zipfile = na >= zipfile
-        if not (convert == 'TEXT' or convert == 'BINARY' or convert == 'B' or convert == 'T' or convert == 'D' or convert == 'Z' or convert == 'DIFF'):
+        if not (convert == 'TEXT' or convert == 'BINARY' or convert == 'B' or convert ==
+                'T' or convert == 'D' or convert == 'Z' or convert == 'DIFF'):
             raise NameError("copyOAfile: convert: should be T, B or D")
         if verbose >= 3:
             print('target0: %s, zipfile %s' % (target0, zipfile))

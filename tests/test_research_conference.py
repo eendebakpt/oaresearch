@@ -11,11 +11,61 @@ import collections
 
 import oapackage
 import oaresearch.research_conference
-from oaresearch.research_conference import conference_design_has_extensions
+from oaresearch.research_conference import conference_design_has_extensions, maximal_extension_size, createConferenceParetoElement
 
 # %%
 
+class TestFullExtensions(unittest.TestCase):
 
+    def test_maximal_extension_size(self):
+        array= oapackage.exampleArray(40)
+        m, extensions = maximal_extension_size(array, verbose=0)
+        self.assertEqual(m , 14)
+        self.assertEqual([array.md5() for aray in extensions], ['045767c7cf6a005c06a6101dcf546ae0'])
+        
+        array= oapackage.exampleArray(50)
+        m, extensions = maximal_extension_size(array, verbose=0)
+        self.assertEqual(m , 12)
+        self.assertEqual([array.md5() for aray in extensions], ['72f829905c4fea1bf17a8d37686ac813'])
+
+from collections import OrderedDict
+
+class TestCreateConferenceParetoElement(unittest.TestCase):
+
+    def test_createConferenceParetoElement(self):
+        array = oapackage.exampleArray(49)
+
+        data, p = createConferenceParetoElement(array)
+        self.assertIsInstance(data, list)
+        self.assertEqual(data[0], [20.])
+        
+        self.assertDictEqual(p, OrderedDict([('ranksecondorder', 20),
+             ('rankinteraction', 19),
+             ('F4', (0, 0, 4, 46, 20)),
+             ('B4', 2.48),
+             ('PEC4', 1.0),
+             ('PEC5', 1.0),
+             ('PIC4', 17.105),
+             ('PIC5', 16.537),
+             ('PPC4', 1.789),
+             ('PPC5', 1.213),
+             ('foldover', 0),
+             ('notfoldover', 1)]) )
+        data, p = createConferenceParetoElement(array, addMaximumExtensionColumns=True)
+        self.assertDictEqual(p,OrderedDict([('ranksecondorder', 20),
+             ('rankinteraction', 19),
+             ('F4', (0, 0, 4, 46, 20)),
+             ('B4', 2.48),
+             ('PEC4', 1.0),
+             ('PEC5', 1.0),
+             ('PIC4', 17.105),
+             ('PIC5', 16.537),
+             ('PPC4', 1.789),
+             ('PPC5', 1.213),
+             ('foldover', 0),
+             ('notfoldover', 1),
+             ('maximum_extension_size', 8)]) )    
+    
 class TestResearchConference(unittest.TestCase):
 
     def test_createConferenceParetoElement(self):

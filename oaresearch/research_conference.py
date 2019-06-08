@@ -1,14 +1,14 @@
 # -*- coding: utf-8 -*-
-""" Module to generate D-optimal designs
-
-For more information see: https://doi.org/10.1080/00401706.2016.1142903
+""" Research topics related to conference designs
 
 Pieter Eendebak <pieter.eendebak@gmail.com>
 
 """
 
-from __future__ import print_function
-
+from collections import OrderedDict
+import json_tricks
+import copy
+import json
 import collections
 import itertools
 import os
@@ -16,15 +16,20 @@ import sys
 import time
 import pickle
 import shutil
+from typing import Tuple, List
+from functools import reduce
+import operator
 
 import numpy as np
+from joblib import Parallel, delayed
 
 try:
     import matplotlib.pyplot as plt
-except:
+except BaseException:
     pass
 
 import oapackage
+from oapackage.oahelper import create_pareto_element
 import oapackage.conference
 import oapackage.markup as markup
 import oapackage.oahelper as oahelper
@@ -39,9 +44,91 @@ from oapackage.conference import momentMatrix, modelStatistics, conferenceProjec
 # %%
 
 
-import json
-import copy
-import json_tricks
+def conference_design_extensions(array: List, verbose: int = 0) -> List:
+    """ Return list of all extensions of a conference design
+
+    All extensions are generated, minus symmetry conditions.
+
+    Args:
+        arrays : List of arrays to be extended
+    Returns:
+        List of extensions
+
+    """
+    j1zero = 0
+    array = oapackage.makearraylink(array)
+    conference_type = oapackage.conference_t(array.n_rows, array.n_columns, j1zero)
+
+    zero_index = -1
+    filterj2 = 1
+    filterj3 = 0
+    filter_symmetry = 1  # we can use symmetry reduction, since any the other filtering is not related to the symmetry of the design
+    extensions = oapackage.generateSingleConferenceExtensions(
+        array, conference_type, zero_index, verbose >= 2, filter_symmetry, filterj2, filterj3, filter_symmetry)
+    extensions = [oapackage.hstack(array, extension) for extension in extensions]
+
+    return list(extensions)
+
+
+def _flatten(data):
+    if len(data) == 0:
+        return data
+    return reduce(operator.concat, data)
+
+
+def _conference_design_extensions_numpy(array, verbose=0):
+    lst = conference_design_extensions(array, verbose)
+    return [np.array(array) for array in lst]
+
+
+def extend_conference_designs_full(extensions: List, number_parallel_jobs=4) -> List:
+    """ Extend a list of conference designs with all possible extensions minus symmetry """
+    if number_parallel_jobs > 1:
+        extensions_numpy = _flatten(Parallel(n_jobs=number_parallel_jobs)(
+            delayed(_conference_design_extensions_numpy)(np.array(array)) for array in extensions))
+        extensions = [oapackage.makearraylink(array) for array in extensions_numpy]
+    else:
+        extensions = _flatten([conference_design_extensions(array) for array in extensions])
+    return extensions
+
+
+def maximal_extension_size(array: object, verbose: int = 1) -> Tuple[int, list]:
+    """ Calculate maximum number of columns in an extention of specified design
+
+    Args:
+        design:
+    Returns:
+        Maximum number of columns
+    """
+
+    maximum_number_of_columns = array.n_columns
+
+    N = array.n_rows
+
+    extensions0 = [array]
+    extensions = extensions0
+
+    t0 = time.time()
+    for c in range(extensions[0].n_columns, N):
+
+        extensions2 = extend_conference_designs_full(extensions)
+        if verbose >= 2:
+            print(f'maximal_extension_size: N {N} columns {c}->{c+1}: {len(extensions)}->{len(extensions2)}')
+        extensionsr = oapackage.selectConferenceIsomorpismClasses(extensions2, verbose=0)
+        if verbose:
+            dt = time.time() - t0
+            print(
+                f'maximal_extension_size: N {N} columns {c}->{c+1}: {len(extensions)}->{len(extensions2)}->{len(extensionsr)}, {dt:.1f} [s]')
+        if len(extensionsr) == 0:
+            break
+
+        extensions = extensionsr
+
+        maximum_number_of_columns = c + 1
+
+    return maximum_number_of_columns, extensions
+
+# %%
 
 
 def select_even_odd_conference_designs(cfile):
@@ -72,11 +159,11 @@ def select_even_odd_conference_designs(cfile):
     return na, eolist
 
 
-#%%
+# %%
 
 
 def cdesignTag(N, kk, page, outputdir, tdstyle='', tags=['cdesign', 'cdesign-diagonal', 'cdesign-diagonal-r'],
-               tagtype=['full', 'r', 'r'], verbose=1, ncache=None, subpage=None, generated_result=None, conference_html_dir = None):
+               tagtype=['full', 'r', 'r'], verbose=1, ncache=None, subpage=None, generated_result=None, conference_html_dir=None):
     """ Create html tag for oa page
 
     Args:
@@ -133,6 +220,7 @@ def cdesignTag(N, kk, page, outputdir, tdstyle='', tags=['cdesign', 'cdesign-dia
             print(cfile)
     return cfile
 
+
 def generate_even_odd_conference_designs(outputdir):
     """ Select even-odd conference designs from generated double conference designs """
     Nrange = range(0, 82, 2)  # full range
@@ -146,7 +234,7 @@ def generate_even_odd_conference_designs(outputdir):
         for ki, kk in enumerate(krange):
 
             cfile = cdesignTag(N, kk, page=None, outputdir=outputdir, tags=[
-                tag, tag + '-r'], tagtype=['full', 'r'], conference_html_dir = None)
+                tag, tag + '-r'], tagtype=['full', 'r'], conference_html_dir=None)
 
             na, eolist = select_even_odd_conference_designs(cfile)
 
@@ -163,8 +251,9 @@ def generate_even_odd_conference_designs(outputdir):
                     if len(eolist) > 100:
                         cmd = 'gzip -f %s' % cfileout
                         os.system(cmd)
-                        
-#%%
+
+# %%
+
 
 def reduce_single_conference(arrays, verbose=0):
     """ Reduce a list of double conference arrays to single conference arrays
@@ -192,12 +281,14 @@ def reduce_single_conference(arrays, verbose=0):
 
 class SingleConferenceParetoCombiner:
 
-    def __init__(self, outputdir, cache_dir, cache=False, verbose=1, pareto_method_options = {}):
+    def __init__(self, outputdir, cache_dir, cache=False, verbose=1, pareto_method_options=None):
         """ Class to generate statistics and Pareto optimality results for a conference design class from double conference designs """
         self.outputdir = outputdir
         self.cache_dir = cache_dir
         self.cache = cache
         self.verbose = verbose
+        if pareto_method_options is None:
+            pareto_method_options = {}
         self._pareto_method_options = pareto_method_options
 
     def append_basepath(self, afile):
@@ -232,7 +323,8 @@ class SingleConferenceParetoCombiner:
             number_arrays = len(arrays)
             arrays = reduce_single_conference(arrays, verbose=1)
 
-            presults, _ = oaresearch.research_conference.calculateConferencePareto(arrays, **self._pareto_method_options)
+            presults, _ = oaresearch.research_conference.calculateConferencePareto(
+                arrays, **self._pareto_method_options)
 
             pareto_designs = [oapackage.array_link(array) for array in presults['pareto_designs']]
             print('generate %s: %d arrays' % (outputfile, len(pareto_designs)))
@@ -280,7 +372,8 @@ class SingleConferenceParetoCombiner:
             stats = json.load(open(outputfile_stats, 'rt'))
             combined_stats = self.combine_statistics(combined_stats, stats)
 
-        presults, pareto = oaresearch.research_conference.calculateConferencePareto(pareto_arrays, **self._pareto_method_options)
+        presults, _ = oaresearch.research_conference.calculateConferencePareto(
+            pareto_arrays, **self._pareto_method_options)
         # remove invalid fields
         for tag in ['B4', 'F4']:
             if tag + '_max' in presults:
@@ -298,7 +391,8 @@ class SingleConferenceParetoCombiner:
 # %%
 
 
-def generate_or_load_conference_results(N, number_of_columns, outputdir, dc_outputdir, double_conference_cases=()):
+def generate_or_load_conference_results(N, number_of_columns, outputdir, dc_outputdir,
+                                        double_conference_cases=(), addExtensions=True, addMaximumExtensionColumns=False):
     """ Calculate results for conference designs class
 
     In data is either calculated directly, or loaded from pre-generated data gathered from double conference designs.
@@ -309,7 +403,11 @@ def generate_or_load_conference_results(N, number_of_columns, outputdir, dc_outp
     from_double_conference = N in double_conference_cases
 
     addExtensions = N <= 26
-    pareto_method_options = {'verbose': 1, 'addProjectionStatistics': None, 'addExtensions': addExtensions}
+    pareto_method_options = {
+        'verbose': 1,
+        'addProjectionStatistics': None,
+        'addExtensions': addExtensions,
+        'addMaximumExtensionColumns': addMaximumExtensionColumns}
 
     if from_double_conference:
         if number_of_columns > N:
@@ -320,7 +418,8 @@ def generate_or_load_conference_results(N, number_of_columns, outputdir, dc_outp
         if not os.path.exists(dc_dir):
             return {}, None
         cache_dir = oapackage.mkdirc(os.path.join(dc_dir, 'sc_pareto_cache'))
-        pareto_calculator = SingleConferenceParetoCombiner(dc_dir, cache_dir=cache_dir, cache=True, pareto_method_options = None)
+        pareto_calculator = SingleConferenceParetoCombiner(
+            dc_dir, cache_dir=cache_dir, cache=True, pareto_method_options=None)
         pareto_results = pareto_calculator.load_combined_results(number_of_columns)
         pareto_results['narrays'] = pareto_results['combined_statistics']['number_conference_arrays']
         pareto_results['idstr'] = 'cdesign-%d-%d' % (pareto_results['N'], pareto_results['ncolumns'])
@@ -494,11 +593,8 @@ def test_confJ4():
     assert (np.sum(np.abs(np.array(J)) == 0) == 23)
 
 
-from oapackage.oahelper import create_pareto_element
-from collections import OrderedDict
-
-
-def createConferenceParetoElement(al, addFoldover=True, addProjectionStatistics=True, pareto=None, rounding_decimals=3):
+def createConferenceParetoElement(al, addFoldover=True, addProjectionStatistics=True,
+                                  addMaximality=False, addMaximumExtensionColumns=False, pareto=None, rounding_decimals=3):
     """ Create Pareto element from conference design """
     rr = conferenceStatistics(al, verbose=0)
     [f4, b4, rankinteraction, ranksecondorder] = rr[0:4]
@@ -534,6 +630,11 @@ def createConferenceParetoElement(al, addFoldover=True, addProjectionStatistics=
 
     if addProjectionStatistics:
         assert (len(values) == len(data.keys()))
+    if addMaximality:
+        data['has_extensions'] = conference_design_has_extensions(al)
+    if addMaximumExtensionColumns:
+        data['maximum_extension_size'] = maximal_extension_size(al)[0]
+
     pareto_element = create_pareto_element(values, pareto=pareto)
 
     return pareto_element, data
@@ -590,8 +691,12 @@ def conference_design_has_extensions(array, verbose=0):
     return result
 
 
+def conferenceParetoIdentifier():
+    return '0.4'
+
+
 def calculateConferencePareto(ll, N=None, k=None, verbose=1, add_data=True, addProjectionStatistics=None,
-                              addExtensions=False):
+                              addExtensions=False, addMaximumExtensionColumns=False):
     """ Calculate Pareto optimal designs from a list of designs
 
     Args:
@@ -605,6 +710,8 @@ def calculateConferencePareto(ll, N=None, k=None, verbose=1, add_data=True, addP
     Returns:
         presults, pareto
     """
+    t0 = time.time()
+
     if verbose:
         print('calculateConferencePareto: analysing %d arrays, addProjectionStatistics %s, addExtensions %s' % (
             len(ll), addProjectionStatistics, addExtensions))
@@ -655,11 +762,6 @@ def calculateConferencePareto(ll, N=None, k=None, verbose=1, add_data=True, addP
         presults['pareto_type'] = 'no design'
     else:
         presults['pareto_type'] = ', '.join([key for key in data.keys() if data[key] is not None])
-    if 0:
-        if addProjectionStatistics:
-            for kk in [4, 5]:
-                presults['pareto_type'] += ', '
-                presults['pareto_type'] += ', '.join(['PIC%d' % kk, 'PEC%d' % kk, 'PPC%d' % kk])
 
     presults['pareto_type'] = presults['pareto_type'].replace('ranksecondorder', 'r(2FI, QE)')
     presults['pareto_type'] = presults['pareto_type'].replace('rankinteraction', 'r(2FI)')
@@ -669,16 +771,16 @@ def calculateConferencePareto(ll, N=None, k=None, verbose=1, add_data=True, addP
     presults['pareto_indices'] = pareto.allindices()
     presults['nclasses'] = pareto.number()
     presults['npareto'] = pareto.numberindices()
-    presults['_version'] = '0.21'
+    presults['_version'] = conferenceParetoIdentifier()
 
     presults['pareto_designs'] = [ll[ii] for ii in presults['pareto_indices']]
     presults['pareto_data'] = []
     for ii, al in enumerate(presults['pareto_designs']):
-        pareto_element, data = createConferenceParetoElement(al, addFoldover=True)
-        if addExtensions:
-            data['has_extensions'] = conference_design_has_extensions(al)
+        pareto_element, data = createConferenceParetoElement(
+            al, addFoldover=True, addMaximality=addExtensions, addMaximumExtensionColumns=addMaximumExtensionColumns)
         presults['pareto_data'].append(data)
 
+    presults['_pareto_processing_time'] = time.time() - t0
     presults = OrderedDict(presults)
     return presults, pareto
 
@@ -907,7 +1009,7 @@ def latexResults(outputdir):
                     cfile0 = 'cdesign-diagonal-%d-%d.oa' % (N, k)
                     nnm = oapackage.nArrays(os.path.join(outputdir, cfile0))
                     if nnm > 0:
-                        X[1 + 1 + ki, 1 + ii] = '$\ge %d$' % nnm
+                        X[1 + 1 + ki, 1 + ii] = r'$\ge %d$' % nnm
                     else:
                         X[1 + 1 + ki, 1 + ii] = '?'
                 else:
@@ -1058,9 +1160,13 @@ def createConferenceDesignsPageParetoTable(page, pareto_results, verbose=0, html
     pareto_data = pareto_results['pareto_data']
 
     add_extension_information = False
+    add_maximum_extension_size = False
+
     if len(pareto_data) > 0:
         if pareto_data[0].get('has_extensions', None) is not None:
             add_extension_information = True
+        if pareto_data[0].get('maximum_extension_size', None) is not None:
+            add_maximum_extension_size = True
 
     if pareto_results['narrays'] > 0 and pareto_results.get('full_results'):
         add_extra = True
@@ -1074,6 +1180,8 @@ def createConferenceDesignsPageParetoTable(page, pareto_results, verbose=0, html
                     header += [tag + '%d' % kk]
         if add_extension_information:
             header += ['Extensions']
+        if add_maximum_extension_size:
+            header += ['Max. columns']
 
         rtable = np.zeros((1 + len(pareto_results['pareto_indices']), len(header)), dtype='|U208')
         rtable[:] = ' '
@@ -1098,6 +1206,9 @@ def createConferenceDesignsPageParetoTable(page, pareto_results, verbose=0, html
                         column_offset = column_offset + 1
             if add_extension_information:
                 rtable[ii + 1, column_offset] = 'Yes' if pareto_data[pareto_idx]['has_extensions'] > 0 else 'No'
+                column_offset = column_offset + 1
+            if add_maximum_extension_size:
+                rtable[ii + 1, column_offset] = pareto_data[pareto_idx]['maximum_extension_size']
                 column_offset = column_offset + 1
 
         subpage = oaresearch.research.array2html(rtable, header=1, tablestyle='border-collapse: collapse;',
@@ -1152,7 +1263,8 @@ def _convert_to_latex_table(rtable, N, ncolumns, offset_columns=[0, 1]):
     return latextable
 
 
-def conferenceDesignsPage(pareto_results, verbose=1, makeheader=True, htmlsubdir=None, generate_latex=True, html_template=False):
+def conferenceDesignsPage(pareto_results, verbose=1, makeheader=True,
+                          htmlsubdir=None, generate_latex=True, html_template=False):
     """ Generate html page for class conference designs
 
     Args:

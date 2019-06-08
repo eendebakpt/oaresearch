@@ -41,7 +41,6 @@ npx = oapackage.numberModelParams(al);
 main_effects = numpy.zeros((N, mesize))
 
 # %%
-import numpy as np
 
 
 def helmert_contrasts(number_of_levels, verbose=0):
@@ -101,7 +100,7 @@ print(hc)
                         if (verbose >= 3) {
                                 myprintf("array2eigenME: calculate ii %d\n", ii);
 
-                                eigenInfo (Z.block (0, 0, N, ii + 1), "Zx"); }
+                                eigenInfo (Z.block (0, 0, N, ii + 1), "Zx");}
 
                         MatrixFloat tmp = Z.block(0, 0, N, ii + 1).transpose() * Z.block(0, 0, N, ii + 1);
                         MatrixFloat tmp2 =
@@ -115,14 +114,14 @@ print(hc)
                         if (verbose >= 3) {
                                 eigenInfo(Z.block(0, 0, N, ii + 1), "Z.block(0,0,N,ii+1) ");
                                 eigenInfo(b, "b");
-                                std: : cout << b << std: : endl;                         }
+                                std:: cout << b << std: : endl;                         }
 # endif
                         Z.col(ii + 1) -= Z.block(0, 0, N, ii + 1) * b;
 
                         tmp = Z.col(ii + 1).transpose() * Z.col(ii + 1);
 
                         main_effects.col(meoffset + ii) =
-                            sqrt (double(N)) * Z.col (ii + 1) / sqrt (double(tmp (0, 0))); }
+                            sqrt (double(N)) * Z.col (ii + 1) / sqrt (double(tmp (0, 0)));}
 
     # %%
 
