@@ -37,7 +37,7 @@ class TestCreateConferenceParetoElement(unittest.TestCase):
 
         data, p = createConferenceParetoElement(array)
         self.assertIsInstance(data, list)
-        self.assertEqual(data[0], 20.)
+        self.assertEqual(data[0], [20.])
         
         self.assertDictEqual(p, OrderedDict([('ranksecondorder', 20),
              ('rankinteraction', 19),

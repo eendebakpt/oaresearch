@@ -1,4 +1,9 @@
 # -*- coding: utf-8 -*-
+from collections import OrderedDict
+from oapackage.oahelper import create_pareto_element
+import json_tricks
+import copy
+import json
 """ Module to generate D-optimal designs
 
 For more information see: https://doi.org/10.1080/00401706.2016.1142903
@@ -128,11 +133,6 @@ def maximal_extension_size(array: object, verbose: int = 1) -> Tuple[int, list]:
     return maximum_number_of_columns, extensions
 
 # %%
-
-
-import json
-import copy
-import json_tricks
 
 
 def select_even_odd_conference_designs(cfile):
@@ -285,12 +285,14 @@ def reduce_single_conference(arrays, verbose=0):
 
 class SingleConferenceParetoCombiner:
 
-    def __init__(self, outputdir, cache_dir, cache=False, verbose=1, pareto_method_options={}):
+    def __init__(self, outputdir, cache_dir, cache=False, verbose=1, pareto_method_options=None):
         """ Class to generate statistics and Pareto optimality results for a conference design class from double conference designs """
         self.outputdir = outputdir
         self.cache_dir = cache_dir
         self.cache = cache
         self.verbose = verbose
+        if pareto_method_options is None:
+            pareto_method_options = {}
         self._pareto_method_options = pareto_method_options
 
     def append_basepath(self, afile):
@@ -374,7 +376,7 @@ class SingleConferenceParetoCombiner:
             stats = json.load(open(outputfile_stats, 'rt'))
             combined_stats = self.combine_statistics(combined_stats, stats)
 
-        presults, pareto = oaresearch.research_conference.calculateConferencePareto(
+        presults, _ = oaresearch.research_conference.calculateConferencePareto(
             pareto_arrays, **self._pareto_method_options)
         # remove invalid fields
         for tag in ['B4', 'F4']:
@@ -593,10 +595,6 @@ def test_confJ4():
     J = conferenceJ4(al)
     assert (np.sum(np.abs(np.array(J)) == 12) == 1)
     assert (np.sum(np.abs(np.array(J)) == 0) == 23)
-
-
-from oapackage.oahelper import create_pareto_element
-from collections import OrderedDict
 
 
 def createConferenceParetoElement(al, addFoldover=True, addProjectionStatistics=True,

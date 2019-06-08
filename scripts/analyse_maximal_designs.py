@@ -1,8 +1,6 @@
 #%%
 
 # %% Load necessary packages
-import os
-import sys
 import numpy as np
 from importlib import reload
 from os.path import join
@@ -18,8 +16,6 @@ import oaresearch.research_conference
 import oaresearch.research_conference
 reload(oaresearch.research_conference)
 from oaresearch.research_conference import maximal_extension_size, extend_conference_designs_full
-
-from functools import reduce
 
 
 maximum_number, designs = maximal_extension_size(oapackage.exampleArray(50,1))
