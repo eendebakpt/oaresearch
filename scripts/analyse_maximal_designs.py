@@ -3,7 +3,6 @@
 # %% Load necessary packages
 import os
 import sys
-import platform
 import numpy as np
 from importlib import reload
 from os.path import join
@@ -12,8 +11,7 @@ from os.path import join
 import oapackage
 import oapackage.graphtools
 import oaresearch.research_conference
-from oaresearch.research_conference import calculateConferencePareto, conferenceResultsFile, generateConferenceResults, \
-    conferenceDesignsPage
+
 
 
 # %%
@@ -22,8 +20,6 @@ reload(oaresearch.research_conference)
 from oaresearch.research_conference import maximal_extension_size, extend_conference_designs_full
 
 from functools import reduce
-import operator
-from joblib import Parallel, delayed
 
 
 maximum_number, designs = maximal_extension_size(oapackage.exampleArray(50,1))

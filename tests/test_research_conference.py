@@ -36,6 +36,9 @@ class TestCreateConferenceParetoElement(unittest.TestCase):
         array = oapackage.exampleArray(49)
 
         data, p = createConferenceParetoElement(array)
+        self.assertIsInstance(data, list)
+        self.assertEqual(data[0], 20.)
+        
         self.assertDictEqual(p, OrderedDict([('ranksecondorder', 20),
              ('rankinteraction', 19),
              ('F4', (0, 0, 4, 46, 20)),
