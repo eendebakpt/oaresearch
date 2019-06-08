@@ -64,13 +64,8 @@ if 0:
     N = 22
     kk = 8
     # N=20; kk=13;
-<<<<<<< HEAD
-    # N=12; kk=4;
-    N = 28;kk = 4
-=======
     N=12; kk=4;
     #N = 28;kk = 8
->>>>>>> 1073a3f... add code to determine maximal number of columns in extension
     # N = 4; kk = 2
     # N=30;kk=6
     
@@ -152,15 +147,9 @@ if 0:
 # %% Generate subpages for the designs
 
 
-<<<<<<< HEAD
-def conferenceSubPages(tag='cdesign', Nmax=40, Nstart=4, kmax=None, outputdir=None, conference_html_dir=None,
-                       verbose=1, specials={}, Nstep=2, NmaxPareto=40, cache=True, cache_tag='results_cachev11',
-                       double_conference_cases=(24,), html_template=False):
-=======
 def conferenceSubPages(tag='conference', Nmax=40, Nstart=4, kmax=None, outputdir=None, conference_html_dir=None,
                        verbose=1, specials={}, Nstep=2, NmaxPareto=40, cache=True,
                        double_conference_cases=(24,), html_template=False, addMaximumExtensionColumns=False):
->>>>>>> 1073a3f... add code to determine maximal number of columns in extension
     """ Generate subpages for single conference results
 
     Args:
