@@ -131,11 +131,11 @@ def maximal_extension_size(array: oapackage.array_link, verbose: int = 1) -> Tup
 # %%
 
 
-def select_even_odd_conference_designs(cfile):
+def select_even_odd_conference_designs(cfile : str) -> Tuple:
     """ Select the even-odd conference designs from a file with designs """
     na = oapackage.nArrayFile(cfile)
 
-    eolist = []
+    eolist : List[Any] = []
     if na > 100000:
         af = oapackage.arrayfile_t(cfile)
         for ii in range(na):

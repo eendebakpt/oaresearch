@@ -16,7 +16,6 @@ except BaseException:
     pass
 
 import oapackage
-#import oalib
 import oapackage.markup as markup
 import oapackage.oahelper as oahelper
 
@@ -25,7 +24,7 @@ from oapackage.markup import oneliner as e
 # %%
 
 
-def array2cpp(array, padding='   '):
+def array2cpp(array: oapackage.array_link, padding : str ='   '):
     """ Convert array to C++ initialization code """
     ss = padding + 'array_link array (%d, %d, 0);' % (array.n_rows, array.n_columns) + ' \n'
     ss += padding + 'int array_data_tmp[] = {%s};\n' % (','.join(['%d' % v for v in np.array(array).T.flatten()]))
