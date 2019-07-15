@@ -73,7 +73,8 @@ parser.add_argument("-s", "--statistics", type=int, default=0,
                     help="calculate statistics of generation")
 parser.add_argument("-N", "--N", type=int, default=dobigcase,
                     help="number of splitting")
-parser.add_argument("-ii", "--ii", type=int, default=- 1, help="only run part of top level")
+parser.add_argument("-ii", "--ii", type=int, default=-
+                    1, help="only run part of top level")
 parser.add_argument("-jj", "--jj", type=int, default=-1,
                     help="only run part of top+1 level")
 parser.add_argument(
@@ -103,7 +104,8 @@ print('double conference: case: %d, resultsdir %s' % (N, resultsdir))
 def compressOA(directory):
     lst = oapackage.findfiles(directory, '.*oa')
     for afile in lst:
-        oapackage.oahelper.compressOAfile(os.path.join(directory, afile), verbose=0)
+        oapackage.oahelper.compressOAfile(
+            os.path.join(directory, afile), verbose=0)
 
 
 def rfile(lvls, N, k, basetag='dconference'):
@@ -323,7 +325,8 @@ for ii in range(splitdata[0]['n']):
         print('make job for split of %s' % (lvls, ))
     alljobs += [j]
 
-    cmd = researchOA.gzipOA(os.path.join(outputdir, splitDir(lvls)), unzip_text=True, cmdverbose=True)
+    cmd = researchOA.gzipOA(os.path.join(
+        outputdir, splitDir(lvls)), unzip_text=True, cmdverbose=True)
     jc = job(cmd, jobtype='compress %s' % tag, checkfiles=[
         checkfile + '.gz'], checkfilesstart=[checkfile])
     jc.compressjob = True
@@ -353,7 +356,8 @@ for ii in range(splitdata[0]['n']):
                 checkfile], checkfilesstart=[startfile])
         alljobs += [j]
 
-        cmd = researchOA.gzipOA(os.path.join(outputdir, splitDir(lvls)), unzip_text=True, cmdverbose=2)
+        cmd = researchOA.gzipOA(os.path.join(
+            outputdir, splitDir(lvls)), unzip_text=True, cmdverbose=2)
         jc = job(cmd, jobtype='compress %s' % tag, checkfiles=[
             checkfileZ + '.gz'], checkfilesstart=[checkfile])
         jc.compressjob = True
@@ -425,8 +429,10 @@ def listFiles(splitdata, k, verbose=1):
 
     cc = list(itertools.product(*[range(i) for i in nn]))
 
-    ll = [os.path.join(splitDir(c), rfile(c, N, k, basetag=basetag)) for c in cc]
-    print('listFiles: k %d, level is %d, splits %s: %d file(s)' % (k, level, nn, len(ll)))
+    ll = [os.path.join(splitDir(c), rfile(c, N, k, basetag=basetag))
+          for c in cc]
+    print('listFiles: k %d, level is %d, splits %s: %d file(s)' %
+          (k, level, nn, len(ll)))
     return ll
 
 #ll=listFiles(splitdata, 4, verbose=1)

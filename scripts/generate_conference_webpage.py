@@ -105,8 +105,10 @@ if 0:
     reload(oaresearch.research_conference)
     from oaresearch.research_conference import SingleConferenceParetoCombiner
 
-    cache_dir = oapackage.mkdirc(os.path.join(resultsdir, 'doubleconference-%d' % (2 * N), 'sc_pareto_cache'))
-    pareto_calculator = SingleConferenceParetoCombiner(outputdir, cache_dir=cache_dir, cache=True)
+    cache_dir = oapackage.mkdirc(os.path.join(
+        resultsdir, 'doubleconference-%d' % (2 * N), 'sc_pareto_cache'))
+    pareto_calculator = SingleConferenceParetoCombiner(
+        outputdir, cache_dir=cache_dir, cache=True)
     presults = pareto_calculator.load_combined_results(5)
     print(presults)
 
@@ -124,16 +126,19 @@ if 0:
 
     designs = ll[4000:]
     for jj, al in enumerate(designs):
-        f4, b4, rank, rankq = oaresearch.research_conference.conferenceStatistics(al, verbose=0)
+        f4, b4, rank, rankq = oaresearch.research_conference.conferenceStatistics(
+            al, verbose=0)
         pec5, pic5, ppc5 = conferenceProjectionStatistics(al, 5)
         if np.abs(ppc5 - 1.2130420253) < 1e-4:
             pec, pic, ppc = conferenceProjectionStatistics(al, 4)
             print('array %d: b4 %s f4 %s' % (jj, b4, f4))
-            print('  pec %s, pec5 %s, ppc %s, ppc5 %s' % (pec, pec5, ppc, ppc5))
+            print('  pec %s, pec5 %s, ppc %s, ppc5 %s' %
+                  (pec, pec5, ppc, ppc5))
 
 # %%
 if 0:
-    rtable = createConferenceDesignsPageParetoTable(markup.page(), pareto_results, verbose=2, htmlsubdir=None)
+    rtable = createConferenceDesignsPageParetoTable(
+        markup.page(), pareto_results, verbose=2, htmlsubdir=None)
     latextable = oapackage.array2latex(rtable)
     print(latextable)
 
@@ -174,7 +179,8 @@ def conferenceSubPages(tag='conference', Nmax=40, Nstart=4, kmax=None, outputdir
         kmax = np.max(Nrange) + 2
     krange = range(2, kmax)
     if verbose:
-        print('conferenceSubPages: tag %s, Nmax %d, kmax %d' % (tag, Nmax, kmax))
+        print('conferenceSubPages: tag %s, Nmax %d, kmax %d' %
+              (tag, Nmax, kmax))
 
     subpages = {}
     subpages[tag] = {}
@@ -188,7 +194,8 @@ def conferenceSubPages(tag='conference', Nmax=40, Nstart=4, kmax=None, outputdir
                     continue
 
             subpages[tag]['N%dk%d' % (N, kk)] = {}
-            cachefile = os.path.join(outputdir, cache_tag, tag + '-' + 'N%dk%d' % (N, kk) + '.pickle')
+            cachefile = os.path.join(
+                outputdir, cache_tag, tag + '-' + 'N%dk%d' % (N, kk) + '.pickle')
 
             if cache and os.path.exists(cachefile):
                 with open(cachefile, 'rb') as fid:
@@ -196,9 +203,11 @@ def conferenceSubPages(tag='conference', Nmax=40, Nstart=4, kmax=None, outputdir
                         print('loading results from cachefile %s' % cachefile)
                     pareto_results, cfile = pickle.load(fid)
                 if verbose:
-                    print('conferenceSubPages %s: from cache: N %d, columns %d' % (tag, N, kk))
+                    print(
+                        'conferenceSubPages %s: from cache: N %d, columns %d' % (tag, N, kk))
                 if pareto_results['_version'] != oaresearch.research_conference.conferenceParetoIdentifier():
-                    raise Exception('conference Pareto definition was updated!')
+                    raise Exception(
+                        'conference Pareto definition was updated!')
 
             else:
                 pareto_results, cfile = generate_or_load_conference_results(N, kk, outputdir, dc_outputdir=resultsdir,
@@ -221,8 +230,10 @@ def conferenceSubPages(tag='conference', Nmax=40, Nstart=4, kmax=None, outputdir
             # write results
             htmlfile0 = tag + '-%d-%d.html' % (N, kk)
             if html_template:
-                oapackage.mkdirc(os.path.join(conference_html_dir, 'templates'))
-                htmlfile = os.path.join(conference_html_dir, 'templates', htmlfile0 + '.template')
+                oapackage.mkdirc(os.path.join(
+                    conference_html_dir, 'templates'))
+                htmlfile = os.path.join(
+                    conference_html_dir, 'templates', htmlfile0 + '.template')
             else:
                 htmlfile = os.path.join(conference_html_dir, htmlfile0)
 
@@ -261,13 +272,15 @@ if 1:
     page = markup.page()
     N = 12
     kk = 9
-    generated_result = generated_subpages['cdesign'].get('N%dk%d' % (N, kk), None)
+    generated_result = generated_subpages['cdesign'].get(
+        'N%dk%d' % (N, kk), None)
     subpage = generated_result['htmlpage0']
     cdesignTag(N, kk, page, outputdir, '',
                ['cdesign', 'cdesign-diagonal', 'cdesign-diagonal-r'],
                ['full', 'r', 'r'], verbose=2, subpage=subpage, generated_result=generated_result, conference_html_dir=conference_html_dir)
 
-    generated_result = generated_subpages['cdesign'].get('N%dk%d' % (28, 4), None)
+    generated_result = generated_subpages['cdesign'].get(
+        'N%dk%d' % (28, 4), None)
     cdesignTag(28, 4, page, outputdir, '',
                ['cdesign', 'cdesign-diagonal', 'cdesign-diagonal-r'],
                ['full', 'r', 'r'], verbose=2, subpage=subpage, generated_result=generated_result, conference_html_dir=conference_html_dir)
@@ -456,7 +469,8 @@ def DconferencePage(page, tag='dconference', Nmax=26, Nstart=4, kmax=None,
 
                             continue
             if verbose:
-                print('DconferencePage: tag %s: %d %d: subpage %s' % (tag, N, kk, subpage))
+                print('DconferencePage: tag %s: %d %d: subpage %s' %
+                      (tag, N, kk, subpage))
 
             if tag == 'cdesign':
                 cdesignTag(N, kk, page, outputdir, tdstyle,
@@ -487,7 +501,8 @@ if generate_webpage:
     tdstyle = 'text-align:left; padding-left: .6em; margin-right: 0em; padding-right: .6em; margin-left: 0px;'
 
     citation = oaresearch.research.citation('conference', style='brief')
-    citation_enumeration = oaresearch.research.citation('cenumeration', style='brief')
+    citation_enumeration = oaresearch.research.citation(
+        'cenumeration', style='brief')
     page = oapackage.markup.page()
 
     if not html_template:
@@ -502,7 +517,8 @@ if generate_webpage:
                   footer="<!-- End of page -->")
 
     page.h1('Non-isomorphic conference designs', style='margin-bottom: 0.1em;')
-    page.p('<em style="color:darkblue;">pieter.eendebak@gmail.com</em>', style='margin-top: 0px;')
+    page.p('<em style="color:darkblue;">pieter.eendebak@gmail.com</em>',
+           style='margin-top: 0px;')
     ss = 'On this page we present numbers of isomorphism classes for conference designs with a specified number of runs (or rows) and factors (or columns). '
     ss += 'For all the cases a set of representatives for the isomorphism classes is available. The algorithm used to generate the results is described in %s and %s. ' % (
         citation, citation_enumeration)
@@ -550,7 +566,8 @@ if generate_webpage:
 
         if 1:
             subheader('DCDs with level balance')  # J1 values are zero
-            page.p('In double conference designs with level balance, the elements of each column sum to zero.')
+            page.p(
+                'In double conference designs with level balance, the elements of each column sum to zero.')
             r = DconferencePage(page, tag='dconferencej1', kmax=14, tableclass='conftable conftable3',
                                 conference_html_dir=conference_html_dir)
 
@@ -571,7 +588,8 @@ if generate_webpage:
         page.h2('Weighing matrices')
 
         if 1:
-            subheader('Plain DCDs (full isomorphism class)')  # no restrictions on J1 and J3
+            # no restrictions on J1 and J3
+            subheader('Plain DCDs (full isomorphism class)')
             page.p()
             page.add(
                 'For the isomorphism class level-permutatations of the rows are allowed.')
@@ -582,7 +600,8 @@ if generate_webpage:
             page.add(
                 'The square double conference matrices are a complete non-isomorphic set of weighing matrices of type W(N, N-2).')
             page.p.close()
-            DconferencePage(page, tag='weighing2', kmax=15, Nmax=25, conference_html_dir=conference_html_dir)
+            DconferencePage(page, tag='weighing2', kmax=15,
+                            Nmax=25, conference_html_dir=conference_html_dir)
 
     ss = 'If you make use of these results, please cite the paper %s.' % citation
     page.p(ss)
@@ -605,7 +624,8 @@ if generate_webpage:
         page.add(
             'The square double conference matrices are weighing matrices of type W(N, N-2).')
         page.p.close()
-        DconferencePage(page, tag='dconference2', conference_html_dir=conference_html_dir)
+        DconferencePage(page, tag='dconference2',
+                        conference_html_dir=conference_html_dir)
 
     if html_template:
         hfile = os.path.join(htmldir, 'templates', 'conference.html')

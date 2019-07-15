@@ -88,7 +88,8 @@ def generateConference(N, kmax=None, verbose=1, diagc=False, nmax=None, selectme
 
     for extcol in range(2, kmax):
         if verbose:
-            print('generateConference: N %d, extcol %d: %d designs' % (N, extcol, len(LL[extcol - 1])))
+            print('generateConference: N %d, extcol %d: %d designs' %
+                  (N, extcol, len(LL[extcol - 1])))
             sys.stdout.flush()
         LL[extcol] = oapackage.extend_conference(
             LL[extcol - 1], ctype, verbose=verbose >= 2)
@@ -159,7 +160,8 @@ else:
     LL = generateConference(24, diagc=True, outputdir=outputdir)
 
     LL = generateConference(26, diagc=True, outputdir=outputdir)
-    LL = generateConference(28, kmax=9, diagc=True, outputdir=outputdir)  # started...
+    # started...
+    LL = generateConference(28, kmax=9, diagc=True, outputdir=outputdir)
     #LL=generateConference(30, kmax=7, diagc=True)
 
     LL = generateConference(28, diagc=True, nmax=100, outputdir=outputdir)
@@ -174,7 +176,8 @@ else:
 scriptfile = os.path.join(scriptdir, 'jobfile-small.sh')
 with open(scriptfile, 'wt') as fid:
     for N in range(2, 18, 2):
-        cmd = 'oaconference -N %d --ctype 0 --itype 2  --j1zero 0 --j3zero 0 -o cdesign' % N  # conference matrix
+        # conference matrix
+        cmd = 'oaconference -N %d --ctype 0 --itype 2  --j1zero 0 --j3zero 0 -o cdesign' % N
         _ = fid.write('%s\n' % cmd)
 
         # double conference design
@@ -194,7 +197,8 @@ with open(scriptfile, 'wt') as fid:
         _ = fid.write('%s\n' % cmd)
 
     for (N, kmax) in [(20, 4), (18, 4), (22, 4), (24, 2)]:
-        cmd = 'oaconference -N %d -k %d --ctype 2 --itype 2  --j1zero 0 --j3zero 0 -o weighing2' % (N, kmax)
+        cmd = 'oaconference -N %d -k %d --ctype 2 --itype 2  --j1zero 0 --j3zero 0 -o weighing2' % (
+            N, kmax)
         _ = fid.write('%s\n' % cmd)
 
     for N in [18, 20]:
@@ -209,9 +213,11 @@ with open(scriptfile, 'wt') as fid:
         _ = fid.write('%s\n' % cmd)
 
     for N in [30, 32, 34]:
-        cmd = 'oaconference -N %d --ctype 0 --itype 2  --j1zero 0 --j3zero 0 -o cdesign -k 5' % N  # conference matrix
+        # conference matrix
+        cmd = 'oaconference -N %d --ctype 0 --itype 2  --j1zero 0 --j3zero 0 -o cdesign -k 5' % N
         _ = fid.write('%s\n' % cmd)
-        cmd = 'oaconference -N %d --ctype 1 --itype 2  --j1zero 0 --j3zero 0 -o cdesign-diagonal -k 7' % N  # conference matrix
+        # conference matrix
+        cmd = 'oaconference -N %d --ctype 1 --itype 2  --j1zero 0 --j3zero 0 -o cdesign-diagonal -k 7' % N
         _ = fid.write('%s\n' % cmd)
 
     for N in [34]:
@@ -219,7 +225,8 @@ with open(scriptfile, 'wt') as fid:
         _ = fid.write('%s\n' % cmd)
 
     for N in [40]:
-        cmd = 'oaconference -N %d --ctype 0 --itype 2  --j1zero 0 --j3zero 0 -o cdesign -k 5' % N  # conference matrix
+        # conference matrix
+        cmd = 'oaconference -N %d --ctype 0 --itype 2  --j1zero 0 --j3zero 0 -o cdesign -k 5' % N
         _ = fid.write('%s\n' % cmd)
 
     # random extension cdesigns
@@ -238,7 +245,8 @@ if 1:
             cmd = 'oaconference -N %d --ctype 2 --itype 3  --j1zero 0  --j3zero 0 -o dconference2' % n
             _ = fid.write('%s\n' % cmd)
         for (n, kmax) in [(14, 4), (12, 4), (16, 3), (18, 3), (20, 3)]:
-            cmd = 'oaconference -N %d -k %d --ctype 2 --itype 3  --j1zero 0 --j3zero 0 -o dconference2' % (n, kmax)
+            cmd = 'oaconference -N %d -k %d --ctype 2 --itype 3  --j1zero 0 --j3zero 0 -o dconference2' % (
+                n, kmax)
             _ = fid.write('%s\n' % cmd)
 
         for n in range(18, 38, 2):
@@ -251,9 +259,11 @@ if 1:
 
         ww = [(46, 7), (48, 7), (50, 7), (52, 6)]
         ww += [(56, 6), (58, 6), (60, 5), (62, 24)]
-        ww += [(n, 5) for n in range(64, 70, 2)] + [(70, 20)] + [(n, 5) for n in range(72, 82, 2)] + [(78, 20)]
+        ww += [(n, 5) for n in range(64, 70, 2)] + [(70, 20)] + [(n, 5)
+                                                                 for n in range(72, 82, 2)] + [(78, 20)]
         for n, kmax in ww:
-            cmd = 'oaconference -N %d -k %d --ctype 2 --itype 3 --j1zero 1 --j3zero 1  -o dconferencej1j3' % (n, kmax)
+            cmd = 'oaconference -N %d -k %d --ctype 2 --itype 3 --j1zero 1 --j3zero 1  -o dconferencej1j3' % (
+                n, kmax)
             _ = fid.write('%s\n' % cmd)
     reportScriptFile(scriptfile)
 
@@ -270,7 +280,8 @@ if 1:
     jj = []
     for i, N in enumerate(NN):
         nmax = nmaxs[i]
-        cmd = 'oaconference -N %d --ctype 2 --itype 3 --j1zero 1 --j3zero 1 -o dconferencej1j3-r --nmax %d' % (N, nmax)
+        cmd = 'oaconference -N %d --ctype 2 --itype 3 --j1zero 1 --j3zero 1 -o dconferencej1j3-r --nmax %d' % (
+            N, nmax)
         if verbose >= 2:
             print(cmd)
         j = job(cmd, shorttag='N%d' % N)
@@ -279,7 +290,8 @@ if 1:
     nmaxs = [2000, 2000, 2000, 200]
     for i, N in enumerate(NN):
         nmax = nmaxs[i]
-        cmd = 'oaconference -N %d --ctype 2 --itype 3 --j1zero 1 --j3zero 1 -o dconferencej1j3-r --nmax %d' % (N, nmax)
+        cmd = 'oaconference -N %d --ctype 2 --itype 3 --j1zero 1 --j3zero 1 -o dconferencej1j3-r --nmax %d' % (
+            N, nmax)
         if verbose >= 2:
             print(cmd)
         j = job(cmd, shorttag='N%d' % N)
@@ -289,7 +301,8 @@ if 1:
     nmaxs = [1000, 1000, 1000, 200, 200, 200, 200]
     for i, N in enumerate(NN):
         nmax = nmaxs[i]
-        cmd = 'oaconference -N %d --ctype 2 --itype 3 --j1zero 1 --j3zero 1 -o dconferencej1j3-r --nmax %d' % (N, nmax)
+        cmd = 'oaconference -N %d --ctype 2 --itype 3 --j1zero 1 --j3zero 1 -o dconferencej1j3-r --nmax %d' % (
+            N, nmax)
         if verbose >= 2:
             print(cmd)
         j = job(cmd, shorttag='N%d' % N)
@@ -298,7 +311,8 @@ if 1:
     jobfile = join(scriptdir, 'subs.sh')
     with open(jobfile, 'wt') as fid:
         for i, j in enumerate(jj):
-            outfile, s = createJobScript(j, index=i, verbose=0, queue='q72h', scriptdir=scriptdir)
+            outfile, s = createJobScript(
+                j, index=i, verbose=0, queue='q72h', scriptdir=scriptdir)
             _ = fid.write('%s\n' % s)
     print('generated job file %s' % jobfile)
 

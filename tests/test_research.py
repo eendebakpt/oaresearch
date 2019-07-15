@@ -16,9 +16,13 @@ import oaresearch.research
 
 def array2cpp(array, padding='   '):
     """ Convert array to C++ initialization code """
-    ss = padding + 'array_link array (%d, %d, 0);' % (array.n_rows, array.n_columns) + ' \n'
-    ss += padding + 'int array_data_tmp[] = {%s};\n' % (','.join(['%d' % v for v in np.array(array).T.flatten()]))
-    ss += padding + 'array.setarraydata (array_data_tmp, array.n_rows * array.n_columns);\n'
+    ss = padding + \
+        'array_link array (%d, %d, 0);' % (
+            array.n_rows, array.n_columns) + ' \n'
+    ss += padding + 'int array_data_tmp[] = {%s};\n' % (
+        ','.join(['%d' % v for v in np.array(array).T.flatten()]))
+    ss += padding + \
+        'array.setarraydata (array_data_tmp, array.n_rows * array.n_columns);\n'
     return ss
 
 

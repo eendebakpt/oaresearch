@@ -20,7 +20,8 @@ class TestHTMLtools(unittest.TestCase):
         txt = 'hello'
         url = 'http://www.world'
         with patch('sys.stdout', new_callable=io.StringIO) as mock_stdout:
-            html = oaresearch.htmltools.formatArrayHyperlink(txt, url, 'arrayfile')
+            html = oaresearch.htmltools.formatArrayHyperlink(
+                txt, url, 'arrayfile')
             self.assertTrue(html.startswith('<a '))
             self.assertTrue(txt in html)
             self.assertTrue(url in html)

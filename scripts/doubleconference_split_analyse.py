@@ -2,7 +2,8 @@
 from oaresearch.research_conference import SingleConferenceParetoCombiner
 import oaresearch
 import oaresearch.research_conference
-from oapackage import oahelper, splitDir, splitFile, splitTag  # reload(oahelper)
+# reload(oahelper)
+from oapackage import oahelper, splitDir, splitFile, splitTag
 import oapackage
 """
 
@@ -56,7 +57,8 @@ parser.add_argument("-s", "--statistics", type=int, default=0,
                     help="calculate statistics of generation")
 parser.add_argument("-N", "--N", type=int, default=dobigcase,
                     help="number of splitting")
-parser.add_argument("-ii", "--ii", type=int, default=6, help="only run part of top level")
+parser.add_argument("-ii", "--ii", type=int, default=6,
+                    help="only run part of top level")
 parser.add_argument("-jj", "--jj", type=int, default=-1,
                     help="only run part of top+1 level")
 parser.add_argument(
@@ -188,8 +190,10 @@ def listFiles(splitdata, k, verbose=1):
 
     cc = list(itertools.product(*[range(i) for i in nn]))
 
-    ll = [os.path.join(splitDir(c), rfile(c, N, k, basetag=basetag)) for c in cc]
-    print('listFiles: k %d, level is %d, splits %s: %d file(s)' % (k, level, nn, len(ll)))
+    ll = [os.path.join(splitDir(c), rfile(c, N, k, basetag=basetag))
+          for c in cc]
+    print('listFiles: k %d, level is %d, splits %s: %d file(s)' %
+          (k, level, nn, len(ll)))
     return ll
 
 
@@ -236,7 +240,8 @@ def calc_stats(ll, func, outputdir, verbose=1):
 
 cache_dir = oapackage.mkdirc(os.path.join(outputdir, 'sc_pareto_cache'))
 
-pareto_method_options = {'verbose': 1, 'addProjectionStatistics': None, 'addExtensions': True}
+pareto_method_options = {'verbose': 1,
+                         'addProjectionStatistics': None, 'addExtensions': True}
 
 pareto_calculator = SingleConferenceParetoCombiner(
     outputdir, cache_dir=cache_dir, cache=True, pareto_method_options=pareto_method_options)
@@ -255,7 +260,8 @@ if 1:
             r = calc_stats(ll, evenodd_count, outputdir, verbose=verbose >= 2)
             totals = np.sum(np.array(r), axis=0)
             rr[k] = totals.tolist()
-            print(Fore.BLUE + 'double conference N %d k %d: foldover, evenodd %s' % (N, k, totals,) + Fore.RESET)
+            print(Fore.BLUE + 'double conference N %d k %d: foldover, evenodd %s' %
+                  (N, k, totals,) + Fore.RESET)
 
         pareto_calculator.pre_calculate(ll)
         results = pareto_calculator.calculate(ll)

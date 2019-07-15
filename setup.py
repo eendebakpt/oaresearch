@@ -9,6 +9,7 @@ from setuptools import setup, find_packages
 
 import re
 
+
 def readme():
     with open('README.md') as f:
         return f.read()
@@ -42,11 +43,13 @@ setup(name='oaresearch',
       author_email='pieter.eendebak@gmail.com',
       license="BSD",
       url='http://www.pietereendebak.nl/oapackage/index.html',
-      keywords=["orthogonal arrays, design of experiments, conference designs, isomorphism testing"],
+      keywords=[
+          "orthogonal arrays, design of experiments, conference designs, isomorphism testing"],
       packages=packages,
       tests_require=['numpy', 'nose>=1.3', 'coverage>=4.0', 'mock'],
       zip_safe=False,
-      install_requires=['numpy>=1.13', 'scanf', 'OApackage', 'json_tricks', 'jsmin', 'htmlmin', 'coreapi', 'joblib'],
+      install_requires=['numpy>=1.13', 'scanf', 'OApackage',
+                        'json_tricks', 'jsmin', 'htmlmin', 'coreapi', 'joblib'],
       extras_require={
           'GUI': ["qtpy", 'matplotlib'],
       },

@@ -81,9 +81,11 @@ def helmert_contrasts(number_of_levels, verbose=0):
     for ii in range(0, md):
             normalization = Z[:, (ii + 1)].T.dot(Z[:, ii + 1]);
             if verbose:
-                    print('helmert_contrasts: normalize number_of_levels tmp: %s ' % (normalization,));
+                    print('helmert_contrasts: normalize number_of_levels tmp: %s ' % (
+                        normalization,));
             main_effects[:, meoffset + ii:(meoffset + ii + 1)] = np.sqrt((N)) * \
-                                           Z[:, (ii + 1):(ii + 2)] / np.sqrt((normalization));
+                                           Z[:, (ii + 1):(ii + 2)] / \
+                                                 np.sqrt((normalization));
 
     return main_effects
 
@@ -98,9 +100,10 @@ print(hc)
 
                 for (int ii=0; ii < md; ii + +) {
                         if (verbose >= 3) {
-                                myprintf("array2eigenME: calculate ii %d\n", ii);
+                                myprintf(
+                                    "array2eigenME: calculate ii %d\n", ii);
 
-                                eigenInfo (Z.block (0, 0, N, ii + 1), "Zx");}
+                                eigenInfo (Z.block (0, 0, N, ii + 1), "Zx"); }
 
                         MatrixFloat tmp = Z.block(0, 0, N, ii + 1).transpose() * Z.block(0, 0, N, ii + 1);
                         MatrixFloat tmp2 =
@@ -112,16 +115,17 @@ print(hc)
 
 # ifdef FULLPACKAGE
                         if (verbose >= 3) {
-                                eigenInfo(Z.block(0, 0, N, ii + 1), "Z.block(0,0,N,ii+1) ");
+                                eigenInfo(Z.block(0, 0, N, ii + 1),
+                                          "Z.block(0,0,N,ii+1) ");
                                 eigenInfo(b, "b");
-                                std:: cout << b << std: : endl;                         }
+                                std: : cout << b << std: : endl;                         }
 # endif
                         Z.col(ii + 1) -= Z.block(0, 0, N, ii + 1) * b;
 
                         tmp = Z.col(ii + 1).transpose() * Z.col(ii + 1);
 
                         main_effects.col(meoffset + ii) =
-                            sqrt (double(N)) * Z.col (ii + 1) / sqrt (double(tmp (0, 0)));}
+                            sqrt (double(N)) * Z.col (ii + 1) / sqrt (double(tmp (0, 0))); }
 
     # %%
 
