@@ -16,7 +16,7 @@ import sys
 import time
 import pickle
 import shutil
-from typing import Tuple, List
+from typing import Tuple, List, Any
 from functools import reduce
 import operator
 
@@ -44,7 +44,7 @@ from oapackage.conference import momentMatrix, modelStatistics, conferenceProjec
 # %%
 
 
-def conference_design_extensions(array: List, verbose: int = 0) -> List:
+def conference_design_extensions(array: Any, verbose: int = 0) -> List:
     """ Return list of all extensions of a conference design
 
     All extensions are generated, minus symmetry conditions.
@@ -92,7 +92,7 @@ def extend_conference_designs_full(extensions: List, number_parallel_jobs=4) -> 
     return extensions
 
 
-def maximal_extension_size(array: object, verbose: int = 1) -> Tuple[int, list]:
+def maximal_extension_size(array: oapackage.array_link, verbose: int = 1) -> Tuple[int, list]:
     """ Calculate maximum number of columns in an extention of specified design
 
     Args:
