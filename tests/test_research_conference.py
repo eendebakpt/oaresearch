@@ -40,48 +40,48 @@ class TestCreateConferenceParetoElement(unittest.TestCase):
 
         pareto_element, data = createConferenceParetoElement(array)
         pareto_data = [list(e.values) for e in list(pareto_element)]
-        
+
         self.assertIsInstance(data, OrderedDict)
         self.assertEqual(pareto_data, [[20.0],
- [19.0],
- [-0.0, -0.0, -4.0, -46.0, -20.0],
- [-2.48],
- [1.0],
- [1.0],
- [17.105],
- [16.537],
- [1.789],
- [1.213],
- [0.0],
- [1.0]])
+                                       [19.0],
+                                       [-0.0, -0.0, -4.0, -46.0, -20.0],
+                                       [-2.48],
+                                       [1.0],
+                                       [1.0],
+                                       [17.105],
+                                       [16.537],
+                                       [1.789],
+                                       [1.213],
+                                       [0.0],
+                                       [1.0]])
 
         self.assertDictEqual(data, OrderedDict([('ranksecondorder', 20),
-                                             ('rankinteraction', 19),
-                                             ('F4', (0, 0, 4, 46, 20)),
-                                             ('B4', 2.48),
-                                             ('PEC4', 1.0),
-                                             ('PEC5', 1.0),
-                                             ('PIC4', 17.105),
-                                             ('PIC5', 16.537),
-                                             ('PPC4', 1.789),
-                                             ('PPC5', 1.213),
-                                             ('foldover', 0),
-                                             ('notfoldover', 1)]))
+                                                ('rankinteraction', 19),
+                                                ('F4', (0, 0, 4, 46, 20)),
+                                                ('B4', 2.48),
+                                                ('PEC4', 1.0),
+                                                ('PEC5', 1.0),
+                                                ('PIC4', 17.105),
+                                                ('PIC5', 16.537),
+                                                ('PPC4', 1.789),
+                                                ('PPC5', 1.213),
+                                                ('foldover', 0),
+                                                ('notfoldover', 1)]))
         pareto_element, data = createConferenceParetoElement(
             array, addMaximumExtensionColumns=True)
         self.assertDictEqual(data, OrderedDict([('ranksecondorder', 20),
-                                             ('rankinteraction', 19),
-                                             ('F4', (0, 0, 4, 46, 20)),
-                                             ('B4', 2.48),
-                                             ('PEC4', 1.0),
-                                             ('PEC5', 1.0),
-                                             ('PIC4', 17.105),
-                                             ('PIC5', 16.537),
-                                             ('PPC4', 1.789),
-                                             ('PPC5', 1.213),
-                                             ('foldover', 0),
-                                             ('notfoldover', 1),
-                                             ('maximum_extension_size', 8)]))
+                                                ('rankinteraction', 19),
+                                                ('F4', (0, 0, 4, 46, 20)),
+                                                ('B4', 2.48),
+                                                ('PEC4', 1.0),
+                                                ('PEC5', 1.0),
+                                                ('PIC4', 17.105),
+                                                ('PIC5', 16.537),
+                                                ('PPC4', 1.789),
+                                                ('PPC5', 1.213),
+                                                ('foldover', 0),
+                                                ('notfoldover', 1),
+                                                ('maximum_extension_size', 8)]))
 
 
 class TestResearchConference(unittest.TestCase):
@@ -90,11 +90,15 @@ class TestResearchConference(unittest.TestCase):
         al1 = oapackage.exampleArray(49)
         pareto1, data1 = oaresearch.research_conference.createConferenceParetoElement(
             al1)
-        self.assertEqual(pareto1[0], [20.])
+        pareto1_data = [list(e.values) for e in list(pareto1)]
+        self.assertEqual(pareto1_data[0], [20.])
+
         al2 = oapackage.exampleArray(50)
         pareto2, data2 = oaresearch.research_conference.createConferenceParetoElement(
             al2)
-        self.assertEqual(pareto1[0], [20.])
+        pareto2_data = [list(e.values) for e in list(pareto1)]
+
+        self.assertEqual(pareto2_data[0], [20.])
 
         self.assertEqual(data1, collections.OrderedDict([('ranksecondorder', 20),
                                                          ('rankinteraction', 19),
@@ -124,17 +128,18 @@ class TestResearchConference(unittest.TestCase):
         self.assertEqual(presults['nclasses'], 2)
         self.assertEqual(presults['pareto_indices'], (0, 3))
         self.assertEqual(presults['pareto_data'][0], OrderedDict([('ranksecondorder', 20),
-             ('rankinteraction', 19),
-             ('F4', (0, 1, 4, 54, 11)),
-             ('B4', 3.16),
-             ('PEC4', 0.986),
-             ('PEC5', 0.929),
-             ('PIC4', 16.831),
-             ('PIC5', 15.207),
-             ('PPC4', 1.752),
-             ('PPC5', 1.079),
-             ('foldover', 0),
-             ('notfoldover', 1)]))
+                                                                  ('rankinteraction', 19),
+                                                                  ('F4', (0, 1,
+                                                                          4, 54, 11)),
+                                                                  ('B4', 3.16),
+                                                                  ('PEC4', 0.986),
+                                                                  ('PEC5', 0.929),
+                                                                  ('PIC4', 16.831),
+                                                                  ('PIC5', 15.207),
+                                                                  ('PPC4', 1.752),
+                                                                  ('PPC5', 1.079),
+                                                                  ('foldover', 0),
+                                                                  ('notfoldover', 1)]))
 
     def test_conferenceStatistics(self):
         array = oapackage.exampleArray(51)
