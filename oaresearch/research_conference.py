@@ -216,7 +216,8 @@ def cdesignTag(N, kk, page, outputdir, tdstyle='', tags=['cdesign', 'cdesign-dia
                                   href=hreflink, ncache=ncache, verbose=verbose >= 2)
         if verbose >= 2:
             print('cdesignTag: N %d, k %d, html txt %s' % (N, kk, txt,))
-        if hyper_link and (cfilex is not None) and not hreflink.endswith('html'):
+        if hyper_link and (
+                cfilex is not None) and not hreflink.endswith('html'):
             # no html page, just copy OA file
             if verbose >= 2:
                 print('cdesignTag: N %d, ncols %d: copy OA file' % (N, kk))
@@ -291,7 +292,8 @@ def reduce_single_conference(arrays, verbose=0):
 
 class SingleConferenceParetoCombiner:
 
-    def __init__(self, outputdir, cache_dir, cache=False, verbose=1, pareto_method_options=None):
+    def __init__(self, outputdir, cache_dir, cache=False,
+                 verbose=1, pareto_method_options=None):
         """ Class to generate statistics and Pareto optimality results for a conference design class from double conference designs """
         self.outputdir = outputdir
         self.cache_dir = cache_dir
@@ -430,7 +432,9 @@ def generate_or_load_conference_results(N, number_of_columns, outputdir, dc_outp
         if number_of_columns > N:
             return pareto_results, None
 
-        print('generate_or_load_conference_results: N %d: loading from doubleconference results' % (N,))
+        print(
+            'generate_or_load_conference_results: N %d: loading from doubleconference results' %
+            (N,))
         dc_dir = os.path.join(dc_outputdir, 'doubleconference-%d' % (2 * N))
         if not os.path.exists(dc_dir):
             return {}, None
@@ -782,7 +786,7 @@ def calculateConferencePareto(ll, N=None, k=None, verbose=1, add_data=True, addP
         return pareto_element, data
 
     block_size = 200
-    blocks = [(ii, min(len(ll), ii+block_size))
+    blocks = [(ii, min(len(ll), ii + block_size))
               for ii in np.arange(0, len(ll), block_size)]
 
     def add_extra_data(presults, data, addProjectionStatistics):
@@ -807,7 +811,7 @@ def calculateConferencePareto(ll, N=None, k=None, verbose=1, add_data=True, addP
                 pareto_element = oapackage.vector_mvalue_t_double(
                     [oapackage.mvalue_t_double(x) for x in pareto_element])
 
-                ii = int(jj+block[0])
+                ii = int(jj + block[0])
                 pareto.addvalue(pareto_element, ii)
                 add_extra_data(presults, data, addProjectionStatistics)
 
@@ -960,7 +964,8 @@ def conferenceResultsFile(N, kk, outputdir, tags=['cdesign', 'cdesign-diagonal',
         gfile = os.path.join(outputdir, cfile0 + '.gz')
         if verbose >= 2:
             print('cdesignTag: try file %s' % cfile0)
-        if os.path.exists(os.path.join(outputdir, cfile0)) and os.path.exists(gfile):
+        if os.path.exists(os.path.join(outputdir, cfile0)
+                          ) and os.path.exists(gfile):
             nn1 = oapackage.nArrayFile(cfile)
             nn2 = oapackage.nArrayFile(gfile)
             raise Exception('both .oa and .oa.gz exist: %s' % cfile)
@@ -1067,7 +1072,9 @@ def htmlTag(nn, kk, N, mode='full', href=None, ncache=None, verbose=0):
                     print('htmlTag: mode %s, N %d, k %d' % (mode, N, kk))
                 if nprevzero(N, kk, ncache):
                     if verbose >= 1:
-                        print('htmlTag: nprevzero(%d, %d, ncache) is True' % (N, kk))
+                        print(
+                            'htmlTag: nprevzero(%d, %d, ncache) is True' %
+                            (N, kk))
                     txt = ''
                 else:
                     txt = '?'
@@ -1115,7 +1122,8 @@ def latexResults(outputdir):
     return X
 
 
-def createConferenceDesignsPageHeader(page, makeheader, conference_class, ncolumns, full_results=False):
+def createConferenceDesignsPageHeader(
+        page, makeheader, conference_class, ncolumns, full_results=False):
     xstr = 'C(%d, %d)' % (conference_class.N, ncolumns)
     xstrplain = xstr
     if makeheader:
@@ -1196,7 +1204,8 @@ def createConferenceDesignsPageResultsTable(page, pareto_results, verbose=0):
     page.p.close()
 
 
-def createConferenceDesignsPageLoadDesignsFile(pareto_results, htmlsubdir=None, verbose=1):
+def createConferenceDesignsPageLoadDesignsFile(
+        pareto_results, htmlsubdir=None, verbose=1):
     havearrayfile = 0
     if 'arrayfile' in list(pareto_results.keys()):
         if not pareto_results['arrayfile'] is None:
@@ -1244,7 +1253,8 @@ def createConferenceDesignsPageLoadDesignsFile(pareto_results, htmlsubdir=None, 
             pareto_results['datafile_tag'] = None
 
 
-def createConferenceDesignsPageParetoTable(page, pareto_results, verbose=0, htmlsubdir=None):
+def createConferenceDesignsPageParetoTable(
+        page, pareto_results, verbose=0, htmlsubdir=None):
     """ Create table with Pareto results and add to the markup object
 
     Args:

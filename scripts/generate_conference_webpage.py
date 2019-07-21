@@ -206,7 +206,7 @@ def conferenceSubPages(tag='conference', Nmax=40, Nstart=4, kmax=None, outputdir
                     print(
                         'conferenceSubPages %s: from cache: N %d, columns %d' % (tag, N, kk))
                 if pareto_results['presults'] is not None:
-                    pversion = pareto_results['_version'] 
+                    pversion = pareto_results['_version']
                     cversion = oaresearch.research_conference.conferenceParetoIdentifier()
                     if pareto_results['_version'] != cversion:
                         raise Exception(
@@ -296,7 +296,7 @@ if 1:
                tagtype=['full', 'r'], verbose=2, ncache=None, subpage=None, generated_result=None, conference_html_dir=conference_html_dir)
     # tag = 'dconferencej1'
     # cdesignTag(N=N, kk=kk, page=page, outputdir=outputdir,
-    #           tags=[tag, tag + '-r'], tagtype=['full', 'r'], verbose=2, ncache=ncache)
+    # tags=[tag, tag + '-r'], tagtype=['full', 'r'], verbose=2, ncache=ncache)
 
 
 # %%
