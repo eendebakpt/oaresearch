@@ -141,6 +141,27 @@ class TestResearchConference(unittest.TestCase):
                                                                   ('foldover', 0),
                                                                   ('notfoldover', 1)]))
 
+    def test_calculateConferencePareto_parallel(self):
+        arrays = [oapackage.exampleArray(idx, 0) for idx in [45, 46, 47, 48]]
+
+        presults, pareto = oaresearch.research_conference.calculateConferencePareto(
+            arrays, N=None, k=None, verbose=1, number_parallel_jobs=2)
+        self.assertEqual(presults['nclasses'], 2)
+        self.assertEqual(presults['pareto_indices'], (0, 3))
+        self.assertEqual(presults['pareto_data'][0], OrderedDict([('ranksecondorder', 20),
+                                                                  ('rankinteraction', 19),
+                                                                  ('F4', (0, 1,
+                                                                          4, 54, 11)),
+                                                                  ('B4', 3.16),
+                                                                  ('PEC4', 0.986),
+                                                                  ('PEC5', 0.929),
+                                                                  ('PIC4', 16.831),
+                                                                  ('PIC5', 15.207),
+                                                                  ('PPC4', 1.752),
+                                                                  ('PPC5', 1.079),
+                                                                  ('foldover', 0),
+                                                                  ('notfoldover', 1)]))
+
     def test_conferenceStatistics(self):
         array = oapackage.exampleArray(51)
         expected = [(0, 1, 0), 0.1111111111111111, 6, 9]

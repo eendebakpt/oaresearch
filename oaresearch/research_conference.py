@@ -621,7 +621,7 @@ def test_confJ4():
 def createConferenceParetoElement(al, addFoldover=True, addProjectionStatistics=True,
                                   addMaximality=False, addMaximumExtensionColumns=False, pareto=None, rounding_decimals=3):
     """ Create Pareto element from conference design
-    
+
     Returns:
         Tuple with pareto_element, data
     """
@@ -734,7 +734,7 @@ def conferenceParetoIdentifier():
 
 
 def calculateConferencePareto(ll, N=None, k=None, verbose=1, add_data=True, addProjectionStatistics=None,
-                              addExtensions=False, addMaximumExtensionColumns=False):
+                              addExtensions=False, addMaximumExtensionColumns=False, number_parallel_jobs=1):
     """ Calculate Pareto optimal designs from a list of designs
 
     Args:
@@ -762,7 +762,6 @@ def calculateConferencePareto(ll, N=None, k=None, verbose=1, add_data=True, addP
     pareto = oapackage.ParetoMultiDoubleLong()
     if N is None:
         presults['N'] = None
-        # pareto['nclasses=']=0
         return presults, pareto
 
     if addProjectionStatistics is None:
@@ -773,21 +772,55 @@ def calculateConferencePareto(ll, N=None, k=None, verbose=1, add_data=True, addP
 
     data = None
     t0 = time.time()
-    for ii, al in enumerate(ll):
-        oapackage.oahelper.tprint('calculateConferencePareto: N %s column %s: array %d/%d (%.1f [s]): %s' %
-                                  (str(N), str(k), ii, len(ll), time.time() - t0, str(pareto).strip()), dt=2)
+
+    def pareto_worker(al):
+        al = oapackage.makearraylink(al)
         pareto_element, data = createConferenceParetoElement(al, addFoldover=False,
                                                              addProjectionStatistics=addProjectionStatistics,
-                                                             pareto=pareto)
+                                                             pareto=None)
+        pareto_element = [list(e.values) for e in list(pareto_element)]
+        return pareto_element, data
 
-        pareto.addvalue(pareto_element, ii)
+    block_size = 200
+    blocks = [(ii, min(len(ll), ii+block_size))
+              for ii in np.arange(0, len(ll), block_size)]
 
+    def add_extra_data(presults, data, addProjectionStatistics):
         if add_data:
             for tag in ['ranksecondorder', 'rankinteraction', 'B4', 'F4']:
                 presults.add_value(tag, data[tag])
             if addProjectionStatistics:
                 for tag in ['PEC4', 'PIC4']:
                     presults.add_value(tag, data[tag])
+
+    if number_parallel_jobs > 1:
+        for blockidx, block in enumerate(blocks):
+            dt = time.time() - t0
+            oapackage.oahelper.tprint(f'calculateConferencePareto: N {N} column {k}: block {blockidx}/{len(blocks)}: ({dt:.1f} [s]): {str(pareto).strip()}')
+
+            xx = Parallel(n_jobs=number_parallel_jobs)(
+                [delayed(pareto_worker)(np.array(al)) for al in ll[block[0]:block[1]]])
+
+            for jj, al in enumerate(ll[block[0]:block[1]]):
+                pareto_element, data = xx[jj]
+
+                pareto_element = oapackage.vector_mvalue_t_double(
+                    [oapackage.mvalue_t_double(x) for x in pareto_element])
+
+                ii = int(jj+block[0])
+                pareto.addvalue(pareto_element, ii)
+                add_extra_data(presults, data, addProjectionStatistics)
+
+    else:
+        for ii, al in enumerate(ll):
+            oapackage.oahelper.tprint('calculateConferencePareto: N %s column %s: array %d/%d (%.1f [s]): %s' %
+                                      (str(N), str(k), ii, len(ll), time.time() - t0, str(pareto).strip()), dt=2)
+            pareto_element, data = createConferenceParetoElement(al, addFoldover=False,
+                                                                 addProjectionStatistics=addProjectionStatistics,
+                                                                 pareto=None)
+
+            pareto.addvalue(pareto_element, ii)
+            add_extra_data(presults, data, addProjectionStatistics)
 
     presults['N'] = N
     presults['ncolumns'] = k
@@ -816,10 +849,25 @@ def calculateConferencePareto(ll, N=None, k=None, verbose=1, add_data=True, addP
 
     presults['pareto_designs'] = [ll[ii] for ii in presults['pareto_indices']]
     presults['pareto_data'] = []
-    for ii, al in enumerate(presults['pareto_designs']):
+
+    def pareto_worker(al):
+        al = oapackage.makearraylink(al)
+
         pareto_element, data = createConferenceParetoElement(
             al, addFoldover=True, addMaximality=addExtensions, addMaximumExtensionColumns=addMaximumExtensionColumns)
-        presults['pareto_data'].append(data)
+        return data
+
+    if number_parallel_jobs > 1:
+        data_results = Parallel(n_jobs=number_parallel_jobs)(
+            [delayed(pareto_worker)(np.array(al)) for al in presults['pareto_designs']])
+
+        for ii, data in enumerate(data_results):
+            presults['pareto_data'].append(data)
+
+    else:
+        for ii, al in enumerate(presults['pareto_designs']):
+            data = pareto_worker(al)
+            presults['pareto_data'].append(data)
 
     presults['_pareto_processing_time'] = time.time() - t0
     presults = OrderedDict(presults)
