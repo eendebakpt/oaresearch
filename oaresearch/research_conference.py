@@ -620,7 +620,11 @@ def test_confJ4():
 
 def createConferenceParetoElement(al, addFoldover=True, addProjectionStatistics=True,
                                   addMaximality=False, addMaximumExtensionColumns=False, pareto=None, rounding_decimals=3):
-    """ Create Pareto element from conference design """
+    """ Create Pareto element from conference design
+    
+    Returns:
+        Tuple with pareto_element, data
+    """
     rr = conferenceStatistics(al, verbose=0)
     [f4, b4, rankinteraction, ranksecondorder] = rr[0:4]
     f4minus = [-float(x) for x in f4]
@@ -663,6 +667,8 @@ def createConferenceParetoElement(al, addFoldover=True, addProjectionStatistics=
     if addMaximumExtensionColumns:
         data['maximum_extension_size'] = maximal_extension_size(al)[0]
 
+    if pareto is None:
+        pareto = oapackage.ParetoMultiDoubleLong()
     pareto_element = create_pareto_element(values, pareto=pareto)
 
     return pareto_element, data

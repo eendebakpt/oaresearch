@@ -1,10 +1,4 @@
 # -*- coding: utf-8 -*-
-from oaresearch.research_conference import SingleConferenceParetoCombiner
-import oaresearch
-import oaresearch.research_conference
-# reload(oahelper)
-from oapackage import oahelper, splitDir, splitFile, splitTag
-import oapackage
 """
 
 Example script for calculating double conference matrices with split jobs
@@ -26,6 +20,10 @@ import tempfile
 from colorama import Fore
 import itertools
 
+from oapackage import oahelper, splitDir, splitFile, splitTag
+import oapackage
+
+
 # setup data locations
 resultsdir = join(os.path.expanduser('~'), 'oatmp')
 
@@ -42,7 +40,10 @@ if not os.path.isdir(resultsdir):
     sys.exit()
 
 
+import oaresearch.research_conference
 reload(oaresearch.research_conference)
+from oaresearch.research_conference import SingleConferenceParetoCombiner
+import oaresearch
 
 
 # %% Parse arguments
@@ -246,6 +247,7 @@ pareto_method_options = {'verbose': 1,
 pareto_calculator = SingleConferenceParetoCombiner(
     outputdir, cache_dir=cache_dir, cache=True, pareto_method_options=pareto_method_options)
 
+#%%
 
 if 1:
     # ii=0
