@@ -5,7 +5,8 @@ import shutil
 from oapackage.oahelper import checkFiles
 
 
-def copyOAfile(source, targetdir, target0, convert=None, zipfile=None, verbose=1, cache=1):
+def copyOAfile(source, targetdir, target0, convert=None,
+               zipfile=None, verbose=1, cache=1):
     """ Copy an OA file, depending on arguments convert or compress the file
 
     Args:

@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-from collections import OrderedDict
 """
 Pieter Eendebak <pieter.eendebak@gmail.com>
 
@@ -9,6 +8,10 @@ Pieter Eendebak <pieter.eendebak@gmail.com>
 import numpy as np
 import unittest
 import collections
+import unittest.mock as mock
+from unittest.mock import patch
+from collections import OrderedDict
+import io
 
 import oapackage
 import oaresearch.research_conference
@@ -123,8 +126,11 @@ class TestResearchConference(unittest.TestCase):
     def test_calculateConferencePareto(self):
         arrays = [oapackage.exampleArray(idx, 0) for idx in [45, 46, 47, 48]]
 
-        presults, pareto = oaresearch.research_conference.calculateConferencePareto(
-            arrays, N=None, k=None, verbose=1)
+        with mock.patch('sys.stdout', new_callable=io.StringIO) as mock_stdout:
+            presults, pareto = oaresearch.research_conference.calculateConferencePareto(
+                arrays, N=None, k=None, verbose=1)
+            stdout = mock_stdout.getvalue()
+            self.assertTrue(stdout.startswith('calculateConferencePareto: analysing 4 arrays'))
         self.assertEqual(presults['nclasses'], 2)
         self.assertEqual(presults['pareto_indices'], (0, 3))
         self.assertEqual(presults['pareto_data'][0], OrderedDict([('ranksecondorder', 20),
@@ -144,8 +150,11 @@ class TestResearchConference(unittest.TestCase):
     def test_calculateConferencePareto_parallel(self):
         arrays = [oapackage.exampleArray(idx, 0) for idx in [45, 46, 47, 48]]
 
-        presults, pareto = oaresearch.research_conference.calculateConferencePareto(
-            arrays, N=None, k=None, verbose=1, number_parallel_jobs=2)
+        with mock.patch('sys.stdout', new_callable=io.StringIO) as mock_stdout:
+            presults, pareto = oaresearch.research_conference.calculateConferencePareto(
+                arrays, N=None, k=None, verbose=0, number_parallel_jobs=2)
+            stdout = mock_stdout.getvalue()
+            self.assertEqual(stdout, 'Pareto: 2 optimal values, 2 objects\n')
         self.assertEqual(presults['nclasses'], 2)
         self.assertEqual(presults['pareto_indices'], (0, 3))
         self.assertEqual(presults['pareto_data'][0], OrderedDict([('ranksecondorder', 20),

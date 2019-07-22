@@ -1,4 +1,8 @@
 # -*- coding: utf-8 -*-
+import researchOA
+from researchOA import splitBase, job, numbersFile, gatherFilesList, gatherResults, checkLevel, gzipOA, doSplitFile
+from researchOA import jobStatus, createJobScript
+from researchOA import makeJobList
 """
 
 Example script for calculating double conference matrices with split jobs
@@ -54,10 +58,6 @@ print('oapackage: %s: %s' % (oapackage, oapackage.version()))
 
 r = oapackage.log_print(-oapackage.SYSTEM, '')
 
-from researchOA import makeJobList
-from researchOA import jobStatus, createJobScript
-from researchOA import splitBase, job, numbersFile, gatherFilesList, gatherResults, checkLevel, gzipOA, doSplitFile
-import researchOA
 
 # %% Helper functions
 
@@ -167,7 +167,8 @@ def make_extend(lvls, splitdata, dosplit=False, verbose=1, makelog=True):
         # oapackage.runcommand(splitcmd)
         cmd += '; ' + splitcmd
         checkfile = os.path.join(outputdir, splitdirx, splitFile(lvls) + '.oa')
-    return cmd, checkfile, startfile, {'basecmd': basecmd, 'checkfileZ': checkfileZ}
+    return cmd, checkfile, startfile, {
+        'basecmd': basecmd, 'checkfileZ': checkfileZ}
 
 
 if 0:
@@ -311,7 +312,8 @@ for ii in range(splitdata[0]['n']):
     lvls = [ii]
     tag = splitTag(lvls)
     cmd, checkfile, startfile, r = make_extend(lvls, splitdata, verbose=0)
-    if oapackage.checkFilesOA(startfile) and not oapackage.checkFilesOA(checkfile):
+    if oapackage.checkFilesOA(
+            startfile) and not oapackage.checkFilesOA(checkfile):
         print('make job for extend of %s' % (lvls, ))
     # create job file
     j = job(cmd, jobtype='extend %s' % tag, checkfiles=[
@@ -348,7 +350,8 @@ for ii in range(splitdata[0]['n']):
         tag = splitTag(lvls)
         cmd, checkfile, startfile, r = make_extend(lvls, splitdata, verbose=0)
         checkfileZ = r['checkfileZ']
-        if oapackage.checkFilesOA(startfile) and not oapackage.checkFilesOA(checkfile):
+        if oapackage.checkFilesOA(
+                startfile) and not oapackage.checkFilesOA(checkfile):
             if verbose >= 2:
                 print('make job for extend of %s' % (lvls, ))
         # create job file

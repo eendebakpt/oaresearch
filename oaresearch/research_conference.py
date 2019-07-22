@@ -554,16 +554,6 @@ def conferenceJ4(al, jj=4):
     al = oapackage.makearraylink(al)
     return oapackage.Jcharacteristics_conference(al, number_of_columns=jj)
 
-    al = np.array(al)
-    nc = al.shape[1]
-    jj = []
-    for c in list(itertools.combinations(range(nc), 4)):
-        X = al[:, c]
-        j4 = int(np.sum(np.prod(X, axis=1)))
-        jj += [j4]
-    return jj
-
-
 @oapackage.oahelper.deprecated
 def conferenceSecondOrder(al, include_so=False):
     """ Calculate second-order interaction matrix for a conference matrix """
@@ -969,9 +959,6 @@ def conferenceResultsFile(N, kk, outputdir, tags=['cdesign', 'cdesign-diagonal',
             nn1 = oapackage.nArrayFile(cfile)
             nn2 = oapackage.nArrayFile(gfile)
             raise Exception('both .oa and .oa.gz exist: %s' % cfile)
-            if nn2 > nn1:
-                print('### removing %s!!!' % cfile)
-                os.remove(cfile)
 
         nn = oapackage.nArrays(cfile)
         mode = tagtype[ii]
