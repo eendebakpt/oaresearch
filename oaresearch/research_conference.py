@@ -1129,7 +1129,7 @@ def createConferenceDesignsPageHeader(
         page.h1('Conference designs %s ' % xstr)
     else:
         page.h1('Conference designs %s (<b>partial results</b>) ' % xstr)
-    oap = e.a('Orthogonal Array package', href='../../software.html')
+    oap = e.a('Orthogonal Array package', href=r'http://www.pietereendebak.nl/oapackage/index.html')
     pstr = 'This page contains information about conference designs. '
     pstr += 'The results have been generated with the %s.' % oap
     pstr += ' If you use these results, please cite the paper ' + \
