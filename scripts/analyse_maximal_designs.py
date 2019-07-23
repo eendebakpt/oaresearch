@@ -33,7 +33,7 @@ lst = oapackage.readarrayfile(afile)
 array = lst[0]
 t0 = time.time()
 maximum_number, designs = maximal_extension_size(array)
-dt = time.time()-t0
+dt = time.time() - t0
 print(f'dt {dt:.2f} [s]')
 
 # %%
@@ -43,7 +43,7 @@ lst = oapackage.readarrayfile(afile)
 for array in lst:
     t0 = time.time()
     maximum_number, designs = maximal_extension_size(array)
-    dt = time.time()-t0
+    dt = time.time() - t0
     print(f'dt {dt:.2f} [s]')
 
 

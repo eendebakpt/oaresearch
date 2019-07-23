@@ -1,11 +1,8 @@
 # -*- coding: utf-8 -*-
-from researchOA import makeJobList
-from researchOA import jobStatus, createJobScript
-from researchOA import splitBase, job, numbersFile, gatherFilesList, gatherResults, checkLevel, gzipOA, doSplitFile
 import researchOA
-from oapackage import splitTag, splitDir, splitFile
-from oapackage import oahelper, splitDir, splitFile  # reload(oahelper)
-import oapackage
+from researchOA import splitBase, job, numbersFile, gatherFilesList, gatherResults, checkLevel, gzipOA, doSplitFile
+from researchOA import jobStatus, createJobScript
+from researchOA import makeJobList
 """
 
 Example script for calculating double conference matrices with split jobs
@@ -26,6 +23,9 @@ import argparse
 import tempfile
 from colorama import Fore
 import itertools
+
+from oapackage import splitTag, splitDir, splitFile, oahelper
+import oapackage
 
 # setup data locations
 oadir = os.path.join(os.path.expanduser('~'), 'misc/oa/oacode/')
@@ -58,10 +58,10 @@ print('oapackage: %s: %s' % (oapackage, oapackage.version()))
 
 r = oapackage.log_print(-oapackage.SYSTEM, '')
 
+
 # %% Helper functions
 
 
-# %%
 dobigcase = 20  # by default run a small case to test the scripts
 
 parser = argparse.ArgumentParser()
@@ -167,7 +167,8 @@ def make_extend(lvls, splitdata, dosplit=False, verbose=1, makelog=True):
         # oapackage.runcommand(splitcmd)
         cmd += '; ' + splitcmd
         checkfile = os.path.join(outputdir, splitdirx, splitFile(lvls) + '.oa')
-    return cmd, checkfile, startfile, {'basecmd': basecmd, 'checkfileZ': checkfileZ}
+    return cmd, checkfile, startfile, {
+        'basecmd': basecmd, 'checkfileZ': checkfileZ}
 
 
 if 0:
@@ -311,7 +312,8 @@ for ii in range(splitdata[0]['n']):
     lvls = [ii]
     tag = splitTag(lvls)
     cmd, checkfile, startfile, r = make_extend(lvls, splitdata, verbose=0)
-    if oapackage.checkFilesOA(startfile) and not oapackage.checkFilesOA(checkfile):
+    if oapackage.checkFilesOA(
+            startfile) and not oapackage.checkFilesOA(checkfile):
         print('make job for extend of %s' % (lvls, ))
     # create job file
     j = job(cmd, jobtype='extend %s' % tag, checkfiles=[
@@ -348,7 +350,8 @@ for ii in range(splitdata[0]['n']):
         tag = splitTag(lvls)
         cmd, checkfile, startfile, r = make_extend(lvls, splitdata, verbose=0)
         checkfileZ = r['checkfileZ']
-        if oapackage.checkFilesOA(startfile) and not oapackage.checkFilesOA(checkfile):
+        if oapackage.checkFilesOA(
+                startfile) and not oapackage.checkFilesOA(checkfile):
             if verbose >= 2:
                 print('make job for extend of %s' % (lvls, ))
         # create job file
@@ -381,38 +384,6 @@ if 0 and not vsccluster:
 
 
 # %%
-
-def paretofunction(al):
-    j4 = conferenceInvariant(al)
-    f4 = al.FvaluesConference(jj=4)
-
-    N = al.n_rows
-    b4 = np.sum(np.array(j4)**2) / N**2
-    #X2 = oapackage.array2secondorder(al)
-    X2 = al.getModelMatrix(2)[:, (1 + al.n_columns):]
-
-    r = np.linalg.matrix_rank(X2)
-
-    if verbose >= 2:
-        print('design %d: rank %d, b4 %.3f, F4 %s' % (ii, r, b4, f4))
-    Q = np.array(al) * np.array(al)
-    rx2q = np.linalg.matrix_rank(np.hstack((X2, Q)))
-
-    presults.f4s += [f4]
-    presults.ranks += [r]
-    presults.b4s += [b4]
-
-    presults.ranksX2Q += [rx2q]
-    return presults
-
-
-def gather_results(lvls, splitdata, paretofunction, verbose=1):
-    level = len(lvls)
-    k = splitdata[level]['n']
-    if verbose:
-        print('gather_results: level %s: getting %d subresults' % (lvls, k))
-    splitdata[level]
-
 
 # %%
 

@@ -50,7 +50,8 @@ def reportScriptFile(scriptfile, verbose=1):
 
 # %%
 
-def generateConference(N, kmax=None, verbose=1, diagc=False, nmax=None, selectmethod='random', tag='cdesign', outputdir=None):
+def generateConference(N, kmax=None, verbose=1, diagc=False,
+                       nmax=None, selectmethod='random', tag='cdesign', outputdir=None):
     """ General function to compute conference matrices
 
     Arguments:
@@ -345,7 +346,7 @@ if platform.node() == 'marmot':
     ss = r'\begin{figure}' + os.linesep
     ss += r'\begin{align*}' + os.linesep
     ss += 'X_0 = ' + l1  # + os.linesep
-    ss += ', \quad' + os.linesep
+    ss += r', \quad' + os.linesep
     ss += 'X_1 = ' + l2  # + os.linesep
     ss += r'\end{align*}' + os.linesep
     ss += r'\caption{Designs in $C(8, 4)$}' + os.linesep

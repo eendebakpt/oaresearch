@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-from collections import OrderedDict
 """
 Pieter Eendebak <pieter.eendebak@gmail.com>
 
@@ -9,6 +8,10 @@ Pieter Eendebak <pieter.eendebak@gmail.com>
 import numpy as np
 import unittest
 import collections
+import unittest.mock as mock
+from unittest.mock import patch
+from collections import OrderedDict
+import io
 
 import oapackage
 import oaresearch.research_conference
@@ -38,37 +41,50 @@ class TestCreateConferenceParetoElement(unittest.TestCase):
     def test_createConferenceParetoElement(self):
         array = oapackage.exampleArray(49)
 
-        data, p = createConferenceParetoElement(array)
-        self.assertIsInstance(data, list)
-        self.assertEqual(data[0], [20.])
+        pareto_element, data = createConferenceParetoElement(array)
+        pareto_data = [list(e.values) for e in list(pareto_element)]
 
-        self.assertDictEqual(p, OrderedDict([('ranksecondorder', 20),
-                                             ('rankinteraction', 19),
-                                             ('F4', (0, 0, 4, 46, 20)),
-                                             ('B4', 2.48),
-                                             ('PEC4', 1.0),
-                                             ('PEC5', 1.0),
-                                             ('PIC4', 17.105),
-                                             ('PIC5', 16.537),
-                                             ('PPC4', 1.789),
-                                             ('PPC5', 1.213),
-                                             ('foldover', 0),
-                                             ('notfoldover', 1)]))
-        data, p = createConferenceParetoElement(
+        self.assertIsInstance(data, OrderedDict)
+        self.assertEqual(pareto_data, [[20.0],
+                                       [19.0],
+                                       [-0.0, -0.0, -4.0, -46.0, -20.0],
+                                       [-2.48],
+                                       [1.0],
+                                       [1.0],
+                                       [17.105],
+                                       [16.537],
+                                       [1.789],
+                                       [1.213],
+                                       [0.0],
+                                       [1.0]])
+
+        self.assertDictEqual(data, OrderedDict([('ranksecondorder', 20),
+                                                ('rankinteraction', 19),
+                                                ('F4', (0, 0, 4, 46, 20)),
+                                                ('B4', 2.48),
+                                                ('PEC4', 1.0),
+                                                ('PEC5', 1.0),
+                                                ('PIC4', 17.105),
+                                                ('PIC5', 16.537),
+                                                ('PPC4', 1.789),
+                                                ('PPC5', 1.213),
+                                                ('foldover', 0),
+                                                ('notfoldover', 1)]))
+        pareto_element, data = createConferenceParetoElement(
             array, addMaximumExtensionColumns=True)
-        self.assertDictEqual(p, OrderedDict([('ranksecondorder', 20),
-                                             ('rankinteraction', 19),
-                                             ('F4', (0, 0, 4, 46, 20)),
-                                             ('B4', 2.48),
-                                             ('PEC4', 1.0),
-                                             ('PEC5', 1.0),
-                                             ('PIC4', 17.105),
-                                             ('PIC5', 16.537),
-                                             ('PPC4', 1.789),
-                                             ('PPC5', 1.213),
-                                             ('foldover', 0),
-                                             ('notfoldover', 1),
-                                             ('maximum_extension_size', 8)]))
+        self.assertDictEqual(data, OrderedDict([('ranksecondorder', 20),
+                                                ('rankinteraction', 19),
+                                                ('F4', (0, 0, 4, 46, 20)),
+                                                ('B4', 2.48),
+                                                ('PEC4', 1.0),
+                                                ('PEC5', 1.0),
+                                                ('PIC4', 17.105),
+                                                ('PIC5', 16.537),
+                                                ('PPC4', 1.789),
+                                                ('PPC5', 1.213),
+                                                ('foldover', 0),
+                                                ('notfoldover', 1),
+                                                ('maximum_extension_size', 8)]))
 
 
 class TestResearchConference(unittest.TestCase):
@@ -77,11 +93,15 @@ class TestResearchConference(unittest.TestCase):
         al1 = oapackage.exampleArray(49)
         pareto1, data1 = oaresearch.research_conference.createConferenceParetoElement(
             al1)
-        self.assertEqual(pareto1[0], [20.])
+        pareto1_data = [list(e.values) for e in list(pareto1)]
+        self.assertEqual(pareto1_data[0], [20.])
+
         al2 = oapackage.exampleArray(50)
         pareto2, data2 = oaresearch.research_conference.createConferenceParetoElement(
             al2)
-        self.assertEqual(pareto1[0], [20.])
+        pareto2_data = [list(e.values) for e in list(pareto1)]
+
+        self.assertEqual(pareto2_data[0], [20.])
 
         self.assertEqual(data1, collections.OrderedDict([('ranksecondorder', 20),
                                                          ('rankinteraction', 19),
@@ -106,10 +126,50 @@ class TestResearchConference(unittest.TestCase):
     def test_calculateConferencePareto(self):
         arrays = [oapackage.exampleArray(idx, 0) for idx in [45, 46, 47, 48]]
 
-        presults, pareto = oaresearch.research_conference.calculateConferencePareto(
-            arrays, N=None, k=None, verbose=1)
+        with mock.patch('sys.stdout', new_callable=io.StringIO) as mock_stdout:
+            presults, pareto = oaresearch.research_conference.calculateConferencePareto(
+                arrays, N=None, k=None, verbose=1)
+            stdout = mock_stdout.getvalue()
+            self.assertTrue(stdout.startswith('calculateConferencePareto: analysing 4 arrays'))
         self.assertEqual(presults['nclasses'], 2)
         self.assertEqual(presults['pareto_indices'], (0, 3))
+        self.assertEqual(presults['pareto_data'][0], OrderedDict([('ranksecondorder', 20),
+                                                                  ('rankinteraction', 19),
+                                                                  ('F4', (0, 1,
+                                                                          4, 54, 11)),
+                                                                  ('B4', 3.16),
+                                                                  ('PEC4', 0.986),
+                                                                  ('PEC5', 0.929),
+                                                                  ('PIC4', 16.831),
+                                                                  ('PIC5', 15.207),
+                                                                  ('PPC4', 1.752),
+                                                                  ('PPC5', 1.079),
+                                                                  ('foldover', 0),
+                                                                  ('notfoldover', 1)]))
+
+    def test_calculateConferencePareto_parallel(self):
+        arrays = [oapackage.exampleArray(idx, 0) for idx in [45, 46, 47, 48]]
+
+        with mock.patch('sys.stdout', new_callable=io.StringIO) as mock_stdout:
+            presults, pareto = oaresearch.research_conference.calculateConferencePareto(
+                arrays, N=None, k=None, verbose=0, number_parallel_jobs=2)
+            stdout = mock_stdout.getvalue()
+            self.assertEqual(stdout, 'Pareto: 2 optimal values, 2 objects\n')
+        self.assertEqual(presults['nclasses'], 2)
+        self.assertEqual(presults['pareto_indices'], (0, 3))
+        self.assertEqual(presults['pareto_data'][0], OrderedDict([('ranksecondorder', 20),
+                                                                  ('rankinteraction', 19),
+                                                                  ('F4', (0, 1,
+                                                                          4, 54, 11)),
+                                                                  ('B4', 3.16),
+                                                                  ('PEC4', 0.986),
+                                                                  ('PEC5', 0.929),
+                                                                  ('PIC4', 16.831),
+                                                                  ('PIC5', 15.207),
+                                                                  ('PPC4', 1.752),
+                                                                  ('PPC5', 1.079),
+                                                                  ('foldover', 0),
+                                                                  ('notfoldover', 1)]))
 
     def test_conferenceStatistics(self):
         array = oapackage.exampleArray(51)
