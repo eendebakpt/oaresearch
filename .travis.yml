@@ -20,4 +20,8 @@ install:
 script: 
     - pytest
     - mypy oaresearch --ignore-missing-imports
+
+# run scripts
+
+    - python scripts/articles/article-dof-example-appendix.py
     
