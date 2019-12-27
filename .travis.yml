@@ -3,9 +3,12 @@ cache: pip
 
 matrix:
   include:
+  - name: "Python 3.7"
+    python: "3.7"
+    dist: bionic
   - name: "Python 3.6"
     python: "3.6"
-
+    
 before_install:
   - sudo apt-get install -y swig3.0
   
