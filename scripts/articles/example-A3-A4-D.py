@@ -14,7 +14,6 @@ import numpy as np
 import matplotlib.pyplot as plt
 oadir = '/home/eendebakpt/misc/oa/oacode/'
 import oapackage
-from oapackage import *
 
 
 def tickfontsize(fontsize=14, ax=None):
@@ -46,7 +45,6 @@ def nonregularProperties(sols):
 if 1:
     # for paper
     arrayclass = oapackage.arraydata_t(2, 36, 2, 7)
-    #arrayclass=oapackage.arraydata_t(2, 40, 2, 7)
 
     basedir = '/home/eendebakpt/misc/homepage/oapage/tpages/'
     basedir = '/home/eendebakpt/misc/oapage2/tpages/'
@@ -55,13 +53,12 @@ if 1:
 else:
     arrayclass = oapackage.arraydata_t(2, 36, 2, 5)   # for paper
     arrayclass = oapackage.arraydata_t(2, 40, 2, 5)  # for paper
-    #arrayclass=oapackage.arraydata_t(2, 56, 2, 5)
 
     basedir = '/home/eendebakpt/misc/homepage/oapage/tpages/'
     oafile = 'class-%s-t%dselection.oa' % (arrayclass.idstr(), arrayclass.strength)
     afile = os.path.join(basedir, 'abdata-%s-t%d' % (arrayclass.idstr(), arrayclass.strength), oafile)
 
-sols = oalib.readarrayfile(afile)
+sols = oapackage.readarrayfile(afile)
 
 print('read %d arrays' % len(sols))
 
@@ -128,7 +125,7 @@ legendh = plt.legend(numpoints=1, fontsize=18)
 oapackage.niceplot(ax, fig=fig, legend=legendh)
 formatFigure()
 
-tilefigs([10, 11, 12, 20], [2, 2])
+oapackage.oahelper.tilefigs([10, 11, 12, 20], [2, 2])
 
 
 # %%
