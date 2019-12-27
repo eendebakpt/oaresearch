@@ -16,7 +16,7 @@ before_install:
 install:
     - ls
     - which swig3.0
-    - pip install OApackage==2.6.5
+    - pip install OApackage==2.6.3
     - python setup.py install
     - python -c "import oapackage; print(oapackage.compile_information())"
     - pip install pytest mypy
