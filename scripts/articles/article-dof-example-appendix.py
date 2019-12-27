@@ -5,7 +5,7 @@ Created on Sat Sep 28 16:43:36 2013
 @author: eendebakpt
 """
 
-#%% Exammple of delete-one-factor article appendix
+# %% Exammple of delete-one-factor article appendix
 import oapackage
 
 al = oapackage.exampleArray(4)
