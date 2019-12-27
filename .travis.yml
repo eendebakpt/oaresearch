@@ -17,7 +17,7 @@ install:
     - ls
     - which swig3.0
     #- pip install OApackage==2.6.4
-    - pip install git+git://github.com/eendebakpt/oapackage.git # @629c3f5e183feb2cba906d11fc6d36a46519d074
+    - pip install git+git://github.com/eendebakpt/oapackage.git@dev # @629c3f5e183feb2cba906d11fc6d36a46519d074
     
     - python setup.py install
     - python -c "import oapackage; print(oapackage.compile_information())"
