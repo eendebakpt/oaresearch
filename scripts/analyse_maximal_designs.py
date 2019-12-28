@@ -6,18 +6,16 @@ from oaresearch.research_conference import conference_design_has_extensions
 import time
 from oaresearch.research_conference import maximal_extension_size, extend_conference_designs_full
 import numpy as np
-from importlib import reload
 from os.path import join
 
 
 import oapackage
 import oapackage.graphtools
 import oaresearch.research_conference
+import oaresearch.research_conference
 
 
 # %%
-import oaresearch.research_conference
-reload(oaresearch.research_conference)
 
 
 maximum_number, designs = maximal_extension_size(oapackage.exampleArray(50, 1))

@@ -18,7 +18,6 @@ install:
     - which swig3.0
     - pip install OApackage
     #- pip install git+git://github.com/eendebakpt/oapackage.git@02338cc9b917f7a3bcfabdcb01eb4d9c1a8cf49a
-    #- pip install OApackage
     
     - python setup.py install
     - python -c "import oapackage; print(oapackage.compile_information())"
@@ -28,7 +27,6 @@ script:
     - pytest
     - mypy oaresearch --ignore-missing-imports
 
-# run scripts
-
-    - python scripts/articles/article-dof-example-appendix.py
+    # run scripts
+    - python scripts/articles/article-dof-example-appendix.py > /dev/null
     
