@@ -1,5 +1,5 @@
 language: python
-#cache: pip
+cache: pip
 
 matrix:
   include:
@@ -16,8 +16,8 @@ before_install:
 install:
     - ls
     - which swig3.0
-    #- pip install OApackage==2.6.4
-    - pip install git+git://github.com/eendebakpt/oapackage.git@02338cc9b917f7a3bcfabdcb01eb4d9c1a8cf49a
+    - pip install OApackage
+    #- pip install git+git://github.com/eendebakpt/oapackage.git@02338cc9b917f7a3bcfabdcb01eb4d9c1a8cf49a
     #- pip install OApackage
     
     - python setup.py install
