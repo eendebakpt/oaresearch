@@ -50,7 +50,7 @@ if platform.node() == 'woelmuis':
 if generate_webpage:
     htmldir = os.path.join(os.path.expanduser('~'), 'misc', 'oapage2')
     html_template = True
-    if 1:
+    if 0:
         # for testing...
         htmldir = os.path.join(os.path.expanduser('~'), 'oatmp', 'confpage_dc')
         html_template = False

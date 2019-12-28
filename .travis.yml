@@ -3,9 +3,12 @@ cache: pip
 
 matrix:
   include:
+  - name: "Python 3.7"
+    python: "3.7"
+    dist: bionic
   - name: "Python 3.6"
     python: "3.6"
-
+    
 before_install:
   - sudo apt-get install -y swig3.0
   
@@ -13,6 +16,9 @@ before_install:
 install:
     - ls
     - which swig3.0
+    - pip install OApackage
+    #- pip install git+git://github.com/eendebakpt/oapackage.git@02338cc9b917f7a3bcfabdcb01eb4d9c1a8cf49a
+    
     - python setup.py install
     - python -c "import oapackage; print(oapackage.compile_information())"
     - pip install pytest mypy
@@ -20,4 +26,7 @@ install:
 script: 
     - pytest
     - mypy oaresearch --ignore-missing-imports
+
+    # run scripts
+    - python scripts/articles/article-dof-example-appendix.py > /dev/null
     

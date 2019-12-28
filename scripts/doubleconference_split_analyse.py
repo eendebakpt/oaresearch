@@ -15,7 +15,6 @@ import platform
 import sys
 import numpy as np
 import time
-from imp import reload
 from os.path import join
 import argparse
 import tempfile
@@ -42,7 +41,6 @@ if not os.path.isdir(resultsdir):
     sys.exit()
 
 
-reload(oaresearch.research_conference)
 
 
 # %% Parse arguments
