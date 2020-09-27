@@ -1,6 +1,4 @@
 # -*- coding: utf-8 -*-
-from oaresearch.research_conference import showMaxZ
-from researchOA import job, createJobScript
 """
 
 Example script for calculating conference designs
@@ -22,6 +20,9 @@ import oapackage.graphtools
 
 oadir = os.path.join(os.path.split(oapackage.__file__)[0], '..')
 sys.path.append(os.path.join(oadir, 'pythondevelop'))
+
+from oaresearch.research_conference import showMaxZ
+from researchOA import job, createJobScript
 
 # %% Setup directories
 basedir = os.path.expanduser('~')
