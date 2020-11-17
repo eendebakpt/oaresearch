@@ -173,6 +173,18 @@ else:
     cmd = './oaconference  -N 22 -k 7 -o cdesign'
     print('do manually: %s (exceeds memory for next column)' % cmd)
 
+#%% Measure generation time
+import time
+generation_times={}
+for NN in range(4, 22, 2):
+    t0=time.time()
+    LL = generateConference(N=NN, kmax=NN+1, outputdir=outputdir)
+    dt=time.time()-t0
+    generation_times[f'cdesign{NN}']=dt
+
+for NN in range(4, 22, 2):
+    dt=generation_times[f'cdesign{NN}']
+    print(f'conference designs N={NN}: {dt:.2f} [s]' )
 
 # %%
 scriptfile = os.path.join(scriptdir, 'jobfile-small.sh')

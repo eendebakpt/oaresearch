@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-from oaresearch.research_conference import select_even_odd_conference_designs, generate_even_odd_conference_designs
 """
 
 Example script for calculating conference designs
@@ -7,7 +6,10 @@ Example script for calculating conference designs
 Pieter Eendebak <pieter.eendebak@gmail.com>
 """
 
+
 # %% Load necessary packages
+from typing import List, Any
+import tempfile
 import os
 import sys
 import platform
@@ -21,6 +23,7 @@ import shutil
 import webbrowser
 
 import oapackage
+from oapackage.oahelper import write_text_arrayfile
 import oapackage.graphtools
 from oapackage.markup import oneliner as e
 from oaresearch.research_conference import htmlTag
@@ -33,6 +36,7 @@ from oapackage import markup
 from oapackage.oahelper import create_pareto_element
 from oaresearch.research_conference import generate_or_load_conference_results, createConferenceParetoElement, \
     calculateConferencePareto, createConferenceDesignsPageParetoTable, cdesignTag, conference_design_has_extensions
+from oaresearch.research_conference import select_even_odd_conference_designs, generate_even_odd_conference_designs
 
 generate_webpage = True
 
@@ -57,12 +61,14 @@ if generate_webpage:
     oapackage.mkdirc(os.path.join(htmldir))
     conference_html_dir = oapackage.mkdirc(os.path.join(htmldir, 'conference'))
 
-def conference_designs_result_file(outputdir : str, tag : str, N : int, kk : int) -> str:
+
+def conference_designs_result_file(outputdir: str, tag: str, N: int, kk: int) -> str:
     cache_tag = f'result-pareto-v1-{oaresearch.research_conference.conferenceParetoIdentifier()}'
     oapackage.mkdirc(os.path.join(outputdir, cache_tag))
     cachefile = os.path.join(
-                outputdir, cache_tag, tag + '-' + 'N%dk%d' % (N, kk) + '.pickle')
+        outputdir, cache_tag, tag + '-' + 'N%dk%d' % (N, kk) + '.pickle')
     return cachefile
+
 
 # %%
 if 0:
@@ -161,7 +167,6 @@ if 0:
 # %% Generate subpages for the designs
 
 
-
 def conferenceSubPages(tag='conference', Nmax=40, Nstart=4, kmax=None, outputdir=None, conference_html_dir=None,
                        verbose=1, specials={}, Nstep=2, NmaxPareto=40, cache=True,
                        double_conference_cases=(24,), html_template=False, addMaximumExtensionColumns=False):
@@ -177,7 +182,6 @@ def conferenceSubPages(tag='conference', Nmax=40, Nstart=4, kmax=None, outputdir
     """
 
     debugdata = {}
-
 
     Nrange = range(Nstart, Nmax + 1, Nstep)
     if kmax == -2:
@@ -270,6 +274,31 @@ generated_subpages = conferenceSubPages(tag='cdesign', Nmax=40, Nstart=4, verbos
 htmlsubdir = os.path.join(htmldir, 'conference')
 
 generate_conference_latex_tables(htmlsubdir, verbose=1)
+
+#%%
+
+#%% Determine number of extensible designs
+from oaresearch.research_conference import conference_design_extensions
+
+
+for Nx in range(4, 10, 2):
+  for k in range(2, Nx+1):
+    data=generated_subpages['cdesign'][f'N{Nx}k{k}' ]
+    
+    data.keys()
+    
+    pr=data['pareto_results']
+    data['arrayfile']
+    
+    cfile=os.path.join(outputdir, pr['idstr']+'.oa' )
+    #print(cfile)
+    
+    designs=oapackage.readarrayfile(cfile)
+    
+    ee=[len(conference_design_extensions(design))>0 for design in designs]
+    #print(ee)
+    ne = np.sum(ee)
+    print(f'N {Nx} k {k}: {len(designs)} designs, {ne} can be extended')
 
 
 # %% Testing
@@ -645,19 +674,15 @@ if generate_webpage:
     webbrowser.open_new_tab(hfile)
 
 
-#%%
-import tempfile
-from typing import List, Any
-
-from oapackage.oahelper import write_text_arrayfile
+# %%
 
 
-#designs=[oapackage.exampleArray(3)]
-#filename=tempfile.mktemp(suffix='.oa')
+# designs=[oapackage.exampleArray(3)]
+# filename=tempfile.mktemp(suffix='.oa')
 #write_text_arrayfile(filename, designs, comment='Test')
-#oapackage.readarrayfile(filename)
+# oapackage.readarrayfile(filename)
 
-#%%
+# %%
 def createConferenceDesignsPageParetoTableDSD(
         page, pareto_results, verbose=0, htmlsubdir=None):
     """ Create table with Pareto results and add to the markup object
@@ -683,7 +708,7 @@ def createConferenceDesignsPageParetoTableDSD(
         if pareto_data[0].get('maximum_extension_size', None) is not None:
             add_maximum_extension_size = True
 
-    ncolumns= pareto_results['ncolumns']
+    ncolumns = pareto_results['ncolumns']
 
     if pareto_results['narrays'] > 0 and pareto_results.get('full_results'):
         add_extra = True
@@ -730,128 +755,89 @@ def createConferenceDesignsPageParetoTableDSD(
                 rtable[ii + 1, column_offset] = pareto_data[pareto_idx]['maximum_extension_size']
                 column_offset = column_offset + 1
 
-    
-#        subpage = oaresearch.research.array2html(rtable, header=1, tablestyle='border-collapse: collapse;',
-#                                                 trclass='', tdstyle='padding-right:1em;', trstyle='',
-#                                                 thstyle='text-align:left; padding-right: 1em;', comment=None)
-#        page.br(clear='both')
-#        page.h2('Pareto optimal designs')
-#        page.p()
-#        if pareto_results['nclasses'] == 1:
-#            pareto_classes_text = 'in %d class' % pareto_results['nclasses']
-#        else:
-#            pareto_classes_text = 'in %d classes' % pareto_results['nclasses']
-#        if pareto_results['npareto'] == 1:
-#            page.add('There is %d Pareto optimal design %s.' %
-#                     (pareto_results['npareto'], pareto_classes_text))
-#        else:
-#            page.add('There are %d Pareto optimal designs %s.' %
-#                     (pareto_results['npareto'], pareto_classes_text))
-#        pareto_type = pareto_results['pareto_type']
-#        if ',' in pareto_type:
-#            k = pareto_type.rfind(", ")
-#            pareto_type = pareto_type[:k] + ", and " + pareto_type[k + 1:]
-#
-#        page.add(
-#            'Pareto optimality is according to %s (any other statistics are ignored).' % pareto_type)
-#        page.p.close()
-#        if pareto_results.get('pareto_designs', None) is not None:
-#            pdesigns = pareto_results.get('pareto_designs', None)
-#
-#        pfile0 = pareto_results['idstr'] + '-pareto.oa'
-#
-#        if htmlsubdir is not None:
-#            pfile = os.path.join(htmlsubdir, pfile0)
-#            oapackage.writearrayfile(
-#                pfile, [oapackage.array_link(array) for array in pdesigns])
-#            page.p('All %s' % e.a('Pareto optimal designs', href=pfile0) + '.')
-#
-#        page.add(str(subpage))
-#        page.br(clear='both')
     else:
         rtable = np.zeros((0, 0))
 
     return rtable
 
-rtable = createConferenceDesignsPageParetoTable(None,pareto_results )
 
-#%% Generate Pareto table
-import tempfile
-pdir=tempfile.mkdtemp(prefix=f'D_X_k'  )
-pdir=r'/home/eendebakpt/Dropbox/conference designs/tmp/pareto-overview'
+rtable = createConferenceDesignsPageParetoTable(None, pareto_results)
 
-tag='cdesign'
+# %% Generate Pareto table
+pdir = tempfile.mkdtemp(prefix=f'D_X_k')
+pdir = r'/home/eendebakpt/Dropbox/conference designs/tmp/pareto-overview'
+
+tag = 'cdesign'
 citation_enumeration = oaresearch.research.citation(
-        'cenumeration', style='brief')
-page =markup.page()
+    'cenumeration', style='brief')
+page = markup.page()
 
 
 page.init(title=f"Pareto optimal designs for D[*](N, k)",
-                  css=('oastyle.css'),
-                  lang='en',
-                  header="", htmlattrs=dict({'xmlns': 'http://www.w3.org/1999/xhtml'}),
-                  doctype='<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">',
-                  metainfo=({'keywords': 'conference designs', 'robots': 'index, follow',
-                             'description': 'Complete Enumeration of conference designs'}),
-                  footer="<!-- End of page -->")
+          css=('oastyle.css'),
+          lang='en',
+          header="", htmlattrs=dict({'xmlns': 'http://www.w3.org/1999/xhtml'}),
+          doctype='<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">',
+          metainfo=({'keywords': 'conference designs', 'robots': 'index, follow',
+                     'description': 'Complete Enumeration of conference designs'}),
+          footer="<!-- End of page -->")
 
 page.h1(f"Pareto optimal designs for D[*](N, k)", style='margin-bottom: 0.1em;')
 page.p('<em style="color:darkblue;">pieter.eendebak@gmail.com</em>',
-           style='margin-top: 0px;')
+       style='margin-top: 0px;')
 ss = f'On this page we present properties of the Pareto optimal designs in D(N, k). The optimality criteria are *,*,* and are discussed in detail in {citation_enumeration}. '
 page.p(ss)
 
-for N in [8, 10,12, 14, 16, 18,20]:
+for N in [8, 10, 12, 14, 16, 18, 20]:
     DN = 2*N+1
-    
+
     page.h3(f"Pareto optimal designs for D[*]({DN}, k)", style='margin-bottom: 0.1em;')
 
-    rtables=[]
-    designs=[]
-    for number_of_columns in range(4, N+1):    
+    rtables = []
+    designs = []
+    for number_of_columns in range(4, N+1):
         print(f'N {N}, properties of {number_of_columns} columns')
-        
+
         cachefile = conference_designs_result_file(outputdir, tag, N, number_of_columns)
-    
+
         with open(cachefile, 'rb') as fid:
-                    pareto_results, cfile = pickle.load(fid)
-    
-        subtable = createConferenceDesignsPageParetoTableDSD(None,pareto_results )
-        rtables.append(subtable[1:,:])
-        header=subtable[:1,:]
-        designs+=pareto_results['pareto_designs']
-    
-    designs=[oapackage.makearraylink(d) for d in designs]
+            pareto_results, cfile = pickle.load(fid)
+
+        subtable = createConferenceDesignsPageParetoTableDSD(None, pareto_results)
+        rtables.append(subtable[1:, :])
+        header = subtable[:1, :]
+        designs += pareto_results['pareto_designs']
+
+    designs = [oapackage.makearraylink(d) for d in designs]
     dsd_designs = [oapackage.conference2DSD(d) for d in designs]
-    designfile_base=os.path.join(f'pareto-designs-N{N}.oa')
-    dfile=os.path.join(pdir, designfile_base)
-    write_text_arrayfile(dfile, dsd_designs, comment=f' Pareto optimal DSDs for {N} rows\nSee {citation_enumeration}' )
+    designfile_base = os.path.join(f'pareto-designs-N{N}.oa')
+    dfile = os.path.join(pdir, designfile_base)
+    write_text_arrayfile(dfile, dsd_designs, comment=f' Pareto optimal DSDs for {N} rows\nSee {citation_enumeration}')
     oapackage.readarrayfile(dfile)
-    
+
     rtable = np.vstack(rtables)
-    
-    #for ii in [4,5]:
+
+    # for ii in [4,5]:
     #    header[0,2+ii]=f'PEC<sub>{ii}</sub>'
-    
+
     rtable = np.vstack((header, rtable))
-    rtable=np.hstack( (rtable[:, :1], rtable[:, 2:]) )
-        
+    rtable = np.hstack((rtable[:, :1], rtable[:, 2:]))
+
     subpage = oaresearch.research.array2html(rtable, header=1, tablestyle='border-collapse: collapse;',
-                                                     trclass='', tdstyle='padding-right:1em;', trstyle='',
-                                                     thstyle='text-align:left; padding-right: 1em;', comment=None)
-    
+                                             trclass='', tdstyle='padding-right:1em;', trstyle='',
+                                             thstyle='text-align:left; padding-right: 1em;', comment=None)
+
     page.add(str(subpage))
-    
-    link=markup.oneliner.a(f'All Pareto DSDs with {DN} rows', href=designfile_base)
+
+    link = markup.oneliner.a(f'All Pareto DSDs with {DN} rows', href=designfile_base)
     page.p(f'{link} (ordered according the table above)')
 
 page.p('TODO: check criteria with the ones used in the paper')
 
-#%
-hfile=os.path.join(pdir, 'pareto-page.html')
+# %
+hfile = os.path.join(pdir, 'pareto-page.html')
 with open(hfile, 'w') as fid:
-        _ = fid.write(str(page))
+    _ = fid.write(str(page))
 webbrowser.open_new_tab(hfile)
 
-#%%
-
+# %%
