@@ -6,6 +6,7 @@ Pieter Eendebak <pieter.eendebak@gmail.com>
 """
 
 from collections import OrderedDict
+from typing import Union
 import json_tricks
 import copy
 import json
@@ -19,6 +20,7 @@ import shutil
 from typing import Tuple, List, Any
 from functools import reduce
 import operator
+from functools import lru_cache
 
 import numpy as np
 from joblib import Parallel, delayed
@@ -41,10 +43,60 @@ import oaresearch.filetools
 
 from oapackage.conference import momentMatrix, modelStatistics, conferenceProjectionStatistics
 
+#%%
+class hashable_array(object):
+    r'''Hashable wrapper for ndarray objects.
+
+        Instances of ndarray are not hashable, meaning they cannot be added to
+        sets, nor used as keys in dictionaries. This is by design - ndarray
+        objects are mutable, and therefore cannot reliably implement the
+        __hash__() method.
+
+        The hashable class allows a way around this limitation. It implements
+        the required methods for hashable objects in terms of an encapsulated
+        ndarray object. This can be either a copied instance (which is safer)
+        or the original object (which requires the user to be careful enough
+        not to modify it).
+    '''
+    def __init__(self, wrapped, tight=False):
+        r'''Creates a new hashable object encapsulating an ndarray.
+
+            wrapped
+                The wrapped ndarray.
+
+            tight
+                Optional. If True, a copy of the input ndaray is created.
+                Defaults to False.
+        '''
+        self.__tight = tight
+        self.__wrapped = np.array(wrapped) if tight else wrapped
+        self.__hash = hash(self.__wrapped.tostring())
+
+    def __eq__(self, other):
+        return np.all(self.__wrapped == other.__wrapped)
+
+    def __hash__(self):
+        return self.__hash
+
+    def unwrap(self):
+        r'''Returns the encapsulated ndarray.
+
+            If the wrapper is "tight", a copy of the encapsulated ndarray is
+            returned. Otherwise, the encapsulated ndarray itself is returned.
+        '''
+        if self.__tight:
+            return np.array(self.__wrapped)
+
+        return self.__wrapped
+    
+def make_hashable_array(design):
+    return hashable_array(np.array(design))
+
 # %%
 
+DesignType = Union[oapackage.array_link, np.ndarray]
 
-def conference_design_extensions(array: Any, verbose: int = 0) -> List:
+def conference_design_extensions(array: DesignType, verbose: int = 0) -> List:
     """ Return list of all extensions of a conference design
 
     All extensions are generated, minus symmetry conditions.
@@ -71,6 +123,80 @@ def conference_design_extensions(array: Any, verbose: int = 0) -> List:
 
     return list(extensions)
 
+
+def conference_design_has_extension(design : DesignType) -> bool:
+    """ Return true if specified conference design has an extension with an additional column
+    
+    Args:
+        design: Conference design
+    Returns:
+        True of the design has extensions
+    """
+    design_np = np.array(design)
+    ee=conference_design_extensions(design_np)
+    return len(ee)>0
+
+def reduce_minimal_form(design, design_stack):
+    """ Reduce design to minimal form using full stack of designs """
+    all_data, all_data_nauty = design_stack
+    nauty_form= oapackage.reduceConference(design) 
+    k=nauty_form.shape[1]
+    idx=all_data_nauty[k].index(nauty_form)
+    return all_data[k][idx]
+
+
+@lru_cache(maxsize=10000)
+@oahelper.static_var('design_stack', None)
+def conference_design_has_maximal_extension(design, verbose=0, Nmax = None) -> bool:
+    """ Determine whether a design has an extension to a maximal design 
+    
+    The static variable design_stack needs to be initialized with a dictionary containing all designs 
+    with the number of rows specifed by the design.
+    
+    Args:
+        design: Conference design
+        N: Number of rows
+    Returns:
+        True if the design can be extended to the full number of columns
+    """
+    
+    design_stack = conference_design_has_maximal_extension.design_stack
+    if design_stack is None:
+        raise Exception('initialize the design stack first!')
+        
+    if isinstance(design, hashable_array):
+        design=design.unwrap()
+    
+    design_np = np.array(design)    
+    N = design_np.shape[0]
+    if Nmax is None:
+        Nmax = N
+    k = design_np.shape[1]
+
+    if not N==design_stack[0][4][0].shape[0]:
+        raise Exception('N {N} does not match design stack')
+    
+    
+    if k==Nmax: 
+        return True
+    
+    ee=conference_design_extensions(design_np)    
+    
+    if verbose:
+        print(f'design {N} {k}: check {len(ee)} extensions' )
+    result = False
+    for subidx, extension_design in enumerate(ee):
+        if verbose:
+            print(f'design {N} {k}: subidx {subidx}' )
+        extension_design_link = oapackage.makearraylink(extension_design)
+        md=reduce_minimal_form(extension_design_link, design_stack)
+        
+        if conference_design_has_maximal_extension(make_hashable_array(md), verbose=verbose, Nmax=Nmax):
+            result= True
+            break
+    if verbose:
+        print(f'design {N} {k}: {result}' )
+    return result
 
 def _flatten(data):
     if len(data) == 0:

@@ -49,10 +49,7 @@ if not os.path.isdir(resultsdir):
 
 print('oapackage: %s: %s' % (oapackage, oapackage.version()))
 
-import researchOA
-from researchOA import splitBase, job, numbersFile, gatherFilesList, gatherResults, checkLevel, gzipOA, doSplitFile
-from researchOA import jobStatus, createJobScript
-from researchOA import makeJobList
+from oaresearch.job_utils import job, makeJobList
 
 
 r = oapackage.log_print(-oapackage.SYSTEM, '')
@@ -61,7 +58,7 @@ r = oapackage.log_print(-oapackage.SYSTEM, '')
 # %% Helper functions
 
 
-dobigcase = 48  # by default run a small case to test the scripts
+dobigcase = 24  # by default run a small case to test the scripts
 
 parser = argparse.ArgumentParser()
 parser.add_argument("-v", "--verbose", help="output level", default=1)
@@ -293,15 +290,7 @@ else:
 if not oapackage.file_exists(checkfile):
     raise Exception('base extention did not work')
 
-if 0:
-    lvls1 = [1, 208]
-    joblistg1 = gatherResults(
-        lvls1, outputdir, splitdata, adata=adata, verbose=2)
-    j = joblistg1[0]
-    print(j)
-    j.analyse(verbose=2)
 
-    exit(0)
 
 
 # %%

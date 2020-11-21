@@ -683,8 +683,7 @@ if generate_webpage:
 # oapackage.readarrayfile(filename)
 
 # %%
-def createConferenceDesignsPageParetoTableDSD(
-        page, pareto_results, verbose=0, htmlsubdir=None):
+def createConferenceDesignsPageParetoTableDSD(page, pareto_results, verbose=0, htmlsubdir=None):
     """ Create table with Pareto results and add to the markup object
 
     Args:
@@ -761,7 +760,7 @@ def createConferenceDesignsPageParetoTableDSD(
     return rtable
 
 
-rtable = createConferenceDesignsPageParetoTable(None, pareto_results)
+#rtable = createConferenceDesignsPageParetoTable(None, pareto_results)
 
 # %% Generate Pareto table
 pdir = tempfile.mkdtemp(prefix=f'D_X_k')
@@ -788,7 +787,7 @@ page.p('<em style="color:darkblue;">pieter.eendebak@gmail.com</em>',
 ss = f'On this page we present properties of the Pareto optimal designs in D(N, k). The optimality criteria are *,*,* and are discussed in detail in {citation_enumeration}. '
 page.p(ss)
 
-for N in [8, 10, 12, 14, 16, 18, 20]:
+for N in [8, 10, 12, 14, 16, 18, 20, 22]:
     DN = 2*N+1
 
     page.h3(f"Pareto optimal designs for D[*]({DN}, k)", style='margin-bottom: 0.1em;')
@@ -804,8 +803,9 @@ for N in [8, 10, 12, 14, 16, 18, 20]:
             pareto_results, cfile = pickle.load(fid)
 
         subtable = createConferenceDesignsPageParetoTableDSD(None, pareto_results)
-        rtables.append(subtable[1:, :])
-        header = subtable[:1, :]
+        if subtable.size>0:        
+            rtables.append(subtable[1:, :])
+            header = subtable[:1, :]
         designs += pareto_results['pareto_designs']
 
     designs = [oapackage.makearraylink(d) for d in designs]
@@ -816,9 +816,6 @@ for N in [8, 10, 12, 14, 16, 18, 20]:
     oapackage.readarrayfile(dfile)
 
     rtable = np.vstack(rtables)
-
-    # for ii in [4,5]:
-    #    header[0,2+ii]=f'PEC<sub>{ii}</sub>'
 
     rtable = np.vstack((header, rtable))
     rtable = np.hstack((rtable[:, :1], rtable[:, 2:]))
