@@ -145,8 +145,8 @@ def reduce_minimal_form(design, design_stack):
     return all_data[k][idx]
 
 
-@lru_cache(maxsize=10000)
 @oahelper.static_var('design_stack', None)
+@lru_cache(maxsize=10000)
 def conference_design_has_maximal_extension(design, verbose=0, Nmax = None) -> bool:
     """ Determine whether a design has an extension to a maximal design 
     

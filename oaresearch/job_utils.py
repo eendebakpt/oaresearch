@@ -272,7 +272,7 @@ def makeJobList(scriptdir : str, jobs : List, verbose=1, ncores : int =0, queue=
 
     jfile = join(scriptdir, 'subs.sh')
     if verbose:
-        print(Fore.BLUE + 'created %d/%d jobs in %s' % (nj, len(jobs), jfile) + Fore.RESET)
+        print('created %d/%d jobs in %s' % (nj, len(jobs), jfile))
 
     fid = open(jfile, 'wt')
     for i, s in enumerate(slist):
