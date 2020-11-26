@@ -7,7 +7,7 @@ Pieter Eendebak <pieter.eendebak@gmail.com>
 
 
 # %% Load necessary packages
-from typing import List, Any
+from typing import List, Any, Dict, Tuple
 import tempfile
 import os
 import sys
@@ -184,7 +184,7 @@ def load_designs(N, k):
     return designs
 
 
-def load_design_stack(Nx : int ):
+def load_design_stack(Nx : int ) -> Tuple[Dict]:
     """ Load all conference designs for a specified number of rows """
     all_data={}
     all_data_nauty={}

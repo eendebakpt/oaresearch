@@ -146,7 +146,6 @@ def reduce_minimal_form(design, design_stack):
 
 
 @oahelper.static_var('design_stack', None)
-@lru_cache(maxsize=10000)
 def conference_design_has_maximal_extension(design, verbose=0, Nmax = None) -> bool:
     """ Determine whether a design has an extension to a maximal design 
     
@@ -160,42 +159,47 @@ def conference_design_has_maximal_extension(design, verbose=0, Nmax = None) -> b
         True if the design can be extended to the full number of columns
     """
     
-    design_stack = conference_design_has_maximal_extension.design_stack
-    if design_stack is None:
-        raise Exception('initialize the design stack first!')
+    @lru_cache(maxsize=10000)
+    def cached_conference_design_has_maximal_extension(design, verbose=0, Nmax = None):
+        design_stack = conference_design_has_maximal_extension.design_stack
+        if design_stack is None:
+            raise Exception('initialize the design stack first!')
+            
+        if isinstance(design, hashable_array):
+            design=design.unwrap()
         
-    if isinstance(design, hashable_array):
-        design=design.unwrap()
+        design_np = np.array(design)    
+        N = design_np.shape[0]
+        if Nmax is None:
+            Nmax = N
+        k = design_np.shape[1]
     
-    design_np = np.array(design)    
-    N = design_np.shape[0]
-    if Nmax is None:
-        Nmax = N
-    k = design_np.shape[1]
-
-    if not N==design_stack[0][4][0].shape[0]:
-        raise Exception('N {N} does not match design stack')
-    
-    
-    if k==Nmax: 
-        return True
-    
-    ee=conference_design_extensions(design_np)    
-    
-    if verbose:
-        print(f'design {N} {k}: check {len(ee)} extensions' )
-    result = False
-    for subidx, extension_design in enumerate(ee):
+        if not N==design_stack[0][4][0].shape[0]:
+            raise Exception('N {N} does not match design stack')
+        
+        if k==Nmax: 
+            return True
+        
+        ee=conference_design_extensions(design_np)    
+        
         if verbose:
-            print(f'design {N} {k}: subidx {subidx}' )
-        extension_design_link = oapackage.makearraylink(extension_design)
-        md=reduce_minimal_form(extension_design_link, design_stack)
-        
-        if conference_design_has_maximal_extension(make_hashable_array(md), verbose=verbose, Nmax=Nmax):
-            result= True
-            break
-    if verbose:
-        print(f'design {N} {k}: {result}' )
+            print(f'design {N} {k}: check {len(ee)} extensions' )
+        result = False
+        for subidx, extension_design in enumerate(ee):
+            if verbose:
+                print(f'design {N} {k}: subidx {subidx}' )
+            extension_design_link = oapackage.makearraylink(extension_design)
+            md=reduce_minimal_form(extension_design_link, design_stack)
+            
+            if cached_conference_design_has_maximal_extension(make_hashable_array(md), verbose=verbose, Nmax=Nmax):
+                result= True
+                break
+        if verbose:
+            print(f'design {N} {k}: {result}' )
+        return result
+    
+    design = make_hashable_array(design)
+    result = cached_conference_design_has_maximal_extension(design, verbose=verbose, Nmax=Nmax)
     return result
 
 def _flatten(data):
