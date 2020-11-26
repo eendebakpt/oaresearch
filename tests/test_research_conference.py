@@ -217,6 +217,14 @@ class TestResearchConference(unittest.TestCase):
         result = conference_design_has_extensions(array)
         self.assertEqual(result, True)
 
+    def test_conference_design_has_maximal_extension(self):
+        
+        # generate design_stack
+        array = oapackage.exampleArray(42, 0)
+        result = conference_design_has_maximal_extension(array)
+        self.assertEqual(result, True)
+
+
 
 if __name__ == '__main__':
     unittest.main()
