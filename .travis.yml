@@ -3,6 +3,9 @@ cache: pip
 
 matrix:
   include:
+  - name: "Python 3.8"
+    python: "3.8"
+    dist: bionic
   - name: "Python 3.7"
     python: "3.7"
     dist: bionic
