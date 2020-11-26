@@ -1,8 +1,4 @@
 # -*- coding: utf-8 -*-
-import researchOA
-from researchOA import splitBase, job, numbersFile, gatherFilesList, gatherResults, checkLevel, gzipOA, doSplitFile
-from researchOA import jobStatus, createJobScript
-from researchOA import makeJobList
 """
 
 Example script for calculating double conference matrices with split jobs
@@ -30,7 +26,7 @@ oadir = os.path.join(os.path.expanduser('~'), 'misc/oa/oacode/')
 if platform.system() == 'Windows':
     oadir = os.path.join(os.path.expanduser('~'), 'svn', 'oapackage')
 
-resultsdir = join(os.path.expanduser('~'), 'oatmp')
+resultsdir = join(os.path.expanduser('~'), 'oatmp2')
 
 # setup data locations
 if 'VSC_SCRATCH' in os.environ.keys():
@@ -53,6 +49,8 @@ if not os.path.isdir(resultsdir):
 
 print('oapackage: %s: %s' % (oapackage, oapackage.version()))
 
+from oaresearch.job_utils import job, makeJobList
+
 
 r = oapackage.log_print(-oapackage.SYSTEM, '')
 
@@ -60,7 +58,7 @@ r = oapackage.log_print(-oapackage.SYSTEM, '')
 # %% Helper functions
 
 
-dobigcase = 20  # by default run a small case to test the scripts
+dobigcase = 24  # by default run a small case to test the scripts
 
 parser = argparse.ArgumentParser()
 parser.add_argument("-v", "--verbose", help="output level", default=1)
@@ -71,8 +69,8 @@ parser.add_argument("-s", "--statistics", type=int, default=0,
                     help="calculate statistics of generation")
 parser.add_argument("-N", "--N", type=int, default=dobigcase,
                     help="number of splitting")
-parser.add_argument("-ii", "--ii", type=int, default=-
-                    1, help="only run part of top level")
+parser.add_argument("-ii", "--ii", type=int, default=
+                    - 1, help="only run part of top level")
 parser.add_argument("-jj", "--jj", type=int, default=-1,
                     help="only run part of top+1 level")
 parser.add_argument(
@@ -195,8 +193,8 @@ def split_file(lvls, splitdata, verbose=1):
         nsplit, splitfile, os.path.join(sdir, basetag + '-' + spl + '-sp%d' % level))
     if verbose:
         print('split_file: split %s into %d files' % (splitfile0, nsplit))
-    checkfile = os.path.join(outputdir, sdir, basetag
-                             + '-' + splitFile(lvls + [nsplit - 1]) + '.oa')
+    checkfile = os.path.join(outputdir, sdir, basetag +
+                             '-' + splitFile(lvls + [nsplit - 1]) + '.oa')
     return splitcmd, checkfile, splitfile, {'splitfile': splitfile}
 
 
@@ -292,15 +290,7 @@ else:
 if not oapackage.file_exists(checkfile):
     raise Exception('base extention did not work')
 
-if 0:
-    lvls1 = [1, 208]
-    joblistg1 = gatherResults(
-        lvls1, outputdir, splitdata, adata=adata, verbose=2)
-    j = joblistg1[0]
-    print(j)
-    j.analyse(verbose=2)
 
-    exit(0)
 
 
 # %%
@@ -470,7 +460,8 @@ if 0:
 
 jfile = makeJobList(scriptdir, jobs, ncores=args.ncores, queue=queue)
 
-#os.system('. %s' % jfile)
+execute_jobfile_command = f'time sh {jfile}'
+# os.system(execute_jobfile_command)
 
 pp = [j for j in alljobs if not j.complete() and j.canrun()]
 #job.execute=True; [j.runjob() for j in alljobs]

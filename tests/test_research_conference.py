@@ -15,12 +15,39 @@ import io
 
 import oapackage
 import oaresearch.research_conference
-from oaresearch.research_conference import conference_design_has_extensions, maximal_extension_size, createConferenceParetoElement
+from oaresearch.research_conference import (conference_design_has_extensions, conference_design_has_maximal_extension,
+                                            maximal_extension_size, createConferenceParetoElement)
 
 # %%
 
 
 class TestFullExtensions(unittest.TestCase):
+
+    def test_conference_design_has_maximal_extension(self):
+        conference_class = oapackage.conference_t(12, 12, 0)
+        conference_designs = [conference_class.create_root_three_columns()]
+        all_data = {3: conference_designs}
+
+        for ii, ncols in enumerate(range(4, conference_class.ncols + 1)):
+            arrays = oapackage.extend_conference(all_data[ncols - 1], conference_class, verbose=0)
+            arrays = oapackage.selectConferenceIsomorpismClasses(arrays, verbose=0)
+            all_data[ncols] = arrays
+
+        all_data_nauty = {}
+        for k in all_data:
+            all_data_nauty[k] = [oapackage.reduceConference(d) for d in all_data[k]]
+        design_stack = all_data, all_data_nauty
+
+        number_of_classes = [len(value) for key, value in design_stack[0].items()]
+
+        self.assertEqual(number_of_classes, [1, 3, 2, 5, 2, 2, 1, 1, 1, 1])
+
+        conference_design_has_maximal_extension.design_stack = design_stack
+        results = [conference_design_has_maximal_extension(array) for array in design_stack[0][4]]
+        self.assertEqual(results, [True, True, False])
+
+        results = [conference_design_has_maximal_extension(array) for array in design_stack[0][6]]
+        self.assertEqual(results, [True, False, True, True, True])
 
     def test_maximal_extension_size(self):
         array = oapackage.exampleArray(40)
