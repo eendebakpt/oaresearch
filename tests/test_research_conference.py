@@ -49,6 +49,7 @@ class TestFullExtensions(unittest.TestCase):
         results = [conference_design_has_maximal_extension(array) for array in design_stack[0][6]]
         self.assertEqual(results, [True, False, True, True, True])
 
+
     def test_maximal_extension_size(self):
         array = oapackage.exampleArray(40)
         m, extensions = maximal_extension_size(array, verbose=0)

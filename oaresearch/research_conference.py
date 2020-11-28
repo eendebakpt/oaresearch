@@ -92,17 +92,22 @@ class hashable_array(object):
 def make_hashable_array(design):
     return hashable_array(np.array(design))
 
+
 # %%
 
 DesignType = Union[oapackage.array_link, np.ndarray]
 
-def conference_design_extensions(array: DesignType, verbose: int = 0) -> List:
+def conference_design_extensions(array: DesignType, verbose: int = 0, filter_symmetry : bool = True, conference_generator = None) -> List:
     """ Return list of all extensions of a conference design
 
     All extensions are generated, minus symmetry conditions.
+    For details see `oapackage.generateSingleConferenceExtensions`
 
     Args:
         arrays : List of arrays to be extended
+        verbose: Verbosity level
+        filter_symmetry: If True then discard any designs that are now minimal according to the row permutations 
+            from the row symmetry group of the input design
     Returns:
         List of extensions
 
@@ -116,8 +121,13 @@ def conference_design_extensions(array: DesignType, verbose: int = 0) -> List:
     filterj2 = 1
     filterj3 = 0
     filter_symmetry = 1  # we can use symmetry reduction, since any the other filtering is not related to the symmetry of the design
-    extensions = oapackage.generateSingleConferenceExtensions(
+    
+    if conference_generator is None:
+        extensions = oapackage.generateSingleConferenceExtensions(
         array, conference_type, zero_index, verbose >= 2, filter_symmetry, filterj2, filterj3, filter_symmetry)
+    else:
+        # TODO assert proper conference class and symmetry types
+        extensions = conference_generator.generateCandidates (array);
     extensions = [oapackage.hstack(array, extension)
                   for extension in extensions]
 
@@ -145,22 +155,8 @@ def reduce_minimal_form(design, design_stack):
     return all_data[k][idx]
 
 
-@oahelper.static_var('design_stack', None)
-def conference_design_has_maximal_extension(design, verbose=0, Nmax = None) -> bool:
-    """ Determine whether a design has an extension to a maximal design 
-    
-    The static variable design_stack needs to be initialized with a dictionary containing all designs 
-    with the number of rows specifed by the design.
-    
-    Args:
-        design: Conference design
-        N: Number of rows
-    Returns:
-        True if the design can be extended to the full number of columns
-    """
-    
-    @lru_cache(maxsize=10000)
-    def cached_conference_design_has_maximal_extension(design, verbose=0, Nmax = None):
+@lru_cache(maxsize=10000)
+def cached_conference_design_has_maximal_extension(design, verbose=0, Nmax = None, conference_generator=None):
         design_stack = conference_design_has_maximal_extension.design_stack
         if design_stack is None:
             raise Exception('initialize the design stack first!')
@@ -180,7 +176,7 @@ def conference_design_has_maximal_extension(design, verbose=0, Nmax = None) -> b
         if k==Nmax: 
             return True
         
-        ee=conference_design_extensions(design_np)    
+        ee=conference_design_extensions(design_np, conference_generator = conference_generator)    
         
         if verbose:
             print(f'design {N} {k}: check {len(ee)} extensions' )
@@ -191,15 +187,31 @@ def conference_design_has_maximal_extension(design, verbose=0, Nmax = None) -> b
             extension_design_link = oapackage.makearraylink(extension_design)
             md=reduce_minimal_form(extension_design_link, design_stack)
             
-            if cached_conference_design_has_maximal_extension(make_hashable_array(md), verbose=verbose, Nmax=Nmax):
+            if cached_conference_design_has_maximal_extension(make_hashable_array(md), verbose=verbose, Nmax=Nmax, conference_generator = conference_generator):
                 result= True
                 break
         if verbose:
             print(f'design {N} {k}: {result}' )
         return result
+
+
+@oahelper.static_var('design_stack', None)
+def conference_design_has_maximal_extension(design, verbose=0, Nmax = None, conference_generator = None) -> bool:
+    """ Determine whether a design has an extension to a maximal design 
     
-    design = make_hashable_array(design)
-    result = cached_conference_design_has_maximal_extension(design, verbose=verbose, Nmax=Nmax)
+    The static variable design_stack needs to be initialized with a dictionary containing all designs 
+    with the number of rows specifed by the design.
+    
+    Args:
+        design: Conference design
+        N: Number of rows
+    Returns:
+        True if the design can be extended to the full number of columns
+    """
+       
+    if not isinstance(design, hashable_array):
+        design = make_hashable_array(design)
+    result = cached_conference_design_has_maximal_extension(design, verbose=verbose, Nmax=Nmax, conference_generator=conference_generator)
     return result
 
 def _flatten(data):
