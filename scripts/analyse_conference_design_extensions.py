@@ -188,6 +188,7 @@ def load_design_stack(Nx : int ) -> Tuple[Dict]:
     all_data={}
     all_data_nauty={}
     sort_idx={}
+    data_nauty_sorted={}
     for k in range(2, Nx+1):
         designs=load_designs(Nx, k)
     
@@ -195,11 +196,12 @@ def load_design_stack(Nx : int ) -> Tuple[Dict]:
         all_data_nauty[k]=[oapackage.reduceConference(d) for d in  all_data[k]]
 
         sort_idx[k] = np.argsort(np.array(all_data_nauty[k], dtype=object))
+        data_nauty_sorted[k]= [ all_data_nauty[k][idx] for idx in sort_idx[k]]
+    return   DesignStack( all_data, all_data_nauty, sort_idx, data_nauty_sorted)
 
-    return   DesignStack( all_data, all_data_nauty, sort_idx)
 
 N=16
-all_data, all_data_nauty, sort_idx=  design_stack =   load_design_stack(N)
+all_data, all_data_nauty, sort_idx,_=  design_stack =   load_design_stack(N)
 k=8
     
 designs=load_designs(N, k)
@@ -333,7 +335,7 @@ if analyse_full:
             design_has_extension_results =[]
             for idx, design in enumerate(designs):
                 if verbose>=2:
-                    if idx%1000==0:
+                    if idx%5000==0:
                         dt=oapackage.get_time_ms()-t0
                         print(f'N {N} k {k} idx {idx}/{len(designs)} dt {dt:.1f} [s]')
                 hd=make_hashable_array(design)

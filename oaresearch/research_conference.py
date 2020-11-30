@@ -153,17 +153,20 @@ from oaresearch.misc_utils import index_sorted_array
 from collections import namedtuple
 #%%
 
-DesignStack = namedtuple('DesignStack', ['designs', 'nauty_designs', 'nauty_sort_index'])
+DesignStack = namedtuple('DesignStack', ['designs', 'nauty_designs', 'nauty_sort_index', 'nauty_designs_sorted'])
 
 def reduce_minimal_form(design, design_stack):
     """ Reduce design to minimal form using full stack of designs """
-    all_data, all_data_nauty, sort_indices = design_stack
+    all_data, all_data_nauty, sort_indices, nauty_designs_sorted= design_stack
     nauty_form= oapackage.reduceConference(design) 
     k=nauty_form.shape[1]
     
     sort_idx = sort_indices[k] 
-    sorted_nauty = [ all_data_nauty[k][idx] for idx in sort_idx]
-    sorted_idx=index_sorted_array(sorted_nauty,nauty_form)
+    if nauty_designs_sorted is None:
+        nauty_sorted = [ all_data_nauty[k][idx] for idx in sort_idx]
+    else:
+        nauty_sorted=nauty_designs_sorted[k]
+    sorted_idx=index_sorted_array(nauty_sorted,nauty_form)
     idx = sort_idx[sorted_idx]
         
     return all_data[k][idx]
