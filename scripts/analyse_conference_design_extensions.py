@@ -8,7 +8,6 @@ Pieter Eendebak <pieter.eendebak@gmail.com>
 
 # %% Load necessary packages
 from typing import List, Any, Dict, Tuple
-import tempfile
 import os
 import sys
 import platform
@@ -17,8 +16,6 @@ import time
 from importlib import reload
 from os.path import join
 import pickle
-import pdb
-import shutil
 import webbrowser
 
 import oapackage
@@ -27,15 +24,14 @@ import oapackage.graphtools
 from oapackage.markup import oneliner as e
 from oaresearch.research_conference import htmlTag
 import oaresearch.research_conference
-from oaresearch.research_conference import calculateConferencePareto, conferenceResultsFile, generateConferenceResults, \
+from oaresearch.research_conference import calculateConferencePareto,  generateConferenceResults, \
     conferenceDesignsPage
 from oapackage.conference import conferenceProjectionStatistics
 from oaresearch.research_conference import SingleConferenceParetoCombiner, generate_conference_latex_tables
 from oapackage import markup
 from oapackage.oahelper import create_pareto_element
-from oaresearch.research_conference import generate_or_load_conference_results, createConferenceParetoElement, \
+from oaresearch.research_conference import generate_or_load_conference_results, \
     calculateConferencePareto, createConferenceDesignsPageParetoTable, cdesignTag, conference_design_has_extensions
-from oaresearch.research_conference import select_even_odd_conference_designs, generate_even_odd_conference_designs
 
 generate_webpage = True
 
@@ -67,6 +63,7 @@ def conference_designs_result_file(outputdir: str, tag: str, N: int, kk: int) ->
 
 
 analyse_full=False
+verbose=1
 
 # %% Generate subpages for the designs
 
@@ -265,7 +262,8 @@ for N in range(4, 20, 2):
         design_has_max_extension_results=[]
         design_has_extension_results =[]
         for idx, design in enumerate(designs):
-            #print(f'N {N} k {k} idx {idx}')
+            if verbose>=2:
+                print(f'N {N} k {k} idx {idx}')
             hd=make_hashable_array(design)
             design_has_max_extension=conference_design_has_maximal_extension(hd, verbose=0, conference_generator = conference_generator)
             design_has_max_extension_results.append(design_has_max_extension)
@@ -312,28 +310,36 @@ for k in k_values:
         print(f'total time: {dt:.1f} [s]: N {N} k {k}: # designs with maximal extension {np.sum(design_has_max_extension_results)}/{na}' ) # , # designs with an extension {np.sum(design_has_extension_results)}/{na}')
 
 #%% 
-N=22
-design_stack=    load_design_stack(N)
-conference_design_has_maximal_extension.design_stack=design_stack
-cached_conference_design_has_maximal_extension.cache_clear()
-
-ctype = oapackage.conference_t(N, N, 0)
-conference_generator= oapackage.CandidateGeneratorConference(oapackage.array_link(), ctype)
+if analyse_full:
+    N=22
+    design_stack=    load_design_stack(N)
+    conference_design_has_maximal_extension.design_stack=design_stack
+    cached_conference_design_has_maximal_extension.cache_clear()
     
-t0=oapackage.get_time_ms()
-for k in [10,11]:
-        designs=load_designs(N, k)
-        design_has_max_extension_results=[]
-        design_has_extension_results =[]
-        for idx, design in enumerate(designs):
-            #print(f'N {N} k {k} idx {idx}')
-            hd=make_hashable_array(design)
-            design_has_max_extension=conference_design_has_maximal_extension(hd, verbose=0, Nmax=12, conference_generator=conference_generator)
-            design_has_max_extension_results.append(design_has_max_extension)
-        dt=oapackage.get_time_ms()-t0
+    ctype = oapackage.conference_t(N, N, 0)
+    conference_generator= oapackage.CandidateGeneratorConference(oapackage.array_link(), ctype)
         
-        na=len(design_has_max_extension_results)
-        print(f'total time: {dt:.1f} [s]: N {N} k {k}: # designs with maximal extension {np.sum(design_has_max_extension_results)}/{na}')
+    kk=[10,11]
+    kk=range(2, 12)
+    kk=kk[::-1]
+    t0=oapackage.get_time_ms()
+    for k in kk:
+            designs=load_designs(N, k)
+            design_has_max_extension_results=[]
+            design_has_extension_results =[]
+            for idx, design in enumerate(designs):
+                if verbose>=2:
+                    if idx%1000==0:
+                        dt=oapackage.get_time_ms()-t0
+                        print(f'N {N} k {k} idx {idx}/{len(designs)} dt {dt:.1f} [s]')
+                hd=make_hashable_array(design)
+                design_has_max_extension=conference_design_has_maximal_extension(hd, verbose=0, Nmax=12, conference_generator=conference_generator)
+                design_has_max_extension_results.append(design_has_max_extension)
+            dt=oapackage.get_time_ms()-t0
+            
+            na=len(design_has_max_extension_results)
+            print(f'total time: {dt:.1f} [s]: N {N} k {k}: # designs with maximal extension {np.sum(design_has_max_extension_results)}/{na}')
+    
 
 #%% N=22 pareto designs
 N=22
@@ -356,7 +362,7 @@ for k in range(7,12+1):
         design_has_max_extension=conference_design_has_maximal_extension(hd, verbose=0, Nmax=12,conference_generator=conference_generator)
         print(f'N {N} k {k} pareto design {idx}: design_has_max_extension {design_has_max_extension}')
 
-print(conference_design_has_maximal_extension.cache_info())
+print(cached_conference_design_has_maximal_extension.cache_info())
     
 #%%
 
@@ -370,7 +376,7 @@ for idx, design in enumerate(designs):
 
 #%%
 design=designs[0]
-r=has_maximal_extension(make_hashable_array(design), verbose=1)
+r=conference_design_has_maximal_extension(make_hashable_array(design), verbose=1)
 print(r)
 
 ee=conference_design_extensions(design)

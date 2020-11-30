@@ -146,12 +146,17 @@ def conference_design_has_extension(design : DesignType) -> bool:
     ee=conference_design_extensions(design_np)
     return len(ee)>0
 
+#%%
+from oaresearch.misc_utils import index_sorted_array
+
+#%%
 def reduce_minimal_form(design, design_stack):
     """ Reduce design to minimal form using full stack of designs """
     all_data, all_data_nauty = design_stack
     nauty_form= oapackage.reduceConference(design) 
     k=nauty_form.shape[1]
-    idx=all_data_nauty[k].index(nauty_form)
+    idx=index_sorted_array(all_data_nauty[k],nauty_form)
+    #idx=all_data_nauty[k].index(nauty_form)
     return all_data[k][idx]
 
 

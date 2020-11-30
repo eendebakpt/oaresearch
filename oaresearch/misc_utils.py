@@ -1,3 +1,12 @@
+from bisect import bisect_left
+
+def index_sorted_array(array, value):
+    """ Return index of leftmost value exactly equal to specified value """
+    i = bisect_left(array, value)
+    if i != len(array) and array[i] == value:
+        return i
+    raise ValueError('could not find {value} in array')
+
 def gzipOA(directory=None, cmdverbose : int =0, add_check : bool =  True, unzip_text : bool = False):
     """ Create script to compress all oa files in a directory with gzip """ 
     if directory is not None:
