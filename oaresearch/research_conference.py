@@ -12,6 +12,7 @@ import copy
 import json
 import collections
 import itertools
+import numpy as np
 import os
 import sys
 import time
@@ -113,7 +114,8 @@ def conference_design_extensions(array: DesignType, verbose: int = 0, filter_sym
 
     """
     j1zero = 0
-    array = oapackage.makearraylink(array)
+    if not isinstance(array, oapackage.array_link):
+        array = oapackage.makearraylink(array)
     conference_type = oapackage.conference_t(
         array.n_rows, array.n_columns, j1zero)
 
@@ -148,15 +150,22 @@ def conference_design_has_extension(design : DesignType) -> bool:
 
 #%%
 from oaresearch.misc_utils import index_sorted_array
-
+from collections import namedtuple
 #%%
+
+DesignStack = namedtuple('DesignStack', ['designs', 'nauty_designs', 'nauty_sort_index'])
+
 def reduce_minimal_form(design, design_stack):
     """ Reduce design to minimal form using full stack of designs """
-    all_data, all_data_nauty = design_stack
+    all_data, all_data_nauty, sort_indices = design_stack
     nauty_form= oapackage.reduceConference(design) 
     k=nauty_form.shape[1]
-    idx=index_sorted_array(all_data_nauty[k],nauty_form)
-    #idx=all_data_nauty[k].index(nauty_form)
+    
+    sort_idx = sort_indices[k] 
+    sorted_nauty = [ all_data_nauty[k][idx] for idx in sort_idx]
+    sorted_idx=index_sorted_array(sorted_nauty,nauty_form)
+    idx = sort_idx[sorted_idx]
+        
     return all_data[k][idx]
 
 

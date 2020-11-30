@@ -32,6 +32,7 @@ from oapackage import markup
 from oapackage.oahelper import create_pareto_element
 from oaresearch.research_conference import generate_or_load_conference_results, \
     calculateConferencePareto, createConferenceDesignsPageParetoTable, cdesignTag, conference_design_has_extensions
+from collections import namedtuple
 
 generate_webpage = True
 
@@ -169,7 +170,7 @@ generated_subpages = conferenceSubPages(tag='cdesign', Nmax=22, Nstart=4, verbos
                                         outputdir=outputdir, conference_html_dir=conference_html_dir, html_template=html_template)
 
 #%%
-from oaresearch.research_conference import conference_design_extensions, conference_design_has_extension, conference_design_has_maximal_extension, make_hashable_array, cached_conference_design_has_maximal_extension
+from oaresearch.research_conference import conference_design_extensions, conference_design_has_extension, conference_design_has_maximal_extension, make_hashable_array, cached_conference_design_has_maximal_extension, DesignStack
 
 def load_designs(N, k):
     data=generated_subpages['cdesign'][f'N{N}k{k}' ]
@@ -186,16 +187,19 @@ def load_design_stack(Nx : int ) -> Tuple[Dict]:
     """ Load all conference designs for a specified number of rows """
     all_data={}
     all_data_nauty={}
+    sort_idx={}
     for k in range(2, Nx+1):
         designs=load_designs(Nx, k)
     
         all_data[k]=designs
         all_data_nauty[k]=[oapackage.reduceConference(d) for d in  all_data[k]]
 
-    return    all_data, all_data_nauty
+        sort_idx[k] = np.argsort(np.array(all_data_nauty[k], dtype=object))
+
+    return   DesignStack( all_data, all_data_nauty, sort_idx)
 
 N=16
-all_data, all_data_nauty=  design_stack =   load_design_stack(N)
+all_data, all_data_nauty, sort_idx=  design_stack =   load_design_stack(N)
 k=8
     
 designs=load_designs(N, k)
@@ -375,7 +379,11 @@ for idx, design in enumerate(designs):
     print(f'{idx}: {r}')
 
 #%%
+    
+design_stack=    load_design_stack(16)
+designs=design_stack[0][6]
 design=designs[0]
+conference_design_has_maximal_extension.design_stack=design_stack
 r=conference_design_has_maximal_extension(make_hashable_array(design), verbose=1)
 print(r)
 

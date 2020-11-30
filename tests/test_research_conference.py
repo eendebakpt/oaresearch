@@ -16,7 +16,7 @@ import io
 import oapackage
 import oaresearch.research_conference
 from oaresearch.research_conference import (conference_design_has_extensions, conference_design_has_maximal_extension,
-                                            maximal_extension_size, createConferenceParetoElement)
+                                            maximal_extension_size, createConferenceParetoElement, DesignStack)
 
 # %%
 
@@ -34,9 +34,11 @@ class TestFullExtensions(unittest.TestCase):
             all_data[ncols] = arrays
 
         all_data_nauty = {}
+        sort_idx={}
         for k in all_data:
             all_data_nauty[k] = [oapackage.reduceConference(d) for d in all_data[k]]
-        design_stack = all_data, all_data_nauty
+            sort_idx[k] = np.argsort(np.array(all_data_nauty[k], dtype=object))
+        design_stack = DesignStack(all_data, all_data_nauty, sort_idx)
 
         number_of_classes = [len(value) for key, value in design_stack[0].items()]
 

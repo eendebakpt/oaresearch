@@ -21,6 +21,8 @@ class TestMiscUtils(unittest.TestCase):
     def test_index_sorted_array(self):
         value = index_sorted_array( range(10),3)
         self.assertEqual(value, 3)
+
+    def test_index_sorted_array_non_sorted_array(self):
         with self.assertRaises(ValueError):
             index_sorted_array( [1,4,1,1,2,2,2,2,3,3,5],4)
     
