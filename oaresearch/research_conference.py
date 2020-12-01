@@ -172,7 +172,7 @@ def reduce_minimal_form(design, design_stack):
     return all_data[k][idx]
 
 
-@lru_cache(maxsize=10000)
+@lru_cache(maxsize=400000)
 def cached_conference_design_has_maximal_extension(design, verbose=0, Nmax = None, conference_generator=None):
         design_stack = conference_design_has_maximal_extension.design_stack
         if design_stack is None:
