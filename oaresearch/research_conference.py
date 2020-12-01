@@ -122,7 +122,7 @@ def conference_design_extensions(array: DesignType, verbose: int = 0, filter_sym
     zero_index = -1
     filterj2 = 1
     filterj3 = 0
-    filter_symmetry = 1  # we can use symmetry reduction, since any the other filtering is not related to the symmetry of the design
+    filter_symmetry = True  # we can use symmetry reduction, since any the other filtering is not related to the symmetry of the design
     
     if conference_generator is None:
         extensions = oapackage.generateSingleConferenceExtensions(
