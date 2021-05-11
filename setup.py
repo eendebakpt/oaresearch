@@ -4,10 +4,10 @@
 setup.py file for OApackage
 """
 
-# %% Load packages
-from setuptools import setup, find_packages
-
 import re
+
+# %% Load packages
+from setuptools import find_packages, setup
 
 
 def readme():
@@ -18,7 +18,7 @@ def readme():
 def get_version(verbose=1, filename='oaresearch/version.py'):
     """ Extract version information from source code """
 
-    with open(filename, 'r') as f:
+    with open(filename) as f:
         ln = f.readline()
         m = re.search('.* ''(.*)''', ln)
         version = (m.group(1)).strip('\'')
@@ -48,7 +48,7 @@ setup(name='oaresearch',
       packages=packages,
       tests_require=['numpy', 'nose>=1.3', 'coverage>=4.0', 'mock'],
       zip_safe=False,
-      install_requires=['numpy>=1.13', 'scanf', 'OApackage>=2.6.8','matplotlib',
+      install_requires=['numpy>=1.20', 'scanf', 'OApackage>=2.6.8', 'matplotlib',
                         'json_tricks', 'jsmin', 'htmlmin', 'coreapi', 'joblib'],
       extras_require={
           'GUI': ["qtpy", 'matplotlib'],
@@ -58,6 +58,7 @@ setup(name='oaresearch',
                    'Programming Language :: Python :: 3',
                    'Programming Language :: Python :: 3.7',
                    'Programming Language :: Python :: 3.8',
+                   'Programming Language :: Python :: 3.9',
                    'License :: OSI Approved :: BSD License'
                    ]
       )
