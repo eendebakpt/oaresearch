@@ -19,7 +19,7 @@ import oapackage.graphtools
 # %%
 
 
-def generateConference(N, kmax=None, verbose=1, diagc=False,
+def generateConference(N, kmax=None, verbose=1, diagc=False,mode='nauty',
                        nmax=None, selectmethod='random', tag='cdesign', outputdir=None):
     """ General function to compute conference matrices
 
@@ -52,7 +52,7 @@ def generateConference(N, kmax=None, verbose=1, diagc=False,
     LL = [[]] * (kmax)
     LL[1] = ll
     if verbose:
-        print('generateConference: start: %s' % ctype)
+        print(f'generateConference: start: {ctype}, mode {mode}' )
     if outputdir is not None:
         _ = oapackage.writearrayfile(
             join(outputdir, 'cdesign-%d-%d.oa' % (N, 2)), LL[1], oapackage.ATEXT, N, 2)
@@ -65,7 +65,14 @@ def generateConference(N, kmax=None, verbose=1, diagc=False,
         LL[extcol] = oapackage.extend_conference(
             LL[extcol - 1], ctype, verbose=verbose >= 2)
 
-        LL[extcol] = oapackage.selectConferenceIsomorpismClasses(LL[extcol], verbose >= 2)
+        if mode=='nauty':
+            LL[extcol] = oapackage.selectConferenceIsomorpismClasses(LL[extcol], verbose >= 2)
+        elif mode=='lmc0':
+
+
+            LL[extcol] = oapackage.selectLMC0(LL[extcol], verbose>=2, ctype)
+        else:
+            raise NotImplementedError(f'mode {mode}')
 
         LL[extcol] = oapackage.sortLMC0(LL[extcol])
 
@@ -95,12 +102,12 @@ def generateConference(N, kmax=None, verbose=1, diagc=False,
 
 # %% Measure generation time
 outputdir = None
-cases = range(4, 20, 2)
+cases = range(4, 22, 2)
 
 generation_times = {}
 for NN in cases:
     t0 = time.time()
-    LL = generateConference(N=NN, kmax=NN+1, outputdir=outputdir, verbose=1)
+    LL = generateConference(N=NN, kmax=NN+1, outputdir=outputdir, verbose=1, mode='lmc0')
     dt = time.time()-t0
     generation_times[f'cdesign{NN}'] = dt
 
