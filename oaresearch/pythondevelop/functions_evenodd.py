@@ -8,7 +8,25 @@ Created on Fri Nov 16 11:24:39 2012
 """ Load necessary packages """
 
 
-def smallEOcase(key: str, adata, basedir, htmldir: str, latexdir: str, subdir=None, verbose=1, cache=1):
+
+
+import datetime
+from researchOA import analyseFile, loadAnalysisFile
+import os
+import numpy as np
+import time
+import math
+import oapackage
+import oalib
+from os.path import join
+import researchOA
+from oapackage import oahelper
+from researchOA import gatherResults, runcommand, splitdir, splitname, splitTag, gatherLockfile
+from researchOA import checkFiles, checkFilesOA, evenoddCases, readNumbersFile
+from ABhelper import *
+from researchOA import *
+from researchOA import parseProcessingTime, nArrayFile, formatProccessingTime
+def smallEOcase(key : str, adata, basedir, htmldir : str, latexdir : str, subdir=None, verbose=1, cache=1):
     """ Calculate one of the small cases """
     t = adata.strength
     if subdir is None:
