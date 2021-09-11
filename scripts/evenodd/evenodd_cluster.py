@@ -264,10 +264,10 @@ else:
     gwlp = loadAnalysisFile(anafile[0])
 
     ii = (np.abs(gwlp[:, -1]) > 1e-5).nonzero()[0]
-    ww = [int(x) for x in ii]
+    eo_indices = [int(x) for x in ii]
     idxvec = oapackage.intVector(ww)
     sols0 = oapackage.arraylist_t()
-    for ii in ww:
+    for ii in eo_indices:
         al = oapackage.oalib.selectArrays(afile, ii)
         sols0.push_back(al)
     oapackage.writearrayfile(eostartfile, sols0, oapackage.ABINARY)
@@ -292,20 +292,22 @@ print('time initial extension: %.1f [s], %d arrays ' % (
     dt0, oapackage.nArrays(afile)))
 
 # %%
-ll = oapackage.readarrayfile(eostartfile)
-for idx, d in enumerate(ll):
-    oapackage.writearrayfile(f'single{idx}.oa', ll[idx])
-    cmd = f'oaextendsingle -r single{idx}.oa -f D -l 2 -m {oapackage.MODE_LMC_2LEVEL} -c oaconfig.txt -o single'
-    print(cmd)
-    cmd = f'oaextendsingle -r single{idx}.oa -f D -l 2 -m {oapackage.MODE_J5ORDERX}-c oaconfig.txt -o single-eo'
-    print(cmd)
+if 0:
+    ll = oapackage.readarrayfile(eostartfile)
+    ll = oapackage.readarrayfile(r'result-48.2-2-2-2-2.oa')  # [2, 5, 6, 8, 9]
+    for idx, d in enumerate(ll):
+        oapackage.writearrayfile(f'single{idx}.oa', ll[idx])
+        cmd = f'oaextendsingle -r single{idx}.oa -f D -l 2 -m {oapackage.MODE_LMC_2LEVEL} -c oaconfig.txt -o single'
+        print(cmd)
+        cmd = f'oaextendsingle -r single{idx}.oa -f D -l 2 -m {oapackage.MODE_J5ORDERX}-c oaconfig.txt -o single-eo'
+        print(cmd)
 
-# even-odd
-# 0: 0.9 [s]
-# 1: 2.8 [s]
-# 2: 0.2 [s]
-# 3: 0.0 [s]
-# 4: 877.9 [s]
+    # even-odd N=48
+    # 0: 0.9 [s]
+    # 1: 2.8 [s]
+    # 2: 0.2 [s]
+    # 3: 0.0 [s]
+    # 4: 877.9 [s]
 
 # %% """ Step 2b: split the initial extension """
 

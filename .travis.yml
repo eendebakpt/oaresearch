@@ -5,13 +5,10 @@ matrix:
   include:
   - name: "Python 3.9"
     python: "3.9"
-    dist: bionic
+    dist: focal
   - name: "Python 3.8"
     python: "3.8"
-    dist: bionic
-  - name: "Python 3.7"
-    python: "3.7"
-    dist: bionic
+    dist: focal
 
 before_install:
   - sudo apt-get install -y swig3.0
