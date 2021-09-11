@@ -11,12 +11,13 @@ matrix:
     dist: focal
 
 before_install:
-  - sudo apt-get install -y swig3.0
+  - sudo apt-get install -y swig
 
 
 install:
     - ls
-    - which swig3.0
+    - which swig
+    - swig -version
     - pip install OApackage
 
     - python setup.py install
