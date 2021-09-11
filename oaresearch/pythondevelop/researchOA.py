@@ -6,7 +6,7 @@ Created on Fri Sep 21 16:14:21 2012
 
 
 # %% Load necessary packages
-
+from typing import Union, List
 import copy
 import itertools
 import os
@@ -41,6 +41,7 @@ import oapackage.scanf as scanf
 from oapackage.markup import oneliner as e
 
 from oaresearch.pythondevelop import ABhelper
+from oaresearch.pythondevelop.ABhelper import checkOAfile, checkFiles, runcommand
 from oaresearch.pythondevelop.ABhelper import *
 
 # %% Make nice plots
@@ -962,7 +963,7 @@ def arraytxt(na):
         return 'arrays'
 
 
-def analyseFile(afile: str, method='a', verbose=1, cache=1, cmdlog=None) -> str:
+def analyseFile(afile: str, method: str = 'a', verbose=1, cache=1, cmdlog=None) -> Union[str, None, List]:
     """ Analyse array file
 
     Args:
@@ -973,7 +974,7 @@ def analyseFile(afile: str, method='a', verbose=1, cache=1, cmdlog=None) -> str:
     nm = checkOAfile(afile)
     if nm is None:
         print('analyseFile: error: file %s does not exist' % afile)
-        return []
+        return None
 
     afile = nm
     if afile.endswith('.oa.gz'):
@@ -985,7 +986,7 @@ def analyseFile(afile: str, method='a', verbose=1, cache=1, cmdlog=None) -> str:
     if verbose >= 2:
         print('analyseFile: method %s' % method)
     if method == 'a':
-        anafile = afile.replace(repstr, '-ana-Dvalues.bin')
+        anafile: Union[str, List[str]] = afile.replace(repstr, '-ana-Dvalues.bin')
         cmd = 'echo "analyse file %s"; nice oaanalyse -j -1 -A -a %s %s' % (
             afile, astr, afile)
     else:
@@ -1661,13 +1662,13 @@ def abSubpage(rr, htmldir, verbose=1, makeheader=True, cache=1):
     return subfile
 
 
-def formatProccessingTime(ss, verbose: int = 1, estimate: bool = 1, keep_seconds=False):
+def formatProccessingTime(ss, verbose: int = 1, estimate: bool = True, keep_seconds=False):
     """ Format processing time to string
 
     Args:
         ss: Time in seconds or a string
     """
-    if isinstance(ss, bytes):
+    if isinstance(ss, (str, bytes)):
         res = ss
     else:
         if ss < 0:
