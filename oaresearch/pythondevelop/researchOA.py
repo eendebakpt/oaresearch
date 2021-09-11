@@ -21,7 +21,7 @@ from os.path import basename, join
 
 import numpy as np
 from colorama import Fore
-from oapackage.oahelper import array2latex
+from oapackage.oahelper import array2latex, series2htmlstr, safemax
 
 from oaresearch.job_utils import createJobScript, job, makeJobList
 from oaresearch.misc_utils import gzipOA
@@ -1923,8 +1923,6 @@ def generateABcase(N, kfinal, kstart=3, kfull=3, Afinal=0, t=2, verbose=1, pfig=
 
     adata0 = oalib.arraydata_t(adata, kstart)
     afile0 = os.path.join(datadir, 'result-' + adata0.idstr() + '.oa')
-#    sols=oalib.readarrayfile(afile0)
-#    print('  initial file: %d solutions' % sols.size())
     if verbose:
         print('  initial file: %d solutions' % oalib.nArrays(afile0))
 
