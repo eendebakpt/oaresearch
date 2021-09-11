@@ -21,6 +21,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import oalib
 import oapackage.oahelper as oahelper
+from oapackage.oahelper import floatformat, checkFiles, getArrayFile
 from oapackage.oahelper import *
 def extendFile(afile, ostr, configfile, verbose=1, cache=1, logfile=None, cmdlog=None):
     """ Extend arrayfile with dynamic filtering """
@@ -55,7 +56,6 @@ def gma2str(gmadata, t=None, sformat=None):
     gmadata[gmadata < 0] = 0
     if not(np.abs(gmadata[0] - 1) < 1e-12 and np.abs(gmadata[1]) < 1e-12):
         print('warning: data are not good GWPL data!!!!')
-        pdb.set_trace()
     bgma = np.around(gmadata, decimals=12)
     if not t is None:
         bgma = bgma[(t + 1):]
@@ -346,7 +346,7 @@ def splitFunc(X, verbose=0):
     n = Y.shape[0]
     k = Y.shape[1]
     Y = Y.astype(float)
-    m = 1 + k + k * (k - 1) / 2
+    #m = 1 + k + k * (k - 1) / 2
     Y -= .5
     Y *= 2
     c = np.ones((n, 1))

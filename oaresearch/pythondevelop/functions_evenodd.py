@@ -21,11 +21,11 @@ import oalib
 from os.path import join
 import researchOA
 from oapackage import oahelper
-from researchOA import gatherResults, runcommand, splitdir, splitname, splitTag, gatherLockfile
-from researchOA import checkFiles, checkFilesOA, evenoddCases, readNumbersFile
+from oaresearch.pythondevelopresearchOA import gatherResults, runcommand, splitdir, splitname, splitTag, gatherLockfile
+from oaresearch.pythondevelopresearchOA import checkFiles, checkFilesOA, evenoddCases, readNumbersFile
 from ABhelper import *
-from researchOA import *
-from researchOA import parseProcessingTime, nArrayFile, formatProccessingTime
+from oaresearch.pythondevelopresearchOA import *
+from oaresearch.pythondevelopresearchOA import parseProcessingTime, nArrayFile, formatProccessingTime
 def smallEOcase(key : str, adata, basedir, htmldir : str, latexdir : str, subdir=None, verbose=1, cache=1):
     """ Calculate one of the small cases """
     t = adata.strength

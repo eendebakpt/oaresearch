@@ -1602,37 +1602,12 @@ def abSubpage(rr, htmldir, verbose=1, makeheader=True, cache=1):
         page.img(src=subimage, style='max-width: 80%', alt='')
         page.p.close()
 
-    pagex = researchOA.statistics2htmltable(page, rr['fullstatistics'])
+    pagex = statistics2htmltable(page, rr['fullstatistics'])
 
     if 'projectiontable' in rr.keys():
         pp = rr['projectiontable']
         page.add('<br/>\n')
         page.add(str(pp))
-
-    # subpage: make image
-    if 0:
-        if verbose:
-            print('generating image')
-        page.h2('Image')
-        xl = list(range(ad.strength + 1, len(nums) + ad.strength + 1))
-        pnums = np.array(nums, dtype=np.float)
-        pnums[pnums < 0] = np.nan
-        axes = plt.figure(1)
-        plt.clf()
-        plt.plot(xl, pnums, '.b', markersize=20)
-        plt.title(r'$%s$' % ad.latexstr(), fontsize=18)
-        plt.ylabel('Number of arrays', fontsize=15)
-        plt.xlabel('Number of columns', fontsize=15)
-        plt.xticks(xl, xl)
-        plt.ylim(-1, max(nums) + 1)
-        plt.xlim(min(xl) - 1, max(xl) + 1)
-
-        subimage = 'series-%s-t%d.png' % (ad.idstr(), ad.strength)
-        plt.savefig(os.path.join(htmldir, 'subpages', subimage))
-
-        page.img(src='' + subimage, style='max-width: 70%')
-#                    impage.div(style='float: right; max-width: 50%; min-width: 300px;')
- #           impage.img(src=imbase, width='')
 
     # import datetime
     # today = datetime.date.today()
@@ -2409,7 +2384,7 @@ def analyseABcase(rr, verbose=1, cache=1, subdir='tpages'):
         # select the gma arrays
 
         afile = os.path.join(rr['datadir'], outfile)
-        xx = researchOA.makeArraySelection(
+        xx = makeArraySelection(
             afile, gmadata['indices'], gfile, verbose=0, dogz=None, cache=cache)
         pxx = xx[1]
         na = xx[2]
@@ -3148,8 +3123,7 @@ def gatherFilesList(lvls, outputdir, splitdata, adata, verbose=1, paretofiles=Tr
     level = len(lvls)
     kmin = splitdata['levels'][level + 1] + 1
     kmax = splitdata['levels'][level + 2]
-    nfile = os.path.join(outputdir, edir0, numbersFile(lvls))
-
+    #nfile = os.path.join(outputdir, edir0, numbersFile(lvls))
     # flist=[nfile]
     flist = []
     kmin = splitdata['levels'][level + 1] + 1
