@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Created on Fri Sep 21 16:14:21 2012
 
@@ -6,19 +5,26 @@ Created on Fri Sep 21 16:14:21 2012
 """
 
 
-#%% Load necessary packages
+# %% Load necessary packages
 
-import sys
+import copy
+import itertools
 import os
-from os.path import join
-import numpy as np
-import time
-from colorama import Fore
+import pickle
+import platform
 import re
 import shutil
-from os.path import basename
-import platform
-import itertools
+import sys
+import time
+import types
+from os.path import basename, join
+
+import numpy as np
+from colorama import Fore
+from oapackage.oahelper import array2latex
+
+from oaresearch.job_utils import createJobScript, job, makeJobList
+from oaresearch.misc_utils import gzipOA
 
 try:
     import matplotlib.pyplot as plt
@@ -28,16 +34,16 @@ except:
     pass
 
 import oapackage
-import oapackage.scanf as scanf
-import oapackage.oahelper as oahelper
 import oapackage as oalib
-import ABhelper
-from ABhelper import *
-
 import oapackage.markup as markup
+import oapackage.oahelper as oahelper
+import oapackage.scanf as scanf
 from oapackage.markup import oneliner as e
 
-#%% Make nice plots
+from oaresearch.pythondevelop import ABhelper
+from oaresearch.pythondevelop.ABhelper import *
+
+# %% Make nice plots
 # http://blog.olgabotvinnik.com/prettyplotlib/
 
 
@@ -97,7 +103,7 @@ def niceplot(ax, fig=None, despine=True, verbose=0, legend=None, almost_black='#
     plt.draw()
     plt.show()
 
-#%% Document markup
+# %% Document markup
 
 
 def indexstart(ii=None):
@@ -113,14 +119,14 @@ def indexend(k):
     return k
 
 
-#%% Math
+# %% Math
 
 def binom(n, k):
     """ Return binomial coefficient """
     return math.factorial(n) / (math.factorial(k) * math.factorial(n - k))
 
 
-#%% File utilities
+# %% File utilities
 
 def findfiles(p, patt=None):
     """ Get a list of files """
@@ -277,9 +283,6 @@ def splitFile(afile, ostr='split', nn=None, maxn=None, nwritemax=1000, method='a
                   (basename(afile), nn))
         return ostr, nn
 
-import copy
-import pickle
-
 
 def loadPickle(pfile):
     """ Python 2/3 helper function """
@@ -296,7 +299,7 @@ def storeResults(rr, outfile, verbose=0):
     rrs = copy.copy(rr)
     adata = rrs['adata']
     if 'fcopy' in rrs.keys():
-                # print('storeResults')
+        # print('storeResults')
         if 'rr' in rrs['fcopy']:
             rrs['fcopy']['rr'].update({'adata': adata.idstrseriesfull()})
     if (type(adata)) == type(oalib.arraydata_t(1, 12, 1, 2)):
@@ -676,7 +679,7 @@ def loadnumbersfile(cfile, num=2, verbose=1):
         k %d: [%d]
 
     """
-    fid = open(cfile, 'r')
+    fid = open(cfile)
     aa = np.zeros((0, 3))
     fmt = 'k %d:' + ' %d' * num
     for ln in fid:
@@ -723,20 +726,21 @@ def citation(paper, style='brief'):
         paper (str): paper to be cited
         style (str): brief or full
     """
-    if paper=='complete':
+    if paper == 'complete':
         return markup.oneliner.a('Complete Enumeration of Pure-Level and Mixed-Level Orthogonal Arrays',
-                          href='http://dx.doi.org/10.1002/jcd.20236') 
-    elif paper=='conference' or paper=='cisomorphism':
+                                 href='http://dx.doi.org/10.1002/jcd.20236')
+    elif paper == 'conference' or paper == 'cisomorphism':
         return '<em>A Classification Criterion for Definitive Screening Designs</em> (in preparation)'
         return markup.oneliner.a('A Classification Criterion for Definitive Screening Designs',
-                          href='...')             
-    elif paper=='conference enumeration' or paper=='cenumeration':
+                                 href='...')
+    elif paper == 'conference enumeration' or paper == 'cenumeration':
         return '<em>Enumeration and Classification of Definitive Screening Designs</em> (in preparation)'
         return markup.oneliner.a('Enumeration and Classification of Definitive Screening Designs',
-                          href='...')             
+                                 href='...')
     else:
-         raise Exception('paper not known')
-                                     
+        raise Exception('paper not known')
+
+
 def parseParetoClass(adata, pfile, dstr=None, targetdir='', subfilebase='test', prevnextstr='', verbose=1):
     """ Generate html page with data about arrays
     """
@@ -958,9 +962,9 @@ def arraytxt(na):
         return 'arrays'
 
 
-def analyseFile(afile : str, method='a', verbose=1, cache=1, cmdlog=None) -> str:
+def analyseFile(afile: str, method='a', verbose=1, cache=1, cmdlog=None) -> str:
     """ Analyse array file
-    
+
     Args:
         afile: Array file to analyse
     Returns:
@@ -1029,7 +1033,7 @@ def analyseFile(afile : str, method='a', verbose=1, cache=1, cmdlog=None) -> str
             print('file already exists')
     return anafile
 
-#%%
+# %%
 
 
 def array2html(X, header=1, tablestyle='border-collapse: collapse;', trclass='', tdstyle='', trstyle='', thstyle='', comment=None):
@@ -1091,8 +1095,8 @@ def array2html(X, header=1, tablestyle='border-collapse: collapse;', trclass='',
     page.table.close()
     return page
 
-#%%
-from oapackage.oahelper import array2latex
+
+# %%
 
 
 def loadGMAdata(afile, cache=1, verbose=0):
@@ -1175,8 +1179,6 @@ def extendInitial(datadir, adata, kstart, verbose=1, cache=1, cmdlog=None):
     if verbose:
         print('  initial file: %d solutions' % nsols)
     return afile0, nsols
-
-import types
 
 
 def projDeff(al, kp, verbose=1):
@@ -1297,14 +1299,14 @@ def statistics2htmltable(page, rrstats, verbose=1, titlestr=None):
 
 def formatAtag(txt, lnk, afile):
     """ Create HTML link to .oa file
-    
+
     Args:
         txt (str)
         lnk (str)
         afile (str): .oa file on disk
     Returns:
         str: generated html
-    
+
     """
     if oahelper.oaIsBinary(afile):
         ss = e.a(txt + e.small(' (binary)'), href=lnk, class_='binarylink')
@@ -1659,12 +1661,12 @@ def abSubpage(rr, htmldir, verbose=1, makeheader=True, cache=1):
     return subfile
 
 
-def formatProccessingTime(ss, verbose:int=1, estimate : bool =1, keep_seconds = False):
+def formatProccessingTime(ss, verbose: int = 1, estimate: bool = 1, keep_seconds=False):
     """ Format processing time to string
-    
+
     Args:
         ss: Time in seconds or a string
-    """ 
+    """
     if isinstance(ss, bytes):
         res = ss
     else:
@@ -1672,7 +1674,7 @@ def formatProccessingTime(ss, verbose:int=1, estimate : bool =1, keep_seconds = 
             res = '-1'
         elif ss < 60:
             if keep_seconds:
-                res = '%.1f seconds' % (float(ss) )
+                res = '%.1f seconds' % (float(ss))
             else:
                 res = '&lt; 1 minute'
         elif ss < 3600:
@@ -1816,7 +1818,7 @@ def seriesSubpage(basedatadir, htmldir, case, dogma=0, verbose=1, cache=1, subta
         if dogma:
             page.td((str(na), gmastr))
         else:
-            page.td((str(na)))
+            page.td(str(na))
         page.tr.close()
         # page.p( xstr + ': ' + 'gma: %s' % gmastr)
 
@@ -2181,7 +2183,7 @@ def generateABcase(N, kfinal, kstart=3, kfull=3, Afinal=0, t=2, verbose=1, pfig=
         plotABfigure(a, b, figid=100 + 1, verbose=1, fontsize=13)
         plotABboundaries(Acc=Acc)
         ss = adata.latexstr()
-        ss = ss.replace('\\OA', '\mathrm{OA}')
+        ss = ss.replace('\\OA', r'\mathrm{OA}')
         plt.title(r'Scatterplot for $%s$' % ss, fontsize=18)
         plt.savefig(figfile)
 
@@ -2206,7 +2208,7 @@ def generateABcase(N, kfinal, kstart=3, kfull=3, Afinal=0, t=2, verbose=1, pfig=
     return rr
     # Estimate total number of arrays
 
-#%%
+# %%
 
 
 def tickfontsize(fontsize=14, ax=None):
@@ -2219,7 +2221,7 @@ def tickfontsize(fontsize=14, ax=None):
         tick.label.set_fontsize(fontsize)
     plt.draw()
 
-#%%
+# %%
 
 
 def generateStatistics(afile, nbest=10, verbose=1, doprojef=0):
@@ -2249,7 +2251,7 @@ def generateStatisticsX(afile, data, gma, nbest=10, verbose=1):
         inx = np.argsort(2 * data[:, 0].flatten() + data[:, 1].flatten())[::-1]
         gmadata = loadGMAdata(afile, cache=1, verbose=0)
         if inx.size == 0:
-                # no arrays...
+            # no arrays...
             gsub = gmadata
             ddx = data
         else:
@@ -2348,7 +2350,6 @@ def analyseABcase(rr, verbose=1, cache=1, subdir='tpages'):
         print('analyseABcase: k %d: m %d, rmaxrnk %d, ngoodrank %d' %
               (k, m, nmaxrnk, ngoodrank))
 
-
     rr['fullstatistics'] = generateStatisticsX(afile, data, gma)
 
     if 1:
@@ -2438,7 +2439,7 @@ def analyseABcase(rr, verbose=1, cache=1, subdir='tpages'):
 
 def copyOAfile(source, targetdir, target0, convert=None, zipfile=None, verbose=1, cache=1):
     """ Copy an OA file, depending on arguments convert or compress the file
-    
+
     Args:
         source (str): source file
         target (str): target output file
@@ -2600,7 +2601,7 @@ def readNumbersFile(nfile, verbose=1):
         if verbose >= 2:
             print('line ' + d)
         kn = scanf.sscanf(d, 'k %d: %d %d')
-        nums.append((kn))
+        nums.append(kn)
     fid.close()
     return nums
 
@@ -2627,7 +2628,7 @@ def caseReadNumbers(case, basedatadir, verbose=1):
 
 # 3
 
-#%%
+# %%
 
 
 def evenoddClusterGetkmax(N, strength):
@@ -2646,7 +2647,7 @@ def evenoddClusterGetkmax(N, strength):
         # special case to reduce the total number of files
         k = 24
     return k
-#%%
+# %%
 
 
 def evenoddCases(N, strength=3, lastlevel=3):
@@ -2730,10 +2731,8 @@ def evenoddCases(N, strength=3, lastlevel=3):
 
     return (splitdata, iisel, jjsel)
 
-#%%
+# %%
 
-
-from oaresearch.job_utils import  createJobScript
 
 def jobStatus(alljobs, verbose=1):
     """ Print status for a list of jobs """
@@ -2748,13 +2747,6 @@ def jobStatus(alljobs, verbose=1):
         print('  %d/%d to run' % (len(gjobs), len(jobs)))
 
     return gjobs, jobs
-
-from oaresearch.job_utils import makeJobList
-
-
-
-
-from oaresearch.job_utils import job
 
 
 def processingtimeFile(lvls):
@@ -2794,7 +2786,7 @@ def writeprocessingTime(pfile, dt):
 def readprocessingTime(pfile):
     """ Read processing time from a file """
     try:
-        f = open(pfile, 'rt')
+        f = open(pfile)
         s = f.readline().strip()  # = f.read()
         f.close()
         T = float(s)
@@ -2803,7 +2795,7 @@ def readprocessingTime(pfile):
         pass
     return T
 
-#%%
+# %%
 
 
 def evenoddAnalyseRun(outputdir, adata, splitdata, verbose=1, iimax=None):
@@ -2817,7 +2809,7 @@ def evenoddAnalyseRun(outputdir, adata, splitdata, verbose=1, iimax=None):
         edir = splitdir([ii])
         nfile = os.path.join(outputdir, edir, 'timelog-split-%d.txt' % ii)
         try:
-            fid = open(nfile, 'r')
+            fid = open(nfile)
         except:
             badidx.append(ii)
             continue
@@ -2862,8 +2854,6 @@ def evenoddAnalyseRun(outputdir, adata, splitdata, verbose=1, iimax=None):
             tEstimate, ncores))
 
     return (ptimes, badidx, nbx)
-
-from os.path import join
 
 
 def doSplitFile(lvls, splitdata, adata, verbose=1, outputdir=None, createdirs=False, cache=True):
@@ -2913,7 +2903,7 @@ def doSplitFile(lvls, splitdata, adata, verbose=1, outputdir=None, createdirs=Fa
             done = True
     return splitcmd, afile, splitout, done
 
-#%%
+# %%
 
 
 def checkLevel(lvls, splitdata, adata, outputdir, verbose=1):
@@ -2970,9 +2960,7 @@ def checkLevel(lvls, splitdata, adata, outputdir, verbose=1):
     return 1
 
 
-#%%
-
-from oaresearch.misc_utils import gzipOA
+# %%
 
 
 def touchFile(fname, txt=''):
@@ -3153,7 +3141,7 @@ def gatherResults(lvls, outputdir, splitdata, adata, dozip=True, verbose=2, npar
     return joblist
 
 
-#%%
+# %%
 def gatherFilesList(lvls, outputdir, splitdata, adata, verbose=1, paretofiles=True, legacy=False):
     """ Return list of files needed to gather results for given stage """
     tag = splitTag(lvls)
@@ -3773,4 +3761,3 @@ def casesOA(allcases=1):
     cases.append(defaultCase(512, 8, 10, [4, 2, 2, 2, 2, 2, 2, 2, 2, 2]))
     cases[-1]['casedir'] = 'design-512-42a-t8'
     return cases
-
