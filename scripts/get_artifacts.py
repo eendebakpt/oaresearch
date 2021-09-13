@@ -33,6 +33,10 @@ document = client.get(
 builds = [build for build in document['builds'] if build['branch'] == 'master']
 
 latest_build = builds[0]
+branch = latest_build['branch']
+PRname = latest_build.get('pullRequestName')
+commitId = latest_build['commitId']
+
 build = client.get(baseurl + '/projects/%s/%s/builds/%d' %
                    (username, project_name, latest_build['buildId']))
 
@@ -40,7 +44,7 @@ print('latest build: %s: branch %s: %s: %s' %
       (build['build']['status'], build['build']['branch'], build['build']['message'], build['build']['created']))
 
 if not latest_build['status'] == 'success':
-    raise Exception('need succesfull build!')
+    raise Exception(f'need succesfull build! tried: branch {branch} c {commitId}: {PRname}')
 
 print(f'download to {targetdir}')
 
@@ -49,12 +53,12 @@ print(f'download to {targetdir}')
 for jobtag, job in enumerate(build['build']['jobs']):
     print('job %s: %s' % (job['jobId'], job['name']))
 
-    url = '/buildjobs/{0}/artifacts'.format(job['jobId'])
+    url = '/buildjobs/{}/artifacts'.format(job['jobId'])
     artifacts = client.get(baseurl + url)
     print('  found %d artifacts' % len(artifacts))
     for artifact in artifacts:
         filename0 = artifact['fileName'].split('/')[-1]
-        url = '/buildjobs/{0}/artifacts/{1}'.format(
+        url = '/buildjobs/{}/artifacts/{}'.format(
             job['jobId'], artifact['fileName'])
         print('   ' + filename0)
 

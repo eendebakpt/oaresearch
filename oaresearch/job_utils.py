@@ -1,20 +1,21 @@
 import os
 import time
-
+from typing import List
 from os.path import join
 
 import oapackage
 
 from oapackage import oahelper
 
-class job(object):
+
+class job:
 
     """ Class representing a job """
     logfile = None
     execute = False
 
     def __init__(self, cmd, jobtype='generic', shorttag=None, checkfiles=[], checkfilesstart=[], ncores=1, queue=None):
-        """ Create an object for job definitions 
+        """ Create an object for job definitions
 
         Arguments:
             cmd (str): command to be executed
@@ -56,7 +57,7 @@ class job(object):
 
         return s
 
-    def canrun(self, verbose : int =0):
+    def canrun(self, verbose: int = 0):
         if oahelper.checkFilesOA(self.checkfilesstart, cache=True, verbose=verbose):
             return True
         else:
@@ -88,17 +89,17 @@ class job(object):
             if verbose:
                 print('job %s: results already calculated' % self.jobtype)
         else:
-            if verbose>=2:
-                print('job %s: canrun() %s' % (self.jobtype, self.canrun() ))
+            if verbose >= 2:
+                print('job %s: canrun() %s' % (self.jobtype, self.canrun()))
             if self.canrun():
-                if verbose>=2:
-                    print('job %s: running command' % self.jobtype )
-                    
+                if verbose >= 2:
+                    print('job %s: running command' % self.jobtype)
+
                 res = oahelper.runcommand(
                     self.cmd, dryrun=(not self.execute), idstr=self.jobtype, logfile=self.logfile)
                 if not res == 0:
                     goodcalc = 0
-                
+
         c = self.complete()
         if self.verbose >= 2:
             print('runjob: c %s, goodcalc %d' % (c, goodcalc))
@@ -106,8 +107,7 @@ class job(object):
         if goodcalc == 0:
             c = 0
         return c
-    
-from typing import List
+
 
 def createJobScript(j, index=0, scriptdir=None, queue='q7d', verbose=1, jobtag='quickjob'):
     """ Create a job script file for easy submission
@@ -234,15 +234,16 @@ def createJobScript(j, index=0, scriptdir=None, queue='q7d', verbose=1, jobtag='
 
     return outfile, substr
 
-def makeJobList(scriptdir : str, jobs : List, verbose=1, ncores : int =0, queue=None):
+
+def makeJobList(scriptdir: str, jobs: List, verbose=1, ncores: int = 0, queue=None):
     """ Create a list of jobs
-    
+
     Args:
         scriptdir (str)
         jobs (list): list of job objects
         verbose (int)
     """
-    slist = []
+    slist: List = []
     nj = 0
     for idx, j in enumerate(jobs):
         if not j.complete() and j.canrun():
