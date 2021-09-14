@@ -9,21 +9,36 @@ Created on Fri Nov 16 11:24:39 2012
 
 
 import datetime
-from oaresearch.pythondevelop.researchOA import analyseFile, loadAnalysisFile
-import os
-import numpy as np
-import time
 import math
-import oapackage
-import oalib
+import os
+import time
 from os.path import join
-import researchOA
+
+import numpy as np
+import oalib
+import oapackage
 from oapackage import oahelper
-from oaresearch.pythondevelop.researchOA import gatherResults, runcommand, splitdir, splitname, splitTag, gatherLockfile
-from oaresearch.pythondevelop.researchOA import checkFiles, checkFilesOA, evenoddCases, readNumbersFile
-from ABhelper import *
 from oaresearch.pythondevelop.researchOA import *
-from oaresearch.pythondevelop.researchOA import parseProcessingTime, nArrayFile, formatProccessingTime
+from oaresearch.pythondevelop.researchOA import (
+    analyseFile,
+    checkFiles,
+    checkFilesOA,
+    evenoddCases,
+    formatProccessingTime,
+    gatherLockfile,
+    gatherResults,
+    loadAnalysisFile,
+    nArrayFile,
+    parseProcessingTime,
+    readNumbersFile,
+    runcommand,
+    splitdir,
+    splitname,
+    splitTag,
+)
+
+import researchOA
+from ABhelper import *
 
 
 def smallEOcase(key: str, adata, basedir, htmldir: str, latexdir: str, subdir=None, verbose=1, cache=1):

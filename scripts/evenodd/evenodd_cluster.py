@@ -70,38 +70,27 @@ from oaresearch.pythondevelop.researchOA import (
 )
 
 # %% setup data locations
-oadir = os.path.join(os.path.expanduser("~"), "projects/oapackage")
 resultsdir = join(os.path.expanduser("~"), "oatmp")
 
 # setup data locations
 if "VSC_SCRATCH" in os.environ.keys():
     vsccluster = 1
     print("we are running on the VSC cluster!")
-    oadir = os.path.join(os.environ["VSC_SCRATCH"], "OA-develop-source")
     resultsdir = os.path.join(os.environ["VSC_SCRATCH"], "OA-run")
 else:
     vsccluster = 0
 
-if not os.path.isdir(oadir):
-    print("  oadir %s does not exist ... exiting" % oadir)
-    sys.exit()
 
 if not os.path.isdir(resultsdir):
     print("  resultsdir %s does not exist ... exiting" % resultsdir)
     sys.exit()
 
 
-# sys.path.append(os.path.join(oadir, 'pythondevelop'))
-
-# import functions_evenodd
-
-
 r = oapackage.log_print(-oapackage.SYSTEM, "")
 
-# %% Helper functions
 
+# %% Setup arguments
 
-# %%
 # dobigcase = 56  # by default run a small case to test the scripts
 dobigcase = 48  # by default run a small case to test the scripts
 # dobigcase=64 #
@@ -301,6 +290,20 @@ res = j.runjob(cache=cache)
 os.chdir(outputdir)
 dt0 = oahelper.parseProcessingTime(cmdlogfile)
 print("time initial extension: %.1f [s], %d arrays " % (dt0, oapackage.nArrays(afile)))
+
+#%% Research:
+
+startfile = "result-48.2-2-2-2-2.oa"
+cmd = f"oaextendsingle -r {startfile} -f D -l 2 -c oaconfig.txt -o full"
+print(cmd)
+
+startfile = "result-48.2-2-2-2-2.oa"
+cmd = f"oaextendsingle -r {startfile} -f D -l 2 -m {oapackage.MODE_J5ORDERX} -c oaconfig.txt -o full"
+print(cmd)
+
+# only even-odd
+cmd = f"oaextendsingle -r {eostartfile} -f D -l 2 -m {oapackage.MODE_J5ORDERX} -c oaconfig.txt -o onlyeo"
+print(cmd)
 
 # %%
 if 0:
