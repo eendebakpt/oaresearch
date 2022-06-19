@@ -10,6 +10,12 @@ Created on Fri Nov 16 11:24:39 2012
 
 import datetime
 import math
+
+
+
+
+import datetime
+from oaresearch.pythondevelop.researchOA  import analyseFile, loadAnalysisFile
 import os
 import time
 from os.path import join
@@ -37,12 +43,20 @@ from oaresearch.pythondevelop.researchOA import (
     splitTag,
 )
 
+import oaresearch.pythondevelop.researchOA
+from oapackage import oahelper
+from oaresearch.pythondevelop import researchOA
+from oaresearch.pythondevelop.researchOA import gatherResults, runcommand, splitdir, splitname, splitTag, gatherLockfile
+from oaresearch.pythondevelop.researchOA import checkFiles, checkFilesOA, evenoddCases, readNumbersFile
+from oaresearch.pythondevelop.ABhelper import *
+from oaresearch.pythondevelop.researchOA import *
+from oaresearch.pythondevelop.researchOA import parseProcessingTime, nArrayFile, formatProccessingTime
+
 import researchOA
-from ABhelper import *
 
 
-def smallEOcase(key: str, adata, basedir, htmldir: str, latexdir: str, subdir=None, verbose=1, cache=1):
-    """Calculate one of the small cases"""
+def smallEOcase(key : str, adata, basedir, htmldir : str, latexdir : str, subdir=None, verbose=1, cache=1):
+    """ Calculate one of the small cases """
     t = adata.strength
     if subdir is None:
         subdir = "evenodd-" + adata.idstr() + "-t%d" % adata.strength
