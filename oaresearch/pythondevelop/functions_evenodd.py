@@ -12,10 +12,8 @@ import datetime
 import math
 
 
-
-
 import datetime
-from oaresearch.pythondevelop.researchOA  import analyseFile, loadAnalysisFile
+from oaresearch.pythondevelop.researchOA import analyseFile, loadAnalysisFile
 import os
 import time
 from os.path import join
@@ -52,11 +50,9 @@ from oaresearch.pythondevelop.ABhelper import *
 from oaresearch.pythondevelop.researchOA import *
 from oaresearch.pythondevelop.researchOA import parseProcessingTime, nArrayFile, formatProccessingTime
 
-import researchOA
 
-
-def smallEOcase(key : str, adata, basedir, htmldir : str, latexdir : str, subdir=None, verbose=1, cache=1):
-    """ Calculate one of the small cases """
+def smallEOcase(key: str, adata, basedir, htmldir: str, latexdir: str, subdir=None, verbose=1, cache=1):
+    """Calculate one of the small cases"""
     t = adata.strength
     if subdir is None:
         subdir = "evenodd-" + adata.idstr() + "-t%d" % adata.strength
