@@ -41,21 +41,21 @@ def maxj_design(A):
 
 
 def cprint(s):
-    print(colored(s, color='cyan'))
+    print(colored(s, color="cyan"))
 
 
 def count_maxj(afile, outfile=None):
-    cmd = f'oa_select_maxj -i {afile} -o {outfile} -f Z'
+    cmd = f"oa_select_maxj -i {afile} -o {outfile} -f Z"
     r = os.system(cmd)
     if r != 0:
-        raise Exception(f'count_maxj: return value {r}')
+        raise Exception(f"count_maxj: return value {r}")
     nn = oapackage.nArrayFile(afile)
     nnm = oapackage.nArrayFile(outfile)
     return nn, nnm
 
 
 def bprint(s):
-    print(colored(s, color='cyan'))
+    print(colored(s, color="cyan"))
 
 
 def profile_expression(expression: str):
@@ -83,7 +83,7 @@ def check_file(afile, tag=None):
     for ii, A in enumerate(aa):
         js = oapackage.jstruct_t(A, 5)
         mj = js.maxJ()
-        if mj >= 32+1:
+        if mj >= 32 + 1:
             ngood += 1
 
             js.Fval()
@@ -91,19 +91,20 @@ def check_file(afile, tag=None):
             J5 = A.Fvalues(5)
 
             # print(f'k {k}: {s1}.{s2}: ', ii, mj, J5)
-    print(f'{tag}: {len(aa)} array(s), {ngood} have maxJ')
+    print(f"{tag}: {len(aa)} array(s), {ngood} have maxJ")
     return (len(aa), ngood)
+
 
 # % Analyse starting point
 
 
-xdir = '/media/eendebakpt/KONIJN/hopper/run64'
+xdir = "/media/eendebakpt/KONIJN/hopper/run64"
 
-adfull = oapackage.readConfigFile(join(xdir, 'oaconfig.txt'))
-afile = join(xdir, f'result-64.2-2-2-2-2.oa.gz')
+adfull = oapackage.readConfigFile(join(xdir, "oaconfig.txt"))
+afile = join(xdir, f"result-64.2-2-2-2-2.oa.gz")
 aa = oapackage.readarrayfile(afile)
 k = aa[0].n_columns
-print(f'start : {len(aa)} array(s)')
+print(f"start : {len(aa)} array(s)")
 for A in aa:
     J5 = A.Fvalues(5)
     js = oapackage.jstruct_t(A, 5)
@@ -112,9 +113,9 @@ for A in aa:
     print(mj, J5)
 
 
-def oa_result_file(ss, k, tag='extend'):
+def oa_result_file(ss, k, tag="extend"):
     idstr = adfull.reduceColumns(k).idstr()
-    return oapackage.splitFile(ss) + f'-{tag}-' + idstr + '.oa'
+    return oapackage.splitFile(ss) + f"-{tag}-" + idstr + ".oa"
 
 
 # %% Analyse start at k=7
@@ -123,9 +124,9 @@ maxj = []
 
 maxblocks = set()
 
-for s1 in (range(780)):
+for s1 in range(780):
 
-    afile = join(xdir, f'sp0-split-{s1}.oa.gz')
+    afile = join(xdir, f"sp0-split-{s1}.oa.gz")
     aa = oapackage.readarrayfile(afile)
     k = aa[0].n_columns
     # print(f'k {k}: {s1}.{s2}: {len(aa)} array(s)')
@@ -134,12 +135,12 @@ for s1 in (range(780)):
     for ii, A in enumerate(aa):
         js = oapackage.jstruct_t(A, 5)
         mj = js.maxJ()
-        if mj >= 48+1:
+        if mj >= 48 + 1:
             js.Fval()
 
             J5 = A.Fvalues(5)
 
-            print(f'k {k}: {s1} design {ii}: maxj {mj}, J5 {J5} ')
+            print(f"k {k}: {s1} design {ii}: maxj {mj}, J5 {J5} ")
             maxj.append(A)
             maxblocks.add(s1)
 
@@ -148,123 +149,137 @@ for s1 in (range(780)):
 
 adata = adfull.reduceColumns(k)
 
-xdir = '/mnt/data/tmp2/'
-oapackage.writearrayfile(f'/mnt/data/tmp2/m64.oa', maxj)
+xdir = "/mnt/data/tmp2/"
+oapackage.writearrayfile(f"/mnt/data/tmp2/m64.oa", maxj)
 # oapackage.writearrayfile(f'/mnt/data/tmp2/m64-{adata.idstr()}.oa', maxj)
 
 # %% Branch factor
-cdir = r'/mnt/data/tmp'
+cdir = r"/mnt/data/tmp"
 
-br = namedtuple('branch', ['columns', 'n', 'index'])
+br = namedtuple("branch", ["columns", "n", "index"])
 
 
 def generate_files(lvl, splits, adfull):
 
     adata = adfull.reduceColumns(splits[lvl].columns)
-    maxk = splits[lvl+1].columns
+    maxk = splits[lvl + 1].columns
 
     w = oapackage.splitFile([b.index for b in splits[:lvl]])
-    ifile_split = f'm64-{w}-{adata.idstr()}.oa'
+    ifile_split = f"m64-{w}-{adata.idstr()}.oa"
     if w:
-        tag_split = f'm64-{w}-sp{lvl}'
+        tag_split = f"m64-{w}-sp{lvl}"
     else:
-        tag_split = f'm64-sp{lvl}'
-    w = oapackage.splitFile([b.index for b in splits[:lvl+1]])
+        tag_split = f"m64-sp{lvl}"
+    w = oapackage.splitFile([b.index for b in splits[: lvl + 1]])
 
-    infile_extend = f'm64-{w}.oa'  # -{adata.idstr()}.oa'
-    outfile_extend = f'm64-{w}'
+    infile_extend = f"m64-{w}.oa"  # -{adata.idstr()}.oa'
+    outfile_extend = f"m64-{w}"
     return ifile_split, tag_split, infile_extend, outfile_extend, maxk
 
 
-splits = [br(9, 100, 93), br(10, 30, 28), br(11, 50, 23), br(12, 2, 1),
-          br(13, 2, 1), br(15, 2, 1), br(17, 2, 1), br(18, 1, 0)]
+splits = [
+    br(9, 100, 93),
+    br(10, 30, 28),
+    br(11, 50, 23),
+    br(12, 2, 1),
+    br(13, 2, 1),
+    br(15, 2, 1),
+    br(17, 2, 1),
+    br(18, 1, 0),
+]
 
-splits = [br(13, 24*50, 3), br(14, 3, 2), br(15, 4, 3), br(18, 2, 1), br(22, 1, 0)]
+splits = [br(13, 24 * 50, 3), br(14, 3, 2), br(15, 4, 3), br(18, 2, 1), br(22, 1, 0)]
 lvl = 0
 
 
-def oa_result_file(ss, k, tag='extend'):
+def oa_result_file(ss, k, tag="extend"):
     idstr = adfull.reduceColumns(k).idstr()
-    return oapackage.splitFile(ss) + f'-{tag}-' + idstr + '.oa'
+    return oapackage.splitFile(ss) + f"-{tag}-" + idstr + ".oa"
 
 
-xdir = '/mnt/data/tmpx/sp0-split-549/sp1-split-6'
-ifile0 = 'sp0-split-549-sp1-split-6-extend-64.2-2-2-2-2-2-2-2-2-2-2-2-2.oa.gz'
+xdir = "/mnt/data/tmpx/sp0-split-549/sp1-split-6"
+ifile0 = "sp0-split-549-sp1-split-6-extend-64.2-2-2-2-2-2-2-2-2-2-2-2-2.oa.gz"
 
-xdir = '/mnt/data/tmpx/sp0-split-549/sp1-split-200'
-ifile0 = 'sp0-split-549-sp1-split-200-extend-64.2-2-2-2-2-2-2-2-2-2-2-2-2.oa.gz'
+xdir = "/mnt/data/tmpx/sp0-split-549/sp1-split-190"
+ifile0 = "sp0-split-549-sp1-split-190-extend-64.2-2-2-2-2-2-2-2-2-2-2-2-2.oa.gz"
 ifile_split, tag_split, infile_extend, outfile_extend, maxk = generate_files(0, splits, adfull)
 
-print(f'narrays at start: {oapackage.nArrays(join(xdir, ifile0)):.3g}')
+print(f"narrays at start: {oapackage.nArrays(join(xdir, ifile0)):.3g}")
 
-cprint('Stage')
-ifile_splitx = ifile_split + '.gz' if ifile0.endswith('gz') else ifile0
-cmd = f'cp {ifile0} {ifile_splitx}'
+cprint("Stage")
+if 0:
+    ifile_splitx = ifile_split + ".gz" if ifile0.endswith("gz") else ifile_split
+    cmd = f"cp {ifile0} {ifile_splitx}"
+else:
+    ifile_splitx = ifile_split
+    cmd = f"oa_select_maxj -i {ifile0} -o {ifile_splitx} -f D"
 print(cmd)
 
-fid = open(os.path.join(cdir, 'c.sh'), 'wt')
-for lvl in range(0, len(splits)-1):
-    cprint(f'lvl: {lvl}')
+fid = open(os.path.join(cdir, "c.sh"), "wt")
+for lvl in range(0, len(splits) - 1):
+    cprint(f"lvl: {lvl}")
     # b = splits[lvl]
     ifile_split, tag_split, infile_extend, outfile_extend, maxk = generate_files(lvl, splits, adfull)
 
     if lvl == 0:
         ifile_split = ifile_splitx
-    cmd = f'oasplit -i {ifile_split} -n {splits[lvl].n} -f Z -o {tag_split}'
-    cmd2 = f'oaextendsingle -m 9 -l 2 -c ~/run64/oaconfig.txt  -f Z --maxk {maxk} -r {infile_extend} -o {outfile_extend}'
+    cmd = f"oasplit -i {ifile_split} -n {splits[lvl].n} -f Z -o {tag_split}"
+    cmd2 = (
+        f"oaextendsingle -m 9 -l 2 -c ~/run64/oaconfig.txt  -f Z --maxk {maxk} -r {infile_extend} -o {outfile_extend}"
+    )
 
-    print(f'{cmd}; {cmd2}')
+    print(f"{cmd}; {cmd2}")
 
-    fid.write(f'# lvl {lvl}\n{cmd}; {cmd2}\n')
+    fid.write(f"# lvl {lvl}\n{cmd}; {cmd2}\n")
 fid.close()
 
 
 # %% Analyse
 
 
-br_result = namedtuple('br_result', ['ndesigns', 'branch_factor', 'k'])
+br_result = namedtuple("br_result", ["ndesigns", "branch_factor", "k"])
 
-xdir = '/mnt/data/tmpx/sp0-split-549/sp1-split-6'
+xdir = "/mnt/data/tmpx/sp0-split-549/sp1-split-6"
 bf = 1
 prev_file = ifile0
 rx = []
 for lvl, b in enumerate(splits[:-2]):
     # print(b)
-    bnext = splits[lvl+1]
-    bf = bf*splits[lvl].n
+    bnext = splits[lvl + 1]
+    bf = bf * splits[lvl].n
 
     ifile_split, tag_split, infile_extend, outfile_extend, maxk = generate_files(lvl, splits, adfull)
-    next_file, _, _, _, _ = generate_files(lvl+1, splits, adfull)
+    next_file, _, _, _, _ = generate_files(lvl + 1, splits, adfull)
 
     print(ifile_split, next_file)
     nn0 = nn = oapackage.nArrayFile(join(xdir, ifile_split))
     if nn == -1:
-        nn0 = nn = oapackage.nArrayFile(join(xdir, ifile_split)+'.gz')
+        nn0 = nn = oapackage.nArrayFile(join(xdir, ifile_split) + ".gz")
     # break
     nn1 = oapackage.nArrayFile(join(xdir, infile_extend))
     nn = nn2 = oapackage.nArrayFile(join(xdir, next_file))
-    cprint(f'{b.columns} -> {bnext.columns}: extend {nn0}->{nn1}->{nn}')
+    cprint(f"{b.columns} -> {bnext.columns}: extend {nn0}->{nn1}->{nn}")
     # print(ifile)
 
     ndesigns = nn * bf
-    print(f'  {bnext.columns}: branch factor {bf:.1f}, estimated: {ndesigns} = {ndesigns:.3g}')
+    print(f"  {bnext.columns}: branch factor {bf:.1f}, estimated: {ndesigns} = {ndesigns:.3g}")
     rx.append(br_result(ndesigns, bf, maxk))
 c13 = {0: 0, 16: 5943257870, 32: 1371594144, 48: 11237518663, 64: 1433821720}
 
 # c13=jd[13]
 
-frac_start = rx[0][0]/c13[64]
-dt = 11*60+3  # [s]
+frac_start = rx[0][0] / c13[64]
+dt = 11 * 60 + 3  # [s]
 
 bfx = rx[1].branch_factor
 r = rx[1]
 tt = sum(jd[15].values())
 
-maxj_frac = (jd[13][64])/sum(jd[13].values())
+maxj_frac = (jd[13][64]) / sum(jd[13].values())
 print(ifile0)
 print(splits)
-print(f'estimated time: {bfx*dt/(24*3600):.2f} [days] (dt {dt:.1f} [s]')
-print(f'estimated maxj designs at {r.k}: {r.ndesigns:.3g}/{tt:.2g} ')
+print(f"estimated time: {bfx*dt/(24*3600):.2f} [days] (dt {dt:.1f} [s]")
+print(f"estimated maxj designs at {r.k}: {r.ndesigns:.3g}/{tt:.2g} ")
 
 # c15=
 
@@ -326,7 +341,7 @@ def maxj_(A):
 
 
 class MaxJ:
-    """ Helper class to quickly count number of maxj designs """
+    """Helper class to quickly count number of maxj designs"""
 
     def __init__(self, A):
 
@@ -350,6 +365,7 @@ class MaxJ:
 
 # %% Only once!
 
+
 def deep_set(d, ss, value):
     if len(ss) == 1:
         d[ss[0]] = value
@@ -358,34 +374,34 @@ def deep_set(d, ss, value):
 
 
 def calculate_data(afile, outfile, tag, maxj=64):
-    jsonfile = outfile.replace('.oa', '.json')
+    jsonfile = outfile.replace(".oa", ".json")
     if os.path.exists(jsonfile):
         jdata = json.load(open(jsonfile))
         nn = sum(jdata.values())
 
         nnm = jdata.get(str(maxj), 0)
-        bprint(f'block {tag}: found {nnm}/{nn} maxj designs! (cache)')
+        bprint(f"block {tag}: found {nnm}/{nn} maxj designs! (cache)")
     else:
         nn, nnm = count_maxj(afile, outfile=outfile)
-        bprint(f'block {tag}: found {nnm}/{nn} maxj designs!')
+        bprint(f"block {tag}: found {nnm}/{nn} maxj designs!")
     return nn, nnm
 
 
 splits = [780, 248, 18]
 # splits=[100, 4, 18]
 
-adfull = oapackage.readConfigFile('/home/eendebakpt/run64/oaconfig.txt')
-tmpdir0 = '/mnt/data/tmpx'
+adfull = oapackage.readConfigFile("/home/eendebakpt/run64/oaconfig.txt")
+tmpdir0 = "/mnt/data/tmpx"
 tmpdir0 = pathlib.Path(tmpdir0)
 tmpdir0.mkdir(exist_ok=True)
 
-odir = pathlib.Path('/mnt/data/maxjout')
+odir = pathlib.Path("/mnt/data/maxjout")
 odir.mkdir(exist_ok=True)
 
 k = 13
 adata = adfull.reduceColumns(k)
 
-xdir = '/media/eendebakpt/KONIJN/hopper/run64'
+xdir = "/media/eendebakpt/KONIJN/hopper/run64"
 
 l1_blocks = {545, 546}  # , 547, 548, 549, 550, 551, 552, 553, 554, 555, 556, 557, 558}:
 l1_blocks = range(0, 780)
@@ -393,19 +409,19 @@ l1_blocks = [246]
 # double special: block 567
 
 
-odir = pathlib.Path('/mnt/data/maxjout')
+odir = pathlib.Path("/mnt/data/maxjout")
 odir_str = str(odir)
 
 # %%
 
 
 def unzip(s1, xdir, target_dir, run=True):
-    """ Unzip a stored file """
-    zfile = join(xdir, f'sp0-split-{s1}', f'splitted-{s1}.zip')
+    """Unzip a stored file"""
+    zfile = join(xdir, f"sp0-split-{s1}", f"splitted-{s1}.zip")
 
-    sdir = os.path.join(target_dir, f'sp0-split-{s1}')
+    sdir = os.path.join(target_dir, f"sp0-split-{s1}")
     oapackage.mkdirc(sdir)
-    cmd = f'cd {target_dir}; unzip {zfile} -d {sdir}'
+    cmd = f"cd {target_dir}; unzip {zfile} -d {sdir}"
     print(cmd)
     if run:
         r = os.system(cmd)
@@ -419,9 +435,9 @@ mj_calculator = None
 
 
 for s1 in l1_blocks:
-    print(f'block {s1}')
+    print(f"block {s1}")
     # copy and unzip data file
-    zfile = join(xdir, f'sp0-split-{s1}', f'splitted-{s1}.zip')
+    zfile = join(xdir, f"sp0-split-{s1}", f"splitted-{s1}.zip")
     tmpdir = tmpdir0
     try:
         shutil.rmtree(tmpdir)
@@ -431,13 +447,13 @@ for s1 in l1_blocks:
 
     if s1 == 567:
         # not sure why 567 is not zipped...
-        five_dir = join(xdir, f'sp0-split-{s1}')
-        cmd = f'rsync -avr {five_dir}/ {tmpdir}/'
+        five_dir = join(xdir, f"sp0-split-{s1}")
+        cmd = f"rsync -avr {five_dir}/ {tmpdir}/"
         print(cmd)
         # r = os.system(cmd)
 
     else:
-        cmd = f'cd {tmpdir}; unzip {zfile} -d {tmpdir}'
+        cmd = f"cd {tmpdir}; unzip {zfile} -d {tmpdir}"
         print(cmd)
         r = os.system(cmd)
 
@@ -451,54 +467,54 @@ for s1 in l1_blocks:
         counts.setdefault(s1, {})
         counts_maxj.setdefault(s1, {})
 
-        zfile0 = f'splitted-{oapackage.splitTag([s1, s2])}.zip'
+        zfile0 = f"splitted-{oapackage.splitTag([s1, s2])}.zip"
         zfile = join(sdir, zfile0)
         if os.path.exists(zfile):
-            print(f'block {s1}.{s2}: special case')
-            cmd = f'cd {sdir}; unzip -o {zfile} -d {sdir}'
+            print(f"block {s1}.{s2}: special case")
+            cmd = f"cd {sdir}; unzip -o {zfile} -d {sdir}"
             print(cmd)
             r = os.system(cmd)
-            assert(r == 0)
+            assert r == 0
 
             counts[s1][s2] = {}
             counts_maxj[s1][s2] = {}
             for s3 in range(splits[2]):
-                sdir2 = join(sdir, f'sp2-split-{s3}')
+                sdir2 = join(sdir, f"sp2-split-{s3}")
 
                 ss = [s1, s2, s3]
-                tag = '-'.join(map(str, ss))
+                tag = "-".join(map(str, ss))
                 # print(f'block {tag}: {nn} arrays')
 
                 afile0 = oa_result_file(ss, k)
                 afile = join(sdir2, afile0)
 
-                outfile = join(odir, f'{tag}-k{k}-maxj64.oa')
-                nn, nnm = calculate_data(afile, outfile, tag='.'.join(map(str, ss)))
+                outfile = join(odir, f"{tag}-k{k}-maxj64.oa")
+                nn, nnm = calculate_data(afile, outfile, tag=".".join(map(str, ss)))
                 deep_set(counts, ss, nn)
                 deep_set(counts_maxj, ss, nnm)
 
         else:
             ss = [s1, s2]
             if s1 == 567:
-                jfile_567 = os.path.join(five_dir, splitFile([0, s2])[12:], researchOA.numbersFile(ss, tag='jstats'))
+                jfile_567 = os.path.join(five_dir, splitFile([0, s2])[12:], researchOA.numbersFile(ss, tag="jstats"))
                 jdata = oapackage.readStatisticsFile(jfile_567, verbose=0)
 
                 jd = {j: jdata.getCount(k, j) for j in [0, 16, 32, 48, 64]}
 
-                jfile = '-'.join([str(e) for e in ss]) + f'-k{k}-maxj64.json'
-                json.dump(jd, open(join(odir_str, jfile), 'wt'))
+                jfile = "-".join([str(e) for e in ss]) + f"-k{k}-maxj64.json"
+                json.dump(jd, open(join(odir_str, jfile), "wt"))
 
                 nn = sum(jd.values())
                 nnm = jd.get(64, 0)
-                print(f'block {ss}: {nn}, {nnm}')
+                print(f"block {ss}: {nn}, {nnm}")
             else:
 
-                tag = '-'.join(map(str, ss))
+                tag = "-".join(map(str, ss))
                 afile0 = oa_result_file(ss, k)
                 afile = join(sdir, afile0)
 
-                outfile = join(odir, f'{tag}-k{k}-maxj64.oa')
-                nn, nnm = calculate_data(afile, outfile, tag='.'.join(map(str, ss)))
+                outfile = join(odir, f"{tag}-k{k}-maxj64.oa")
+                nn, nnm = calculate_data(afile, outfile, tag=".".join(map(str, ss)))
                 # print(f'block {tag}: {nn} arrays')
 
             deep_set(counts, ss, nn)
@@ -507,11 +523,11 @@ for s1 in l1_blocks:
 
 
 # %%
-json.dump((counts, counts_maxj), open(join(odir, f'counts-{k}.json'), 'wt'))
+json.dump((counts, counts_maxj), open(join(odir, f"counts-{k}.json"), "wt"))
 
 # %% Load pre-calculated data
 
-(counts, counts_maxj) = json.load(open(join(odir, f'counts-{k}.json')))
+(counts, counts_maxj) = json.load(open(join(odir, f"counts-{k}.json")))
 
 
 # %%
@@ -524,7 +540,7 @@ def dict_sum(dd):
 
 
 def getnumber(entry):
-    """ Get total number in subblock """
+    """Get total number in subblock"""
     if isinstance(entry, dict):
         return sum(getnumber(v) for v in entry.values())
     else:
@@ -532,16 +548,16 @@ def getnumber(entry):
 
 
 def get_full_numbers(entry, k, start_block=[], subblocks=[]):
-    """ Get total number in subblock """
+    """Get total number in subblock"""
     for b in start_block:
         entry = entry[str(b)]
     if isinstance(entry, dict):
-        blocks = start_block+subblocks
-        sub_results = [get_full_numbers(v, k, start_block=[], subblocks=blocks+[key]) for key, v in entry.items()]
+        blocks = start_block + subblocks
+        sub_results = [get_full_numbers(v, k, start_block=[], subblocks=blocks + [key]) for key, v in entry.items()]
         return dict_sum(sub_results)
     else:
-        jfile = '-'.join([str(e) for e in start_block+subblocks]) + f'-k{k}-maxj64.json'
-        entry = rapidjson.load(open(join(odir_str, jfile), 'rb'))
+        jfile = "-".join([str(e) for e in start_block + subblocks]) + f"-k{k}-maxj64.json"
+        entry = rapidjson.load(open(join(odir_str, jfile), "rb"))
         # print(f' {start_block+subblocks}: {entry}')
         return entry
 
@@ -552,9 +568,9 @@ with measure_time():
 
 # %%
 
-jdata = oapackage.readStatisticsFile((join(xdir, 'jstats-base.txt')), verbose=0)
+jdata = oapackage.readStatisticsFile((join(xdir, "jstats-base.txt")), verbose=0)
 
-jd = {k: {j: jdata.getCount(k, j) for j in [0, 16, 32, 48, 64]} for k in range(jdata.maxCols()+1)}
+jd = {k: {j: jdata.getCount(k, j) for j in [0, 16, 32, 48, 64]} for k in range(jdata.maxCols() + 1)}
 print(jd)
 
 plt.figure(1)
@@ -565,22 +581,22 @@ for j in [16, 32, 48, 64]:
     xx = np.array([jd[k][j] if jd[k][j] >= 0 else np.NaN for k in kk])
     xx = np.maximum(xx, 1e-10)
     # print(xx)
-    label = f'max($J_5$)={j}'
+    label = f"max($J_5$)={j}"
     if j == 64:
         idx = kk.index(13)
-        h = plt.plot(kk[:idx+1], xx[:idx+1], '.-', label=label)[0]
-        plt.plot(kk[idx:], xx[idx:], '.--', alpha=.72, color=h.get_color())
+        h = plt.plot(kk[: idx + 1], xx[: idx + 1], ".-", label=label)[0]
+        plt.plot(kk[idx:], xx[idx:], ".--", alpha=0.72, color=h.get_color())
     else:
-        plt.plot(kk, xx, '.-', label=label)
-plt.yscale('symlog')
+        plt.plot(kk, xx, ".-", label=label)
+plt.yscale("symlog")
 plt.legend()
-plt.xlabel('Number of columns')
-plt.ylabel('Number of designs')
-plt.title(f'Number of designs in series ${adfull.latexstr()}$')
+plt.xlabel("Number of columns")
+plt.ylabel("Number of designs")
+plt.title(f"Number of designs in series ${adfull.latexstr()}$")
 
 # %%
 
-jfile = '-'.join([str(e) for e in start_block+subblocks]) + f'-k{k}-maxj64.json'
+jfile = "-".join([str(e) for e in start_block + subblocks]) + f"-k{k}-maxj64.json"
 
 
 # %%
@@ -612,15 +628,22 @@ bins = np.logspace(np.log10(max(1, np.floor(np.min(cc)))), np.log10(np.max(cc)),
 bin_indices = np.digitize(cc, bins)
 
 # %%
-nblocks = [len(cc[np.searchsorted(bin_indices, j, side='left'):
-                  np.searchsorted(bin_indices, j, side='right')])
-           for j in range(1, len(bins))]
-ndesigns = np.array([sum(cc[np.searchsorted(bin_indices, j, side='left'):
-                     np.searchsorted(bin_indices, j, side='right')])
-                     for j in range(1, len(bins))])
-ndesigns64 = np.array([sum(ccm[np.searchsorted(bin_indices, j, side='left'):
-                               np.searchsorted(bin_indices, j, side='right')])
-                       for j in range(1, len(bins))])
+nblocks = [
+    len(cc[np.searchsorted(bin_indices, j, side="left") : np.searchsorted(bin_indices, j, side="right")])
+    for j in range(1, len(bins))
+]
+ndesigns = np.array(
+    [
+        sum(cc[np.searchsorted(bin_indices, j, side="left") : np.searchsorted(bin_indices, j, side="right")])
+        for j in range(1, len(bins))
+    ]
+)
+ndesigns64 = np.array(
+    [
+        sum(ccm[np.searchsorted(bin_indices, j, side="left") : np.searchsorted(bin_indices, j, side="right")])
+        for j in range(1, len(bins))
+    ]
+)
 
 
 # %%
@@ -628,51 +651,51 @@ ndesigns64 = np.array([sum(ccm[np.searchsorted(bin_indices, j, side='left'):
 # print(v)
 
 
-bin_centres = (bins[: -1]+bins[1:])/2
+bin_centres = (bins[:-1] + bins[1:]) / 2
 plt.figure(30)
 plt.clf()
 ax = plt.gca()
 
-vv, bins, _ = plt.hist(cc, bins, label='Designs')
+vv, bins, _ = plt.hist(cc, bins, label="Designs")
 
 # plt.plot(cc, np.array(ccm)/np.array(cc), '.b')
 # plt.hist(ccm, bins, color='r', rwidth=.68)
-plt.xlabel('Number of designs in block')
-plt.ylabel('Number of blocks')
+plt.xlabel("Number of designs in block")
+plt.ylabel("Number of blocks")
 # plt.semilogx()
 plt.loglog()
 ax2 = ax.twinx()
-ax2.plot(bin_centres, np.array(ndesigns64/ndesigns), '.-r', label='Fraction')
-plt.ylabel('Fraction of designs with max(J5)=64')
-plt.title(f'Distribution of designs over {len(cc)} blocks')
+ax2.plot(bin_centres, np.array(ndesigns64 / ndesigns), ".-r", label="Fraction")
+plt.ylabel("Fraction of designs with max(J5)=64")
+plt.title(f"Distribution of designs over {len(cc)} blocks")
 # plt.suptitle(f'(total number of blocks: {780*248})')
 # plt.semilogx()
 plt.legend()
 combine_legends([ax, ax2])
-g = plt.grid(which='major', axis='y')
+g = plt.grid(which="major", axis="y")
 
 # %%
 plt.figure(10)
 plt.clf()
-vv, bins, _ = plt.hist(cc, bins, label='Designs')
-plt.hist(ccm, bins, color='r', rwidth=.68)
-plt.xlabel('Number of designs')
-plt.ylabel('Frequency')
+vv, bins, _ = plt.hist(cc, bins, label="Designs")
+plt.hist(ccm, bins, color="r", rwidth=0.68)
+plt.xlabel("Number of designs")
+plt.ylabel("Frequency")
 plt.semilogx()
-plt.title(f'Distribution of designs over {len(cc)} blocks with a max J design')
-plt.suptitle(f'(total number of blocks: {780*248})')
+plt.title(f"Distribution of designs over {len(cc)} blocks with a max J design")
+plt.suptitle(f"(total number of blocks: {780*248})")
 # plt.semilogx()
 # plt.legend()
 
 plt.figure(20)
 plt.clf()
-plt.plot(cc, np.array(ccm)/np.array(cc), '.b')
+plt.plot(cc, np.array(ccm) / np.array(cc), ".b")
 # plt.hist(ccm, bins, color='r', rwidth=.68)
-plt.xlabel('Number of designs')
-plt.ylabel('Fraction of designs with max(J5)=64')
+plt.xlabel("Number of designs")
+plt.ylabel("Fraction of designs with max(J5)=64")
 plt.semilogx()
-plt.title(f'Distribution of designs over {len(cc)} blocks')
-plt.suptitle(f'(total number of blocks: {780*248})')
+plt.title(f"Distribution of designs over {len(cc)} blocks")
+plt.suptitle(f"(total number of blocks: {780*248})")
 # plt.semilogx()
 # plt.legend()
 
@@ -682,12 +705,12 @@ vals = np.random.random(1e8)
 vals.sort()
 
 nbins = 100
-bins = np.linspace(0, 1, nbins+1)
+bins = np.linspace(0, 1, nbins + 1)
 ind = np.digitize(vals, bins)
 
-results = [func(vals[np.searchsorted(ind, j, side='left'):
-                     np.searchsorted(ind, j, side='right')])
-           for j in range(1, nbins)]
+results = [
+    func(vals[np.searchsorted(ind, j, side="left") : np.searchsorted(ind, j, side="right")]) for j in range(1, nbins)
+]
 
 
 # %% Maxj designs at k columns
@@ -695,7 +718,7 @@ results = [func(vals[np.searchsorted(ind, j, side='left'):
 k = 13
 for s1 in range(545, 559):
     r = get_full_numbers(counts, k, [s1])
-    print(f'block {s1}: k {k}: {r}')
+    print(f"block {s1}: k {k}: {r}")
 
 
 # So 546 and 549 are the largest blocks. We only need to consider one of them
@@ -704,7 +727,7 @@ for s2 in range(248):
     s = [549, s2]
     r = get_full_numbers(counts, k, s)
     r = {k: r[k] for k in sorted(r)}
-    print(f'block {s}: k {k}: {r}')
+    print(f"block {s}: k {k}: {r}")
 
 # %%
 unzip(549, xdir, tmpdir0)
@@ -717,10 +740,10 @@ x = os.path.join(tmpdir0, oapackage.splitDir(s))
 print(x)
 
 afile = oa_result_file(s, 13)
-ifile = os.path.join(x, afile + '.gz')
+ifile = os.path.join(x, afile + ".gz")
 print(ifile)
 
-shutil.copyfile(ifile, os.path.join(tmpdir0, 'm64-64.2-2-2-2-2-2-2-2-2-2-2-2-2-2.oa'))
+shutil.copyfile(ifile, os.path.join(tmpdir0, "m64-64.2-2-2-2-2-2-2-2-2-2-2-2-2-2.oa"))
 
 
 # %% TODO:
@@ -743,22 +766,22 @@ s1 = 549
 s1 = 545
 
 
-for s2 in (range(248)):
+for s2 in range(248):
 
-    xdir = f'/mnt/data/tmp/{s1}/sp1-split-{s2}'
+    xdir = f"/mnt/data/tmp/{s1}/sp1-split-{s2}"
 
     k = 12
-    kk = '-'.join(['2' for j in range(k)])
-    afile = join(xdir, f'sp0-split-{s1}-sp1-split-{s2}-pareto-64.{kk}.oa.gz')
+    kk = "-".join(["2" for j in range(k)])
+    afile = join(xdir, f"sp0-split-{s1}-sp1-split-{s2}-pareto-64.{kk}.oa.gz")
     aa = oapackage.readarrayfile(afile)
-    tag = f'k {k}: {s1}.{s2}'
+    tag = f"k {k}: {s1}.{s2}"
     # _,n12=check_file(aa, tag=tag)
 
     k = 14
-    kk = '-'.join(['2' for j in range(k)])
-    afile = join(xdir, f'sp0-split-{s1}-sp1-split-{s2}-pareto-64.{kk}.oa.gz')
+    kk = "-".join(["2" for j in range(k)])
+    afile = join(xdir, f"sp0-split-{s1}-sp1-split-{s2}-pareto-64.{kk}.oa.gz")
     aa = oapackage.readarrayfile(afile)
-    tag = f'k {k}: {s1}.{s2}'
+    tag = f"k {k}: {s1}.{s2}"
     _, n12 = check_file(aa, tag=tag)
 
     # for ii, A in enumerate(aa):
@@ -779,21 +802,21 @@ split = [545, 87]
 oapackage.splitFile(split)
 
 k = 14
-kk = '-'.join(['2' for j in range(k)])
+kk = "-".join(["2" for j in range(k)])
 
 
-for snext in (range(18)):
+for snext in range(18):
 
-    xx = oapackage.splitDir(split+[snext])
-    xx = '/'.join(xx.split('/')[1:])
-    xdir = join(f'/mnt/data/tmp/', f'{split[0]}', xx)
+    xx = oapackage.splitDir(split + [snext])
+    xx = "/".join(xx.split("/")[1:])
+    xdir = join(f"/mnt/data/tmp/", f"{split[0]}", xx)
 
-    afile = join(xdir, oapackage.splitFile(split+[snext])+f'-extend-64.{kk}.oa.gz')
+    afile = join(xdir, oapackage.splitFile(split + [snext]) + f"-extend-64.{kk}.oa.gz")
 
     aa = oapackage.readarrayfile(afile)
     # print(f'k {k}: {s1}.{s2}: {len(aa)} array(s)')
 
-    tag = f'k {k}: {oapackage.splitTag(split+[snext])}'
+    tag = f"k {k}: {oapackage.splitTag(split+[snext])}"
     check_file(aa, tag=tag)
 
 # %%
@@ -804,10 +827,10 @@ s2 = 91
 k = 12
 
 for k in range(10, 16):
-    kk = '-'.join(['2' for j in range(k)])
+    kk = "-".join(["2" for j in range(k)])
 
-    xdir = f'/mnt/data/tmp/{s1}/sp1-split-{s2}'
-    afile = xdir + '/' + f'sp0-split-{s1}-sp1-split-{s2}-extend-64.{kk}.oa.gz'
+    xdir = f"/mnt/data/tmp/{s1}/sp1-split-{s2}"
+    afile = xdir + "/" + f"sp0-split-{s1}-sp1-split-{s2}-extend-64.{kk}.oa.gz"
 
     aa = oapackage.readarrayfile(afile)
 
@@ -815,7 +838,7 @@ for k in range(10, 16):
     for ii, A in enumerate(aa):
         js = oapackage.jstruct_t(A, 5)
         mj = js.maxJ()
-        if mj >= 32+1:
+        if mj >= 32 + 1:
             ngood += 1
 
             js.Fval()
@@ -823,7 +846,7 @@ for k in range(10, 16):
             J5 = A.Fvalues(5)
 
             # print(f'k {k}: {s1}.{s2}: ', ii, mj, J5)
-    print(f'k {k}: {s1}.{s2}: {len(aa)} array(s), {ngood} have maxJ')
+    print(f"k {k}: {s1}.{s2}: {len(aa)} array(s), {ngood} have maxJ")
 
 # %% Time of L5 check
 s = [567, 90]
@@ -835,14 +858,14 @@ oaextend = oapackage.OAextend()
 
 def calculate_lmc_speed(s, niter=5, select_maxj=False):
     results = {}
-    xdir = join('/home/eendebakpt/run64', oapackage.splitDir(s))
+    xdir = join("/home/eendebakpt/run64", oapackage.splitDir(s))
     for kk in range(9, 21):
         adata = adfull.reduceColumns(kk)
-        afile = oapackage.splitFile(s)+'-pareto-'+adata.idstr()+'.oa'
+        afile = oapackage.splitFile(s) + "-pareto-" + adata.idstr() + ".oa"
 
         aa = oapackage.readarrayfile(join(xdir, afile))
 
-       # print(f'{kk}: {len(aa)}')
+        # print(f'{kk}: {len(aa)}')
 
         na = len(aa)
         aamax = list(filter(lambda x: maxj_design(x) != 64, aa))
@@ -858,9 +881,9 @@ def calculate_lmc_speed(s, niter=5, select_maxj=False):
                         # oapackage.LMC_LESS = 0
                         reduction.reset()
                         r = oapackage.LMCcheckj5(A, adata, reduction, oaextend)
-            dtn = (mt.dt/len(aa))/niter
-            print(f'k {kk}: ndesigns {len(aamax)}/{na}: {1/dtn:.4f} checks/s')
-            results[kk] = {'n': len(aa), 'dt': dtn, 'cps': 1/dtn}
+            dtn = (mt.dt / len(aa)) / niter
+            print(f"k {kk}: ndesigns {len(aamax)}/{na}: {1/dtn:.4f} checks/s")
+            results[kk] = {"n": len(aa), "dt": dtn, "cps": 1 / dtn}
     return results
 
 
@@ -873,35 +896,35 @@ ad = []
 for s1 in range(545, 560, 1):
     # for s2 in [0, 20, 40, 80]:
     s = [s1]
-    bprint(f'determine speed on {s}')
+    bprint(f"determine speed on {s}")
     results = calculate_lmc_speed(s, select_maxj=True)
     ad.append(results)
 
 # %%
 kk = range(8, 21)
-speed = [None]*len(kk)
+speed = [None] * len(kk)
 for ii, k in enumerate(kk):
-    speed[ii] = np.nanmean([r.get(k, {'cps': np.NaN})['cps'] for r in ad])
+    speed[ii] = np.nanmean([r.get(k, {"cps": np.NaN})["cps"] for r in ad])
 
 plt.figure(20)
 plt.clf()
-plt.plot(kk, speed, '.-')
-plt.xlabel('Number of columns')
-plt.ylabel('Checks / second')
-plt.suptitle('Performance of L5 check', fontsize=18)
+plt.plot(kk, speed, ".-")
+plt.xlabel("Number of columns")
+plt.ylabel("Checks / second")
+plt.suptitle("Performance of L5 check", fontsize=18)
 # plt.title('(measured on selection of designs in L5 format)')
-plt.title('(measured on selection of max($J_5$)=64 designs in L5 format)')
+plt.title("(measured on selection of max($J_5$)=64 designs in L5 format)")
 
 # %%
 
-afile = join(xdir,  r'test-64.2-2-2-2-2-2-2-2-2-2-2-2-2.oa')
+afile = join(xdir, r"test-64.2-2-2-2-2-2-2-2-2-2-2-2-2.oa")
 check_file(afile)
 
 
 # %%
 arraylist = maxj
 al = maxj[0]
-adfull = oapackage.readConfigFile('/home/eendebakpt/run64/oaconfig.txt')
+adfull = oapackage.readConfigFile("/home/eendebakpt/run64/oaconfig.txt")
 discardJ5 = 20
 dextend = oapackage.depth_extend_t(adfull, 10, discardJ5)
 
@@ -945,7 +968,7 @@ oapackage.depth_extend_array(al, dextendloop, adfull, verbose, None, ai)
 # %%
 
 
-profile_expression('go()')
+profile_expression("go()")
 
 # %%
 
@@ -953,7 +976,7 @@ profile_expression('go()')
 
 
 def count_maxj2(afile, outfile=None):
-    """ Count number of maxj elements in a file and store them in result file"""
+    """Count number of maxj elements in a file and store them in result file"""
     nn = oapackage.nArrayFile(afile)
     afout = None
     mj_calculator = None
@@ -964,11 +987,10 @@ def count_maxj2(afile, outfile=None):
             mj_calculator = MaxJ(A)
         if mj_calculator.maxj(A):
             if afout is None and outfile is not None:
-                afout = oapackage.arrayfile_t(outfile, 64, A.n_columns, -1,
-                                              oapackage.ABINARY_DIFFZERO, 1)
+                afout = oapackage.arrayfile_t(outfile, 64, A.n_columns, -1, oapackage.ABINARY_DIFFZERO, 1)
             if afout is not None:
                 afout.append_array(A)
-            nnm = nnm+1
+            nnm = nnm + 1
     if afout:
         afout.closefile()
     return nn, nnm
