@@ -210,8 +210,6 @@ def evenoddSubpageSpecial(htmldir, r, verbose=1, pagecache=1):
 
     kinitial = r["kinitial"]
     nn = adata.ncols
-    #  nn=eotable.sum(axis=1).nonzero()[0][-1]+1
-    # nn=adata.ncols
 
     nnp = r["nnp"]
     for ii in range(adata.strength, nn + 1):
@@ -800,11 +798,7 @@ def generateLevelNext(
                 pfile0 = splitBase(lvls) + "-pareto-%s.oa" % vv
                 pfile = os.path.join(outputdir, edir, pfile0)
                 if os.path.exists(pfile):
-                    # print(pfile)
                     continue
-                if 0:
-                    print("   parse %s to %s" % (afile0, pfile0))
-                    researchOA.parseParetoFile(afile, pfile)
                 cmd = "oapareto %s --paretomethod %d -o %s" % (afile, paretomethod, pfile)
                 cmd += "  | tee -a log-legacy-%s.txt" % tag
                 cc += cmd + "\n"
@@ -1001,12 +995,6 @@ def generateLevelNext(
                         print("# generateLevelNext %s: extend %d" % (tag, kk))
                     joblist.append(j)
 
-                if 0:
-                    print("xxx: adding job %s" % str(j))
-                    print("  start %s" % (str(j.checkfilesstart)))
-                    print("  check %s" % (str(j.checkfiles)))
-                    print(os.getcwd())
-                    exit(0)
         # for each splitted file do an extend
         # gather results
     runcomplete = None

@@ -73,7 +73,7 @@ class hashable_array:
         """
         self.__tight = tight
         self.__wrapped = np.array(wrapped) if tight else wrapped
-        self.__hash = hash(self.__wrapped.bytes())
+        self.__hash = hash(self.__wrapped.tobytes())
 
     def __eq__(self, other):
         return np.all(self.__wrapped == other.__wrapped)
