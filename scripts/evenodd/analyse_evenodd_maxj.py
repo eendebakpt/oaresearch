@@ -104,7 +104,7 @@ adfull = oapackage.readConfigFile(join(xdir, "oaconfig.txt"))
 afile = join(xdir, f"result-64.2-2-2-2-2.oa.gz")
 aa = oapackage.readarrayfile(afile)
 k = aa[0].n_columns
-print(f"start : {len(aa)} array(s)")
+print(f"start : {len(aa)} array(s) with 5 columns")
 for A in aa:
     J5 = A.Fvalues(5)
     js = oapackage.jstruct_t(A, 5)
@@ -116,6 +116,30 @@ for A in aa:
 def oa_result_file(ss, k, tag="extend"):
     idstr = adfull.reduceColumns(k).idstr()
     return oapackage.splitFile(ss) + f"-{tag}-" + idstr + ".oa"
+
+
+#%%
+k = 5
+a7 = adfull.reduceColumns(k)
+afile = join(xdir, f"eo-{a7.idstr()}.oa.gz")
+# afile = join(xdir, f"result-{a7.idstr()}.oa.gz")
+aa = oapackage.readarrayfile(afile)
+print(f"start : {len(aa)} array(s) with {k} columns")
+
+for idx, A in enumerate(aa):
+    J5 = A.Fvalues(5)
+    print(idx, J5)
+    js = oapackage.jstruct_t(A, 5)
+    mj = js.maxJ()
+    J7 = A.Fvalues(7)
+    js7 = oapackage.jstruct_t(A, 7)
+    mj7 = js7.maxJ()
+
+    if np.sum(np.abs(A.Jcharacteristics(5))) == 0:
+        print(f"design {idx}: max(J5) {mj}  max(J7) {mj7} sum J7 {sum(J7)} gwlp {A.GWLP()}")
+
+#%%
+B = A.selectFirstColumns(5)
 
 
 # %% Analyse start at k=7
