@@ -8,13 +8,13 @@ The script consists of 5 steps:
     2. Extend the selected arrays to OA(N; 3; kinitial)
     2b. Split the resulting arrays in blocks
     3. For each block available:
-        3a. Extend to OA(N; 3; 2^kinitial) using the algorithm ORDER_J5X
+        3a. Extend to OA(N; 3; 2^knext) using the algorithm ORDER_J5X
         3b. Split the resulting arrays into blocks
     4. For each block available:
         4a. Extend to OA(N; 3; 2^klevel) using the algorithm ORDER_J5X and a special algorithm (depth mode)
         *** OR ***
         4a.i Extend to OA(N; 3; 2^(kinitial+delta) )
-        4a.ii Split into a nuber of blocks
+        4a.ii Split into a number of blocks
         4a.iii Extend each of the blocks
         4a.iv Merge extended blocks into original format
 
@@ -37,6 +37,8 @@ import numpy as np
 import oapackage
 from oapackage import oahelper  # reload(oahelper)
 from oapackage import MODE_J5ORDERX
+
+from oaresearch.pythondevelop.researchOA import makeJobList
 
 import oaresearch.pythondevelop.researchOA as researchOA
 from oaresearch.pythondevelop.functions_evenodd import generateLevelNext
@@ -88,12 +90,11 @@ if not os.path.isdir(resultsdir):
 
 r = oapackage.log_print(-oapackage.SYSTEM, "")
 
-
 # %% Setup arguments
 
 # dobigcase = 56  # by default run a small case to test the scripts
 dobigcase = 48  # by default run a small case to test the scripts
-# dobigcase=64 #
+dobigcase = 64
 
 print("evenodd_cluster: command line usage evenodd_cluster.py -N [N]")
 
@@ -267,7 +268,7 @@ else:
 
     ii = (np.abs(gwlp[:, -1]) > 1e-5).nonzero()[0]
     eo_indices = [int(x) for x in ii]
-    idxvec = oapackage.intVector(ww)
+    #idxvec = oapackage.intVector(ww)
     sols0 = oapackage.arraylist_t()
     for ii in eo_indices:
         al = oapackage.oalib.selectArrays(afile, ii)
@@ -275,10 +276,12 @@ else:
     oapackage.writearrayfile(eostartfile, sols0, oapackage.ABINARY)
 
 
-# %% """ Step 2. """
-print("--- Step 2 (sequential) ---")
-kinitial = splitdata["kinitial"]
-cmdlogfile = "logstart.txt"
+# %%  Step 2. Extend the selected arrays to OA(N; 3; kinitial)
+
+print('--- Step 2 (sequential) ---')
+kinitial = splitdata['kinitial']
+cmdlogfile = 'logstart.txt'
+
 adatastart = oapackage.arraydata_t(adata, kinitial)
 adatastart.writeConfigFile(os.path.join(outputdir, "oaconfig-start.txt"))
 cmd = f"cd {outputdir}; oaextendsingle -r {eostartfile} -f D -l 2 -m {oapackage.MODE_J5ORDERX} -c oaconfig-start.txt -o eo | tee {cmdlogfile}"
