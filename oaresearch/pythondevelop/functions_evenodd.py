@@ -9,11 +9,6 @@ Created on Fri Nov 16 11:24:39 2012
 
 
 import datetime
-import math
-
-
-import datetime
-from oaresearch.pythondevelop.researchOA import analyseFile, loadAnalysisFile
 import os
 import time
 from os.path import join
@@ -22,11 +17,13 @@ import numpy as np
 import oalib
 import oapackage
 from oapackage import oahelper
+
+from oaresearch.pythondevelop import researchOA
+from oaresearch.pythondevelop.ABhelper import *
 from oaresearch.pythondevelop.researchOA import *
 from oaresearch.pythondevelop.researchOA import (
     analyseFile,
     checkFiles,
-    checkFilesOA,
     evenoddCases,
     formatProccessingTime,
     gatherLockfile,
@@ -40,15 +37,6 @@ from oaresearch.pythondevelop.researchOA import (
     splitname,
     splitTag,
 )
-
-import oaresearch.pythondevelop.researchOA
-from oapackage import oahelper
-from oaresearch.pythondevelop import researchOA
-from oaresearch.pythondevelop.researchOA import gatherResults, runcommand, splitdir, splitname, splitTag, gatherLockfile
-from oaresearch.pythondevelop.researchOA import checkFiles, checkFilesOA, evenoddCases, readNumbersFile
-from oaresearch.pythondevelop.ABhelper import *
-from oaresearch.pythondevelop.researchOA import *
-from oaresearch.pythondevelop.researchOA import parseProcessingTime, nArrayFile, formatProccessingTime
 
 
 def smallEOcase(key: str, adata, basedir, htmldir: str, latexdir: str, subdir=None, verbose=1, cache=1):
@@ -77,7 +65,7 @@ def smallEOcase(key: str, adata, basedir, htmldir: str, latexdir: str, subdir=No
     rr["totaltime"] = parseProcessingTime(os.path.join(casedir, "log0.txt"))
     rr["subdir"] = subdir
 
-    with open(os.path.join(casedir, "code.txt"), "wt") as fid:
+    with open(os.path.join(casedir, "code.txt"), "w") as fid:
         fid.write("generated with smallEOcase\n")
         fid.write("paretomethod: 1\n")
 
@@ -101,7 +89,7 @@ def smallEOcase(key: str, adata, basedir, htmldir: str, latexdir: str, subdir=No
         eotable = np.vstack((eotable, ww[0]))
 
         pfile = os.path.join(casedir, "result-pareto-%s.oa" % adata0.idstr())
-        cmd = "oapareto %s --paretomethod 1 -f T -v 1 -o %s" % (afile, pfile)
+        cmd = f"oapareto {afile} --paretomethod 1 -f T -v 1 -o {pfile}"
         if checkFiles(pfile, cache=cache):
             if verbose >= 2:
                 print("file %s already exists" % pfile)
@@ -208,7 +196,7 @@ def evenoddSubpageSpecial(htmldir, r, verbose=1, pagecache=1):
 
     page.tr.close()
 
-    kinitial = r["kinitial"]
+    r["kinitial"]
     nn = adata.ncols
 
     nnp = r["nnp"]
@@ -235,7 +223,7 @@ def evenoddSubpageSpecial(htmldir, r, verbose=1, pagecache=1):
         pnstr = "Series: " + e.a(xstr, href=subfile) + ", " + e.a("main page", href="../index-evenodd.html")
         # generate subpage
         if ii >= 5 and na != 0:
-            dstr = "Pareto optimal designs of J5 type." % ()
+            dstr = "Pareto optimal designs of J5 type.".format()
             targetdir = os.path.join(htmldir, "evenoddpages")
             subfilebase = "paretoclassx-%s" % adata0.fullidstr()
             subfilecase = parseParetoClass(
@@ -289,7 +277,7 @@ def evenoddSubpageSpecial(htmldir, r, verbose=1, pagecache=1):
     page.p("Page generated on %s." % dstr)
 
     r["subpage0"] = subfile
-    fid = open(os.path.join(htmldir, "evenoddpages", subfile), "wt")
+    fid = open(os.path.join(htmldir, "evenoddpages", subfile), "w")
     fid.write(str(page))
     fid.close()
     return subfile, adata
@@ -425,7 +413,7 @@ def evenoddSubpage(htmldir, r, verbose=1, pagecache=1):
     page.p(e.small("kmax %d, adata.ncols %d, nn %d" % (kmax, adata.ncols, nn)))
 
     r["subpage0"] = subfile
-    fid = open(os.path.join(htmldir, "evenoddpages", subfile), "wt")
+    fid = open(os.path.join(htmldir, "evenoddpages", subfile), "w")
     fid.write(str(page))
     fid.close()
     return subfile
@@ -463,7 +451,7 @@ def eoseries2html(eotable, r):
 
     eoseries = eotable[:, 1:].sum(axis=1)
     evenseries = eotable[:, 0:].sum(axis=1)
-    ii = r["eoseries"].size
+    r["eoseries"].size
     ss = ""
     for jj in range(0, ncolsmax + 1):
         ss += e.span("%d" % eoseries[jj], style="color: blue;")
@@ -494,7 +482,7 @@ def geteotype(afile, cache=1, verbose=1):
             oapackage.tprint("array %d" % j)
         b = np.nonzero(w[j, 0:] > 1e-10)[0]
         if verbose >= 3:
-            print("series %s, b %s" % (w[j, 0:], str(b)))
+            print(f"series {w[j, 0:]}, b {str(b)}")
         if b.size > 0:
             eotype[j] = 1 + 2 * b[0]
         else:
@@ -568,7 +556,7 @@ def rerunGather(
     tag = splitTag(lvls)
     level = len(lvls)
     splitfile = "splitted-%s.zip" % splitTag(lvls)
-    splitfiletag0 = "splitted-%s-%s.txt" % (splitTag(lvls), reruntag)
+    splitfiletag0 = f"splitted-{splitTag(lvls)}-{reruntag}.txt"
     splitfiletag = os.path.join(outputdirtmp, edir0, splitfiletag0)
 
     lockfile = gatherLockfile(outputdirtmp, lvls)
@@ -576,21 +564,21 @@ def rerunGather(
     if os.path.exists(lockfile):
         raise Exception("lockfile %s exists" % lockfile)
     if oahelper.checkFiles(splitfiletag, cache=cache):
-        print("rerunGather %s: split directory with tag %s already calculated " % (tag, splitfiletag0))
+        print(f"rerunGather {tag}: split directory with tag {splitfiletag0} already calculated ")
         return
 
     if outputdirtmp is None:
         outputdirtmp = tempfile.mkdtemp("oa-%s" % tag)
 
     if oahelper.checkFiles(os.path.join(outputdirtmp, edir0, splitfile), cache=cache):
-        print("rerunGather %s: split directory %s already calculated " % (tag, edir0))
+        print(f"rerunGather {tag}: split directory {edir0} already calculated ")
     else:
         if (verbose >= 2) or (verbose >= 1 and level <= 2):
-            print("rerunGather %s: split file %s does not exist " % (tag, join(edir0, splitfile)))
+            print(f"rerunGather {tag}: split file {join(edir0, splitfile)} does not exist ")
         adatax = adata.reduceColumns(splitdata["kmax"])
         edir = splitdir(lvls)
         rfile = splitname(lvls)
-        afile = os.path.join(edir, "%s-%s" % (rfile.replace(".oa", "-extend"), adatax.idstr() + ".oa"))
+        afile = os.path.join(edir, "{}-{}".format(rfile.replace(".oa", "-extend"), adatax.idstr() + ".oa"))
         if oapackage.checkArrayFile(join(outputdirtmp, afile)):
             if (verbose >= 2) or (verbose >= 1 and level <= 2):
                 print("   file %s does exist!" % join(afile))
@@ -603,8 +591,8 @@ def rerunGather(
     qqdir = join(outputdirtmp, edir0)
 
     if sublevels:
-        print("rerunGather %s: unzip to %s" % (tag, qqdir))
-        cmd = "cd %s; unzip -q -o %s;" % (qqdir, join(outputdirtmp, edir0, splitfile))
+        print(f"rerunGather {tag}: unzip to {qqdir}")
+        cmd = f"cd {qqdir}; unzip -q -o {join(outputdirtmp, edir0, splitfile)};"
         if verbose >= 2:
             print(cmd)
         if verbose:
@@ -618,7 +606,7 @@ def rerunGather(
             return None
         # r = subprocess.check_output(cmd, shell=True)
 
-        print("rerunGather %s: unzip complete" % (tag,))
+        print(f"rerunGather {tag}: unzip complete")
 
         for ij in range(splitdata[level]["n"]):
             sublvls = lvls + [ij]
@@ -649,13 +637,13 @@ def rerunGather(
         print("warning level structure too deep...")
         if lvls[0] == 567 and lvls[1] == 111 and lvls[2] == 16 and adata.N == 64 and adata.strength == 3:
             print("!!! special case, overriding splitdata !!!")
-            print("lvls %s" % (lvls,))
+            print(f"lvls {lvls}")
             splitdata, iisel, jjsel = evenoddCases(adata.N, strength=adata.strength, lastlevel=4)
         else:
             raise
 
     if verbose:
-        print("rerunGather %s: before gatherResults: %.1f [seconds]" % (tag, time.time() - t0))
+        print(f"rerunGather {tag}: before gatherResults: {time.time() - t0:.1f} [seconds]")
 
     joblistg1 = gatherResults(
         lvls,
@@ -669,7 +657,7 @@ def rerunGather(
         gatherJstats=gatherJstats,
     )
     if verbose:
-        print("\nrerunGather %s: run gather: %.1f [seconds]" % (tag, time.time() - t0))
+        print(f"\nrerunGather {tag}: run gather: {time.time() - t0:.1f} [seconds]")
         if verbose >= 2:
             print(joblistg1[0].cmd)
             print("---")
@@ -696,12 +684,12 @@ def rerunGather(
     good = np.all(jr)
     if good:
         ss = "jobresults: " + str(jr)
-        researchOA.touchFile(splitfiletag, "%s\noapackage %s\n%s\n" % (oapackage.timeString(), oapackage.version(), ss))
+        researchOA.touchFile(splitfiletag, f"{oapackage.timeString()}\noapackage {oapackage.version()}\n{ss}\n")
     else:
-        print("rerunGather %s: gather returned error" % (tag,))
+        print(f"rerunGather {tag}: gather returned error")
 
     if verbose:
-        print("rerunGather %s: done: %.1f [seconds]" % (tag, time.time() - t0))
+        print(f"rerunGather {tag}: done: {time.time() - t0:.1f} [seconds]")
 
     return alljobs
 
@@ -722,7 +710,7 @@ def finalStageProcessing(outputdir, adata, splitdata, lvls, verbose=1, cache=Tru
     else:
         efile = os.path.join(edir, rfile.replace(".oa", "-extend.txt"))
         dtx = oapackage.parseProcessingTime(efile, verbose=0)
-        print("generateLevelNext %s: legacy:  read processing time from %s: %.1f" % (tag, efile, dtx))
+        print(f"generateLevelNext {tag}: legacy:  read processing time from {efile}: {dtx:.1f}")
         researchOA.writeprocessingTime(pfile, dtx)
         # create numbers file?
     return None
@@ -754,7 +742,7 @@ def generateLevelNext(
         ncores = 4
 
     if verbose >= 2:
-        print("split tag %s: file %s" % (tag, rfile))
+        print(f"split tag {tag}: file {rfile}")
     ebasefull = os.path.join(edir, rfile).replace(".oa", "-extend")
     afilee = os.path.join(edir0, rfile)
 
@@ -816,7 +804,7 @@ def generateLevelNext(
                     job(
                         cc,
                         jobtype="convert legacy %s" % tag,
-                        shorttag="legacy-%s" % (tag,),
+                        shorttag=f"legacy-{tag}",
                         checkfiles=[pfile],
                         checkfilesstart=[afile],
                         ncores=1,
@@ -834,13 +822,13 @@ def generateLevelNext(
             pfile0 = researchOA.processingtimeFile(lvls)
             nfile0 = researchOA.numbersFile(lvls)
             pfile = os.path.join(outputdir, edir, pfile0)
-            nfile = os.path.join(outputdir, edir, nfile0)
+            os.path.join(outputdir, edir, nfile0)
             if os.path.exists(pfile):  # and os.path.exists(nfile):
                 pass
             else:
                 efile = os.path.join(edir, rfile.replace(".oa", "-extend.txt"))
                 dtx = oapackage.parseProcessingTime(efile, verbose=0)
-                print("generateLevelNext %s: legacy:  read processing time from %s: %.1f" % (tag, efile, dtx))
+                print(f"generateLevelNext {tag}: legacy:  read processing time from {efile}: {dtx:.1f}")
                 researchOA.writeprocessingTime(pfile, dtx)
                 # create numbers file
             print(
@@ -873,7 +861,7 @@ def generateLevelNext(
 
     os.chdir(outputdir)
     if not researchOA.checkFilesOA(afilee):
-        print("generateLevelNext: %s: note: file %s does not exist!" % (tag, afilee))
+        print(f"generateLevelNext: {tag}: note: file {afilee} does not exist!")
         runcomplete = None
         cmd = None
         return joblist, runcomplete, cmd
@@ -889,7 +877,7 @@ def generateLevelNext(
         qtime = 240
     else:
         qtime = 5
-    print("# generateLevelNext: step 4a: tag %s, priorextend %s " % (tag, priorextend))
+    print(f"# generateLevelNext: step 4a: tag {tag}, priorextend {priorextend} ")
     if 1:
         edirf = edir
 
@@ -900,7 +888,7 @@ def generateLevelNext(
         checkstart = None
         cmd = ""
         if priorextend:
-            cmd += "cd %s; mkdir -p %s;" % (outputdir, edirf)
+            cmd += f"cd {outputdir}; mkdir -p {edirf};"
             cmd += os.linesep + "touch %s" % lfile
             cmd += os.linesep + 'echo "discardJ5 %d" > %s\n' % (discardJ5, join(edirf, "extendoptions.txt"))
             if splitmode:
@@ -917,7 +905,7 @@ def generateLevelNext(
                 )
             cmd += os.linesep + "rm -f %s" % lfile + os.linesep
             checkstart = afilee
-        cmd += "cd %s; mkdir -p %s;" % (outputdir, edirf)
+        cmd += f"cd {outputdir}; mkdir -p {edirf};"
         cmd += os.linesep + "# split data at level %d" % (level) + os.linesep
         splitcmd, splitfile, splitout, done = doSplitFile(
             lvls, splitdata, adata, verbose=verbose >= 2, outputdir=outputdir
@@ -944,7 +932,7 @@ def generateLevelNext(
 
         if j.complete():
             if verbose:
-                print("# generateLevelNext %s: extend and split complete" % (tag,))
+                print(f"# generateLevelNext {tag}: extend and split complete")
 
             for kk in range(splitdata[level]["n"]):
                 rfile = splitname(lvls + [kk])
@@ -966,7 +954,7 @@ def generateLevelNext(
                 # cmd=''
                 cmd = os.linesep + "# extend data at level (%d+?): %s" % (level, (tagX) + os.linesep)
                 maxk = splitdata["levels"][level + 2]
-                cmd += "cd %s; \nmkdir -p %s;\n" % (outputdir, edirX)
+                cmd += f"cd {outputdir}; \nmkdir -p {edirX};\n"
                 cmd += os.linesep + 'echo "discardJ5 %d" > %s\n' % (discardJ5, join(edirX, "extendoptions.txt"))
                 cmd += os.linesep + "touch %s" % lfile
                 cmd += (
@@ -977,7 +965,7 @@ def generateLevelNext(
                 cmd += os.linesep + "sleep .1"
                 cmd += os.linesep + "rm -f %s" % lfile
                 cmd += os.linesep + "cd %s; gzip -q -f *.oa; " % os.path.join(outputdir, edirX)
-                cmd += os.linesep + "md5sum *.oa.gz > %s; " % (mdfileX,)
+                cmd += os.linesep + f"md5sum *.oa.gz > {mdfileX}; "
                 j = job(
                     cmd=cmd,
                     checkfiles=[join(edirX, mdfileX)],
@@ -1033,7 +1021,7 @@ def makeJobList(scriptdir, jobs, ncores, queue, verbose=1):
 
     print("created %d/%d jobs in %s" % (nj, len(jobs), scriptdir))
 
-    fid = open(join(scriptdir, "subs.sh"), "wt")
+    fid = open(join(scriptdir, "subs.sh"), "w")
     for i, s in enumerate(slist):
         _ = fid.write("%s\n" % s)
     fid.close()
@@ -1067,7 +1055,7 @@ def checkNumbers(basedir, lvls=[1, 95], verbose=1, debug=False):
     xdate = datetime.datetime.fromtimestamp(mtime)
     xdate0 = datetime.datetime(2016, 1, 1)
     if xdate < xdate0 and mtime > 0:
-        print("numbers file for %s is old: %s" % (lvls, time.ctime(mtime)))
+        print(f"numbers file for {lvls} is old: {time.ctime(mtime)}")
 
     ndata = readNumbersFile(nfile)
 

@@ -5,21 +5,18 @@ Created on Fri Nov 16 11:24:39 2012
 """
 
 
-from researchOA import *
-import researchOA
-import oalib
-import operator
-import matplotlib.pyplot as plt
-import time
-import numpy as np
 import os
 import sys
-oadir = '/home/eendebakpt/misc/oa/oacode/'
-xdir = '/home/eendebakpt/misc/oa/dof'
+
+import oalib
+from researchOA import *
+
+oadir = "/home/eendebakpt/misc/oa/oacode/"
+xdir = "/home/eendebakpt/misc/oa/dof"
 
 """ Load necessary packages """
-sys.path.append(os.path.join(oadir, 'pythondevelop'))
-sys.path.append(os.path.join(oadir, 'oalib'))
+sys.path.append(os.path.join(oadir, "pythondevelop"))
+sys.path.append(os.path.join(oadir, "oalib"))
 
 os.chdir(xdir)
 t = 2
@@ -44,9 +41,8 @@ aidx = 4  # forward order
 # N=12; ncols=8;kstart=5; aidx=0 # ??
 adata = oalib.arraydata_t(oalib.intVector([2] * ncols), N, t, ncols)
 adata0 = oalib.arraydata_t(adata, kstart)
-adata0.writeConfigFile('oaconfig%d.txt' % kstart)
-afile0, nsols = extendInitial(
-    xdir, adata, kstart, verbose=2, cache=0, cmdlog=None)
+adata0.writeConfigFile("oaconfig%d.txt" % kstart)
+afile0, nsols = extendInitial(xdir, adata, kstart, verbose=2, cache=0, cmdlog=None)
 
 
 sols = oalib.readarrayfile(afile0)
@@ -63,14 +59,15 @@ X.T.flatten()
 
 # binom(9,5)*math.factorial(5)
 
+
 def showVector(v):
     for ii in range(0, v.size()):
-        print(('%s,' % v[0]), end='')
-    print('')
+        print(("%s," % v[0]), end="")
+    print("")
 
 
-print('')
-print('')
+print("")
+print("")
 
 
 ncols = 4

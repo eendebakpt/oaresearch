@@ -1,7 +1,8 @@
 import os
-import oapackage
+
 import matplotlib.pyplot as plt
 import numpy as np
+import oapackage
 
 output_path = "/home/eendebakpt/tmp"
 

@@ -10,26 +10,25 @@ Created on Mon Jun 13 14:12:51 2011
 import fileinput
 import os
 import sys
-from os.path import basename
+
 import matplotlib.pyplot as plt
 import numpy as np
 import oalib
-import oapackage.oahelper as oahelper
-from oapackage.oahelper import floatformat, checkFiles, getArrayFile
 from oapackage.oahelper import *
+from oapackage.oahelper import checkFiles, floatformat, getArrayFile
 
 
 def extendFile(afile, ostr, configfile, verbose=1, cache=1, logfile=None, cmdlog=None):
     """Extend arrayfile with dynamic filtering"""
     print("incomplete")
-    if logfile == None:
-        cmd = "oaextendsingle -c %s -l 2 -r %s -o %s" % (configfile, afile, ostr)
+    if logfile is None:
+        cmd = f"oaextendsingle -c {configfile} -l 2 -r {afile} -o {ostr}"
     else:
-        cmd = "oaextendsingle -c %s -l 2 -r %s -o %s | tee %s" % (configfile, afile, ostr, logfile)
+        cmd = f"oaextendsingle -c {configfile} -l 2 -r {afile} -o {ostr} | tee {logfile}"
     nextfile = ""
     if verbose >= 2:
         print(cmd)
-    if cmdlog != None:
+    if cmdlog is not None:
         cmdlog.write("# Extend \n" + scriptCheck(cmd, nextfile) + "\n\n")
         cmdlog.flush()
     sys.stdout.flush()  # needed for tee command
@@ -51,7 +50,7 @@ def gma2str(gmadata, t=None, sformat=None):
     if not (np.abs(gmadata[0] - 1) < 1e-12 and np.abs(gmadata[1]) < 1e-12):
         print("warning: data are not good GWPL data!!!!")
     bgma = np.around(gmadata, decimals=12)
-    if not t is None:
+    if t is not None:
         bgma = bgma[(t + 1) :]
     if sformat is None:
         gstr = ",".join([floatformat(v, mind=2, maxd=4) for v in bgma])
@@ -116,8 +115,8 @@ def nextDthr(A, k):
 
 def plotAthresholdsY(Afinal, kfinal, k=None, yl=None, label="Threshold for final D-efficiency value"):
     xl = plt.xlim()
-    yl = plt.ylim()
-    if k == None:
+    plt.ylim()
+    if k is None:
         k = kfinal
     Afinaln = calculateAthreshold(Afinal, kfinal, k)
     ph = plt.plot(xl, [Afinaln, Afinaln], "--r", linewidth=3, label=label)
@@ -126,11 +125,11 @@ def plotAthresholdsY(Afinal, kfinal, k=None, yl=None, label="Threshold for final
 
 def plotAthresholds(Afinal, kfinal, k=None, yl=None):
     """Plot thresholds for AB figure"""
-    if yl == None:
+    if yl is None:
         yl = plt.ylim()
     plt.plot([Afinal, Afinal], yl, "-g")
     Acurr = Afinal
-    if not k == None:
+    if k is not None:
         mfinal = 1 + kfinal + kfinal * (kfinal - 1) / 2
         m = 1 + k + k * (k - 1) / 2
         Acurr = Afinal ** (float(mfinal) / m)
@@ -143,7 +142,6 @@ def parseProcessingTimeOld(logfile, verbose=0):
         print("ERROR: do not use this functioN!")
     fileinput.close()
     tstart = None
-    tend = None
     for line in fileinput.input([logfile]):
         if line.startswith(" TIME"):
             if verbose:
@@ -156,7 +154,7 @@ def parseProcessingTimeOld(logfile, verbose=0):
 
 def setABfigure(figid=None, fontsize=13):
     """Set labels for AB figure"""
-    if not figid == None:
+    if figid is not None:
         plt.figure(figid)
     plt.xlabel("D-efficiency", fontsize=fontsize)
     plt.ylabel("log(average variation inflation factor)", fontsize=fontsize)
@@ -184,17 +182,16 @@ def plotAsAboundaries(k):
 def plotABboundaries(Acc=None):
     """Plot boundaries for D-eff and A-eff values"""
     #    xl=plt.xlim();
-    xl = [0, 1]
     yl = plt.ylim()
     plt.plot([1, 1], yl, "--r")
     dstep = 0.005
     xx = np.arange(dstep, 1, dstep)
     yy = 1 / xx
     idx = np.log(yy) < yl[1]
-    hborder = plt.plot(xx[idx], np.log(yy[idx]), "--r", label="Boundary")
+    plt.plot(xx[idx], np.log(yy[idx]), "--r", label="Boundary")
 
-    if not Acc == None:
-        hacc = plt.plot([Acc, Acc], yl, "--m", label="Numerical accuracy limit")
+    if Acc is not None:
+        plt.plot([Acc, Acc], yl, "--m", label="Numerical accuracy limit")
 
 
 def ABcalclist(sols, verbose=0):
@@ -239,7 +236,7 @@ def ABcalc(X, verbose=0):
         B = n * np.sum((1 / s) ** 2) / m
 
     if verbose:
-        print("D-eff %f A-eff %f" % (A, B))
+        print(f"D-eff {A:f} A-eff {B:f}")
     return (A, B)
 
 
@@ -268,7 +265,7 @@ def processBlocks(nblocks, outfiles, analysisfiles, verbose, cverbose, cache=1, 
     """Process data in blocks"""
 
     if cmdfile is not None:
-        cfid = open(cmdfile, "wt")
+        cfid = open(cmdfile, "w")
 
     for nn in range(0, nblocks):
         if verbose:
@@ -348,7 +345,7 @@ def parseABarrayfull(X, subcols=None, verbose=1):
     nc = X.shape[1]
     asub = np.zeros(nc)
     bsub = np.zeros(nc)
-    if subcols == None:
+    if subcols is None:
         subcols = range(0, nc)
     for ii in subcols:
         Xs = np.delete(X, np.s_[ii], axis=1)

@@ -2,10 +2,11 @@
 #
 # Get appveyour artifacts
 
-from coreapi import Client
-import urllib.request
 import os
 import platform
+import urllib.request
+
+from coreapi import Client
 
 
 def mkdirc(directory_name):
@@ -28,7 +29,7 @@ project_name = "oapackage-4lws8"
 baseurl = "https://ci.appveyor.com/api"
 
 client = Client()
-document = client.get(baseurl + "/projects/%s/%s/history?recordsNumber=10" % (username, project_name))
+document = client.get(baseurl + f"/projects/{username}/{project_name}/history?recordsNumber=10")
 
 builds = [build for build in document["builds"] if build["branch"] == "master"]
 
@@ -52,7 +53,7 @@ print(f"download to {targetdir}")
 # %% Get artifacts
 
 for jobtag, job in enumerate(build["build"]["jobs"]):
-    print("job %s: %s" % (job["jobId"], job["name"]))
+    print("job {}: {}".format(job["jobId"], job["name"]))
 
     url = "/buildjobs/{}/artifacts".format(job["jobId"])
     artifacts = client.get(baseurl + url)

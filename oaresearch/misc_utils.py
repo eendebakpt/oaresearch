@@ -1,5 +1,5 @@
-from bisect import bisect_left
 import inspect
+from bisect import bisect_left
 
 
 def printd(text: str):
