@@ -6,33 +6,28 @@ Created on Wed May 18 12:52:15 2022
 """
 
 # %%
-from qtt.utilities.visualization import combine_legends
-import matplotlib
-from qtt.utilities.tools import flatten
-import rapidjson
-import numpy as np
-import timeit
-import itertools
-from oapackage import readStatisticsFile
-from oaresearch.pythondevelop.researchOA import numbersFile
-import matplotlib.pyplot as plt
 import json
-from oapackage.oahelper import arrayfile_generator
-from oapackage import splitFile
-import pathlib
-from typing import Any, Dict, List, Optional
-import time
-import tempfile
-import subprocess
-from collections import namedtuple
-import oapackage
-from tqdm import tqdm
 import os
-from os.path import join
-from termcolor import colored
+import pathlib
 import shutil
+import subprocess
+import tempfile
+import time
+from collections import namedtuple
+from os.path import join
+
+import matplotlib.pyplot as plt
+import numpy as np
+import oapackage
+import rapidjson
+from oapackage import splitFile
+from oapackage.oahelper import arrayfile_generator
+from qtt.utilities.tools import flatten, measure_time
+from qtt.utilities.visualization import combine_legends
+from termcolor import colored
+from tqdm import tqdm
+
 from oaresearch.pythondevelop import researchOA
-from qtt.utilities.tools import measure_time
 
 
 def maxj_design(A):
@@ -88,7 +83,7 @@ def check_file(afile, tag=None):
 
             js.Fval()
 
-            J5 = A.Fvalues(5)
+            A.Fvalues(5)
 
             # print(f'k {k}: {s1}.{s2}: ', ii, mj, J5)
     print(f"{tag}: {len(aa)} array(s), {ngood} have maxJ")
@@ -101,7 +96,7 @@ def check_file(afile, tag=None):
 xdir = "/media/eendebakpt/KONIJN/hopper/run64"
 
 adfull = oapackage.readConfigFile(join(xdir, "oaconfig.txt"))
-afile = join(xdir, f"result-64.2-2-2-2-2.oa.gz")
+afile = join(xdir, "result-64.2-2-2-2-2.oa.gz")
 aa = oapackage.readarrayfile(afile)
 k = aa[0].n_columns
 print(f"start : {len(aa)} array(s) with 5 columns")
@@ -174,7 +169,7 @@ for s1 in range(780):
 adata = adfull.reduceColumns(k)
 
 xdir = "/mnt/data/tmp2/"
-oapackage.writearrayfile(f"/mnt/data/tmp2/m64.oa", maxj)
+oapackage.writearrayfile("/mnt/data/tmp2/m64.oa", maxj)
 # oapackage.writearrayfile(f'/mnt/data/tmp2/m64-{adata.idstr()}.oa', maxj)
 
 # %% Branch factor
@@ -239,7 +234,7 @@ else:
     cmd = f"oa_select_maxj -i {ifile0} -o {ifile_splitx} -f D"
 print(cmd)
 
-fid = open(os.path.join(cdir, "c.sh"), "wt")
+fid = open(os.path.join(cdir, "c.sh"), "w")
 for lvl in range(0, len(splits) - 1):
     cprint(f"lvl: {lvl}")
     # b = splits[lvl]
@@ -526,7 +521,7 @@ for s1 in l1_blocks:
                 jd = {j: jdata.getCount(k, j) for j in [0, 16, 32, 48, 64]}
 
                 jfile = "-".join([str(e) for e in ss]) + f"-k{k}-maxj64.json"
-                json.dump(jd, open(join(odir_str, jfile), "wt"))
+                json.dump(jd, open(join(odir_str, jfile), "w"))
 
                 nn = sum(jd.values())
                 nnm = jd.get(64, 0)
@@ -547,7 +542,7 @@ for s1 in l1_blocks:
 
 
 # %%
-json.dump((counts, counts_maxj), open(join(odir, f"counts-{k}.json"), "wt"))
+json.dump((counts, counts_maxj), open(join(odir, f"counts-{k}.json"), "w"))
 
 # %% Load pre-calculated data
 
@@ -833,7 +828,7 @@ for snext in range(18):
 
     xx = oapackage.splitDir(split + [snext])
     xx = "/".join(xx.split("/")[1:])
-    xdir = join(f"/mnt/data/tmp/", f"{split[0]}", xx)
+    xdir = join("/mnt/data/tmp/", f"{split[0]}", xx)
 
     afile = join(xdir, oapackage.splitFile(split + [snext]) + f"-extend-64.{kk}.oa.gz")
 
@@ -904,7 +899,7 @@ def calculate_lmc_speed(s, niter=5, select_maxj=False):
                     for A in aa:
                         # oapackage.LMC_LESS = 0
                         reduction.reset()
-                        r = oapackage.LMCcheckj5(A, adata, reduction, oaextend)
+                        oapackage.LMCcheckj5(A, adata, reduction, oaextend)
             dtn = (mt.dt / len(aa)) / niter
             print(f"k {kk}: ndesigns {len(aamax)}/{na}: {1/dtn:.4f} checks/s")
             results[kk] = {"n": len(aa), "dt": dtn, "cps": 1 / dtn}

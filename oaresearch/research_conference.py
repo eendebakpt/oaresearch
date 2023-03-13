@@ -4,46 +4,42 @@ Pieter Eendebak <pieter.eendebak@gmail.com>
 
 """
 
-from collections import OrderedDict
-from typing import Union
-import json_tricks
+import collections
 import copy
 import json
-import collections
-import itertools
-import numpy as np
+import operator
 import os
-import sys
-import time
 import pickle
 import shutil
-from typing import Tuple, List, Any
-from functools import reduce
-import operator
-from functools import lru_cache
+import sys
+import time
+from collections import OrderedDict
+from functools import lru_cache, reduce
+from typing import Any, List, Tuple, Union
 
+import json_tricks
 import numpy as np
 from joblib import Parallel, delayed
 
 try:
-    import matplotlib.pyplot as plt
+    pass
 except BaseException:
     pass
 
+from collections import namedtuple
+
 import oapackage
-from oapackage.oahelper import create_pareto_element
 import oapackage.conference
 import oapackage.markup as markup
 import oapackage.oahelper as oahelper
 from oapackage.markup import oneliner as e
-from oaresearch.misc_utils import index_sorted_array
-from collections import namedtuple
+from oapackage.oahelper import create_pareto_element
 
 import oaresearch
-from oaresearch.research import citation
 import oaresearch.filetools
+from oaresearch.misc_utils import index_sorted_array
+from oaresearch.research import citation
 
-from oapackage.conference import momentMatrix, modelStatistics, conferenceProjectionStatistics
 
 #%%
 class hashable_array:
@@ -529,7 +525,7 @@ class SingleConferenceParetoCombiner:
             pareto_designs = [oapackage.array_link(array) for array in presults["pareto_designs"]]
             print("generate %s: %d arrays" % (outputfile, len(pareto_designs)))
             oapackage.writearrayfile(outputfile, oapackage.arraylist_t(pareto_designs), oapackage.ABINARY)
-            with open(outputfile_stats, "wt") as fid:
+            with open(outputfile_stats, "w") as fid:
                 json.dump({"number_arrays": number_arrays, "number_conference_arrays": len(arrays)}, fid)
 
     @staticmethod
@@ -544,7 +540,7 @@ class SingleConferenceParetoCombiner:
 
     def write_combined_results(self, number_columns, results):
         results["pareto_designs"] = [np.array(array) for array in results["pareto_designs"]]
-        with open(self.combined_results_file(number_columns), "wt") as fid:
+        with open(self.combined_results_file(number_columns), "w") as fid:
             json_tricks.dump(results, fid, indent=4)
 
     def load_combined_results(self, number_columns):
@@ -785,10 +781,10 @@ def conferenceStatistics(al, verbose=0):
     rankq = np.linalg.matrix_rank(modelmatrix_quadratic)
 
     if verbose:
-        print("f4: %s" % (f4,))
-        print("j4: %s" % (j4,))
-        print("rank X2: %s" % (rank,))
-        print("rank X2+quadratics: %s" % (rankq,))
+        print(f"f4: {f4}")
+        print(f"j4: {j4}")
+        print(f"rank X2: {rank}")
+        print(f"rank X2+quadratics: {rankq}")
     return [f4, b4, rank, rankq]
 
 
@@ -881,9 +877,9 @@ class pareto_results_structure(collections.OrderedDict):
     def add_value(self, tag, value):
         mintag = tag + "_min"
         maxtag = tag + "_max"
-        if not mintag in self:
+        if mintag not in self:
             self[mintag] = value
-        if not maxtag in self:
+        if maxtag not in self:
             self[maxtag] = value
         self[mintag] = min(value, self[mintag])
         self[maxtag] = max(value, self[maxtag])
@@ -1134,7 +1130,7 @@ def generate_conference_latex_tables(htmlsubdir, verbose=1):
         )
         if verbose:
             print(latextable)
-        with open(os.path.join(htmlsubdir, "conference-N%d-overview.tex" % (N,)), "wt") as fid:
+        with open(os.path.join(htmlsubdir, "conference-N%d-overview.tex" % (N,)), "w") as fid:
             fid.write(latextable)
 
 
@@ -1160,17 +1156,17 @@ def conferenceResultsFile(
         if verbose >= 2:
             print("cdesignTag: try file %s" % cfile0)
         if os.path.exists(os.path.join(outputdir, cfile0)) and os.path.exists(gfile):
-            nn1 = oapackage.nArrayFile(cfile)
-            nn2 = oapackage.nArrayFile(gfile)
+            oapackage.nArrayFile(cfile)
+            oapackage.nArrayFile(gfile)
             raise Exception("both .oa and .oa.gz exist: %s" % cfile)
 
         nn = oapackage.nArrays(cfile)
         mode = tagtype[ii]
         cfilex = oapackage.oahelper.checkOAfile(cfile)
         if cfilex is not None:
-            cfilebase = os.path.basename(cfilex)
+            os.path.basename(cfilex)
         else:
-            cfilebase = None
+            pass
         if nn >= 0:
             break
 
@@ -1383,9 +1379,9 @@ def createConferenceDesignsPageResultsTable(page, pareto_results, verbose=0):
         if "B4_max" in pareto_results:
             simpleRow("Maximum B4", "%.4f" % pareto_results["B4_max"])
         if "F4_min" in pareto_results:
-            simpleRow("Minimum F4", "%s" % (pareto_results["F4_min"],))
+            simpleRow("Minimum F4", "{}".format(pareto_results["F4_min"]))
         if "F4_max" in pareto_results:
-            simpleRow("Maximum F4", "%s" % (pareto_results["F4_max"],))
+            simpleRow("Maximum F4", "{}".format(pareto_results["F4_max"]))
     if "totaltime" in list(pareto_results.keys()):
         simpleRow("Processing time", str(pareto_results["totaltime"]) + "s")
 
@@ -1401,7 +1397,7 @@ def createConferenceDesignsPageResultsTable(page, pareto_results, verbose=0):
 def createConferenceDesignsPageLoadDesignsFile(pareto_results, htmlsubdir=None, verbose=1):
     havearrayfile = 0
     if "arrayfile" in list(pareto_results.keys()):
-        if not pareto_results["arrayfile"] is None:
+        if pareto_results["arrayfile"] is not None:
             havearrayfile = 1
 
     if verbose:
@@ -1589,9 +1585,9 @@ def conferenceDesignsPage(
     ncolumns = pareto_results["ncolumns"]
 
     if makeheader:
-        pext = "html"
+        pass
     else:
-        pext = "html.template"
+        pass
 
     conference_class = oapackage.conference_t(N, ncolumns, 0)
 
@@ -1613,7 +1609,7 @@ def conferenceDesignsPage(
     latextable = _convert_to_latex_table(rtable, N, ncolumns)
 
     if generate_latex:
-        with open(os.path.join(htmlsubdir, "conference-N%dk%d.tex" % (N, ncolumns)), "wt") as fid:
+        with open(os.path.join(htmlsubdir, "conference-N%dk%d.tex" % (N, ncolumns)), "w") as fid:
             fid.write(latextable)
         import pickle
 

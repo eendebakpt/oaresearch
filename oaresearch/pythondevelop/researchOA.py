@@ -6,7 +6,6 @@ Created on Fri Sep 21 16:14:21 2012
 
 
 # %% Load necessary packages
-from typing import Union, List
 import copy
 import itertools
 import os
@@ -16,14 +15,13 @@ import re
 import shutil
 import sys
 import time
-import types
 from os.path import basename, join
+from typing import List, Union
 
 import numpy as np
-from colorama import Fore
-from oapackage.oahelper import array2latex, series2htmlstr, safemax
+from oapackage.oahelper import safemax, series2htmlstr
 
-from oaresearch.job_utils import createJobScript, job, makeJobList
+from oaresearch.job_utils import job
 from oaresearch.misc_utils import gzipOA
 
 try:
@@ -41,8 +39,8 @@ import oapackage.scanf as scanf
 from oapackage.markup import oneliner as e
 
 from oaresearch.pythondevelop import ABhelper
-from oaresearch.pythondevelop.ABhelper import checkOAfile, checkFiles, runcommand
 from oaresearch.pythondevelop.ABhelper import *
+from oaresearch.pythondevelop.ABhelper import checkFiles, checkOAfile
 
 # %% Make nice plots
 # http://blog.olgabotvinnik.com/prettyplotlib/
@@ -81,7 +79,7 @@ def niceplot(ax, fig=None, despine=True, verbose=0, legend=None, almost_black="#
 
     ax.tick_params(axis="both", direction="out")
 
-    if not legend is None:
+    if legend is not None:
         if verbose:
             print("niceplot: adjust legend")
 
@@ -98,7 +96,7 @@ def niceplot(ax, fig=None, despine=True, verbose=0, legend=None, almost_black="#
         for t in texts:
             t.set_color(almost_black)
 
-    if not fig is None:
+    if fig is not None:
         fig.tight_layout(pad=1.0)
 
     plt.draw()
@@ -135,7 +133,7 @@ def binom(n, k):
 def findfiles(p, patt=None):
     """Get a list of files"""
     lst = os.listdir(p)
-    if not patt is None:
+    if patt is not None:
         rr = re.compile(patt)
         lst = [l for l in lst if re.match(rr, l)]
     return lst
@@ -144,7 +142,7 @@ def findfiles(p, patt=None):
 def finddirectories(p, patt=None):
     """Get a list of directories"""
     lst = os.listdir(p)
-    if not patt is None:
+    if patt is not None:
         rr = re.compile(patt)
         lst = [l for l in lst if re.match(rr, l)]
     lst = [l for l in lst if os.path.isdir(os.path.join(p, l))]
@@ -168,7 +166,7 @@ def splitname(idx, oa=".oa"):
     for ii, n in enumerate(idx):
         name += "sp%d-split-%d-" % (ii, n)
     name = name[0:-1]
-    if not oa is None:
+    if oa is not None:
         name += oa
     return name
 
@@ -176,7 +174,7 @@ def splitname(idx, oa=".oa"):
 def splitfileTag(lvls, outputdir, reruntag):
     """Return name of zip file for splitted results"""
     edir0 = splitdir(lvls)
-    splitfiletag0 = "splitted-%s-%s.txt" % (splitTag(lvls), reruntag)
+    splitfiletag0 = f"splitted-{splitTag(lvls)}-{reruntag}.txt"
     splitfiletag = os.path.join(outputdir, edir0, splitfiletag0)
     return splitfiletag0, splitfiletag
 
@@ -246,15 +244,13 @@ def analyseAB(afile, outputdir=None, Afinal=0, cache=1, verbose=0):
     gidxmask = A >= Afinal
     bidxmask = A < Afinal
     gidx = gidxmask.nonzero()[0]
-    bidx = bidxmask.nonzero()[0]
+    bidxmask.nonzero()[0]
 
-    maxDeff = safemax(A)
-    minB = safemin(b, np.inf)
+    safemax(A)
+    safemin(b, np.inf)
 
-    aidx = A == maxDeff
-
-    if not outputdir is None:
-        outfileA = join(outputdir, "tmp.oa")
+    if outputdir is not None:
+        join(outputdir, "tmp.oa")
         selectArrays(afile, outfile, gidx, verbose=1, cache=cache)
 
 
@@ -270,7 +266,7 @@ def splitFile(afile, ostr="split", nn=None, maxn=None, nwritemax=1000, method="a
     if verbose >= 2:
         print("splitFile: cmd %s" % cmd)
     cfile = ostr + "-split-%d" % (0) + ".oa"
-    if not cmdlog is None:
+    if cmdlog is not None:
         cmdlog.write("# Split files\n" + cmd + "\n\n")
         cmdlog.flush()
     sys.stdout.flush()  # needed for tee command
@@ -359,7 +355,7 @@ def arrayfilesMD5(xdir, outfile, verbose=1):
     for name in lst:
         f = os.path.join(xdir, name)
         m = oalib.md5(f)
-        fid.write("%s  %s\n" % (m, name))
+        fid.write(f"{m}  {name}\n")
     fid.close()
 
 
@@ -389,7 +385,7 @@ def arrayfilecompression(xdir, verbose=1):
 def loadAnalysisFile(anafile, ncolshint=-1, verbose=1):
     """Load data from analysis file"""
     data = loadbinfile(anafile, ncols=ncolshint, verbose=verbose >= 2)
-    ncols = data.shape[1]
+    data.shape[1]
 
     if verbose:
         print("loadAnalysisFile: loaded data %s" % str(data.shape))
@@ -435,7 +431,7 @@ def dynamicExtendFile(afile, nextfile, kfinal, Afinal=0, verbose=1, dryrun=0, ca
 
     if verbose >= 2:
         print(cmd)
-    if cmdlog != None:
+    if cmdlog is not None:
         cmdlog.write("# Extend dynamic\n" + scriptCheck(cmd, nextfile) + "\n\n")
         cmdlog.flush()
     sys.stdout.flush()  # needed for tee command
@@ -538,7 +534,7 @@ def estimateNarrays(datadir, adata, maxn=None, cache=1, verbose=1):
         # FIXME: what if A=0?
 
         logfile = nextfile.replace(".oa", "-log.txt")
-        tmp = dynamicExtendFile(
+        dynamicExtendFile(
             splitfile, nextfile, kfinal=kfinal, Afinal=0, verbose=1, cache=cache, logfile=logfile, cmdlog=cmdlogfid
         )
         dt[kk] = oahelper.parseProcessingTime(logfile)
@@ -713,7 +709,7 @@ def combineNumbers(nlist, outfile=None, num=2, verbose=1):
                 ww[k] = ww[k] + ln[1:]
             else:
                 ww[k] = ln[1:]
-    if not outfile is None:
+    if outfile is not None:
         fid = open(outfile, "w")
         for k in np.sort(list(ww.keys())):
             # ls='%d %d' %  (ww[k][0], ww[k][1])
@@ -814,7 +810,7 @@ def parseParetoClass(adata, pfile, dstr=None, targetdir="", subfilebase="test", 
 
     m = 1 + adata.ncols + adata.ncols * (adata.ncols - 1) / 2
 
-    if not dstr is None:
+    if dstr is not None:
         page.p(dstr)
     page.p("For each array we have 3 different optimization criteria. These are: ")
     page.ol()
@@ -861,7 +857,7 @@ def parseParetoClass(adata, pfile, dstr=None, targetdir="", subfilebase="test", 
         if len(gwlp) < 5:
             gstr = "%.4f, -" % (gwlp[3]) + "; " + Fstr
         else:
-            gstr = "%.4f, %.4f" % (gwlp[3], gwlp[4]) + "; " + Fstr
+            gstr = f"{gwlp[3]:.4f}, {gwlp[4]:.4f}" + "; " + Fstr
         page.tr(style="")
         page.td(["%d" % rnk, gstr, Fstr], style="padding-right:30px;")
         istr = ",".join(["%d" % x for x in ee.indices])
@@ -903,7 +899,7 @@ def parseParetoClass(adata, pfile, dstr=None, targetdir="", subfilebase="test", 
         print(page)
 
     subfile = subfilebase + ".html"
-    fid = open(os.path.join(targetdir, subfile), "wt")
+    fid = open(os.path.join(targetdir, subfile), "w")
     fid.write(str(page))
     fid.close()
 
@@ -1008,22 +1004,22 @@ def analyseFile(afile: str, method: str = "a", verbose=1, cache=1, cmdlog=None) 
         print("analyseFile: method %s" % method)
     if method == "a":
         anafile: Union[str, List[str]] = afile.replace(repstr, "-ana-Dvalues.bin")
-        cmd = 'echo "analyse file %s"; nice oaanalyse -j -1 -A -a %s %s' % (afile, astr, afile)
+        cmd = f'echo "analyse file {afile}"; nice oaanalyse -j -1 -A -a {astr} {afile}'
     else:
         if verbose >= 2:
             print("analyseFile: method %s" % method)
         if method == "ab":
             anafile = [afile.replace(repstr, "-ana-Dvalues.bin"), afile.replace(repstr, "-ana-rankvalues.bin")]
-            cmd = 'echo "analyse file %s"; nice oaanalyse -r -j -1 -A -a %s %s' % (afile, astr, afile)
+            cmd = f'echo "analyse file {afile}"; nice oaanalyse -r -j -1 -A -a {astr} {afile}'
         elif method == "Deff":
             anafile = [afile.replace(repstr, "-ana-Dvalues.bin")]
-            cmd = 'echo "analyse file %s"; nice oaanalyse -A -j -1 -a %s %s' % (afile, astr, afile)
+            cmd = f'echo "analyse file {afile}"; nice oaanalyse -A -j -1 -a {astr} {afile}'
         elif method == "rankvalues":
             anafile = [afile.replace(repstr, "-ana-rankvalues.bin")]
-            cmd = 'echo "analyse file %s"; nice oaanalyse -r -j -1 -a %s %s' % (afile, astr, afile)
+            cmd = f'echo "analyse file {afile}"; nice oaanalyse -r -j -1 -a {astr} {afile}'
         elif method == "gma" or method == "gwlp":
             anafile = [afile.replace(repstr, "-ana-gwlpfull.bin")]
-            cmd = 'echo "analyse file %s"; nice oaanalyse  -j -1 --gma -a "%s" "%s"' % (afile, astr, afile)
+            cmd = f'echo "analyse file {afile}"; nice oaanalyse  -j -1 --gma -a "{astr}" "{afile}"'
         else:
             # full calculation
             anafile = [
@@ -1031,7 +1027,7 @@ def analyseFile(afile: str, method: str = "a", verbose=1, cache=1, cmdlog=None) 
                 afile.replace(repstr, "-ana-rankvalues.bin"),
                 afile.replace(repstr, "-ana-gwlpfull.bin"),
             ]
-            cmd = 'echo "analyse file %s"; nice oaanalyse --gma -r -j -1 -A -a %s %s' % (afile, astr, afile)
+            cmd = f'echo "analyse file {afile}"; nice oaanalyse --gma -r -j -1 -A -a {astr} {afile}'
 
     if verbose >= 2:
         print(cmd)
@@ -1044,7 +1040,7 @@ def analyseFile(afile: str, method: str = "a", verbose=1, cache=1, cmdlog=None) 
     if not checkFiles(anafile, cache=cache):
         if verbose >= 2:
             print(cmd)
-        r = os.system(cmd)
+        os.system(cmd)
     else:
         if verbose >= 2:
             print(f"file {anafile} already exists")
@@ -1177,7 +1173,7 @@ def extendInitial(datadir, adata, kstart, verbose=1, cache=1, cmdlog=None):
     cmd = "oaextendsingle -c oaconfig%d.txt -l 2 -f B -o result | tee log0.txt " % kstart
     if verbose:
         print("#extendInitial Initial calculation")
-    if not cmdlog is None:
+    if cmdlog is not None:
         cmdlog.write("# Initial calculation\n" + cmd + "\n\n")
         cmdlog.flush()
     cfile = "result-" + adata0.idstr() + ".oa"
@@ -1258,7 +1254,7 @@ def generatePICtable(afile, kmin=3, kmax=5, verbose=1, aidx=None):
 
 
 def statistics2htmltable(page, rrstats, verbose=1, titlestr=None):
-    if not rrstats is None:
+    if rrstats is not None:
         data = rrstats["data"]
         if "gwlpdata" in list(rrstats.keys()):
             gwlp = rrstats["gwlpdata"]
@@ -1267,7 +1263,7 @@ def statistics2htmltable(page, rrstats, verbose=1, titlestr=None):
             gwlp = None
         na = data.shape[0]
         if verbose:
-            print("statistics2htmltable:  generating full statistics table" % ())
+            print("statistics2htmltable:  generating full statistics table".format())
         if titlestr is None:
             if rrstats["mode"] == "all":
                 page.h2("Table of arrays")
@@ -1436,7 +1432,7 @@ def abSubpage(rr, htmldir, verbose=1, makeheader=True, cache=1):
 
     afstr = ""
     bfstr = ""
-    if not rr["ABselection"] is None:
+    if rr["ABselection"] is not None:
         if verbose >= 2:
             print("abSubpage: make AB selection")
         ww = rr["ABselection"]
@@ -1462,7 +1458,7 @@ def abSubpage(rr, htmldir, verbose=1, makeheader=True, cache=1):
         if verbose >= 2:
             print("abSubpage: make gmafile")
 
-        if not rr["gmafile"] is None:
+        if rr["gmafile"] is not None:
             shutil.copyfile(os.path.join(datadir, rr["gmafile"]), os.path.join(htmlsubdir, rr["gmafile"]))
 
     def simpleRow(a, b):
@@ -1480,7 +1476,7 @@ def abSubpage(rr, htmldir, verbose=1, makeheader=True, cache=1):
 
     havearrayfile = 0
     if "arrayfile" in list(rr.keys()):
-        if not rr["arrayfile"] is None:
+        if rr["arrayfile"] is not None:
             havearrayfile = 1
 
     if havearrayfile:
@@ -1556,9 +1552,7 @@ def abSubpage(rr, htmldir, verbose=1, makeheader=True, cache=1):
             rr["datafilestrfile"] = None
             rr["datafilestr"] = "-"
 
-    haveVIFarrayfile = 0
-    if "outfileVIF" in list(rr.keys()) and not rr["outfileVIF"] is None:
-        haveVIFarrayfile = 1
+    if "outfileVIF" in list(rr.keys()) and rr["outfileVIF"] is not None:
         print("generating page for VIF arrayfile")
 
         if verbose >= 3:
@@ -1603,7 +1597,7 @@ def abSubpage(rr, htmldir, verbose=1, makeheader=True, cache=1):
 
     page.table.close()
 
-    if not rr["abscatterplot"] is None:
+    if rr["abscatterplot"] is not None:
         subimage = rr["abscatterplot"]
         if verbose:
             print("  generating scatterplot image: %s" % subimage)
@@ -1620,7 +1614,7 @@ def abSubpage(rr, htmldir, verbose=1, makeheader=True, cache=1):
         page.img(src=subimage, style="max-width: 80%", alt="")
         page.p.close()
 
-    pagex = statistics2htmltable(page, rr["fullstatistics"])
+    statistics2htmltable(page, rr["fullstatistics"])
 
     if "projectiontable" in rr.keys():
         pp = rr["projectiontable"]
@@ -1648,12 +1642,12 @@ def abSubpage(rr, htmldir, verbose=1, makeheader=True, cache=1):
     )
 
     print("writing to %s" % subfilef)
-    fid = open(subfilef, "wt")
+    fid = open(subfilef, "w")
     fid.write(pstr)
     fid.close()
 
     if verbose >= 3:
-        print("abSubpage: %s (%s)" % (subfile, subfilef))
+        print(f"abSubpage: {subfile} ({subfilef})")
     return subfile
 
 
@@ -1838,7 +1832,7 @@ def seriesSubpage(basedatadir, htmldir, case, dogma=0, verbose=1, cache=1, subta
         xl = list(range(ad.strength + 1, len(nums) + ad.strength + 1))
         pnums = np.array(nums, dtype=np.float)
         pnums[pnums < 0] = np.nan
-        axes = plt.figure(1)
+        plt.figure(1)
         plt.clf()
         plt.plot(xl, pnums, ".b", markersize=20)
         plt.title(r"$%s$" % ad.latexstr(), fontsize=18)
@@ -1946,16 +1940,12 @@ def generateABcase(
     anafile = analyseFile(outfile, method="full", verbose=1, cache=1)
     anafile = anafile[1]
 
-    kmax = kfinal
-
     # init
     k = kstart
     adata0 = oalib.arraydata_t(adata, kstart)
     outfile0 = ("result-") + adata0.idstr() + ".oa"
     outfile = "resultdynamic-" + adata0.idstr() + ".oa"
     shutil.copyfile(outfile0, outfile)
-
-    averbose = 0
 
     totaltime = 0
 
@@ -1970,12 +1960,12 @@ def generateABcase(
         adatan = oalib.arraydata_t(adata, kn)
         nextfile = os.path.join(datadir, "resultdynamic-" + adatan.idstr() + ".oa")
         logfile = nextfile.replace(".oa", "-log.txt")
-        cmd = dynamicExtendFile(
+        dynamicExtendFile(
             afile, nextfile, kfinal=kfinal, Afinal=Afinal, cmdlog=cmdlogfid, verbose=1, logfile=logfile, cache=cache
         )
         dt = parseProcessingTime(logfile)
         totaltime += dt
-        print("processing: %.0f [s], %.1f [h]" % (dt, float(dt) / 3600))
+        print(f"processing: {dt:.0f} [s], {float(dt) / 3600:.1f} [h]")
 
     adata0 = oalib.arraydata_t(adata, kfull)
     infile = "resultdynamic-" + adata0.idstr() + ".oa"
@@ -2011,7 +2001,7 @@ def generateABcase(
                 anafiles = analyseFile(afile, verbose=1, method="full", cache=cache)
                 data = loadAnalysisFile(anafiles[1])
                 a = data[:, 1]
-            fig = drawAvalues(data, fig=100 + k)
+            drawAvalues(data, fig=100 + k)
             plotAthresholdsY(Afinal, kfinal, k)
             plt.title(r"Case $%s$: %d columns, selection" % (adata.latexstr(), k))
 
@@ -2033,8 +2023,8 @@ def generateABcase(
                     v1 = a[inx[ngoodrank - 1]]
                     v2 = a[inx[ngoodrank]]
                     if verbose:
-                        print("  good rank threshold: %e -> %e" % (v1, v2))
-                        print("  good rank threshold: C %e -> %e" % (v1**m, v2**m))
+                        print(f"  good rank threshold: {v1:e} -> {v2:e}")
+                        print("  good rank threshold: C {:e} -> {:e}".format(v1**m, v2**m))
             if selectfullrank:
                 if verbose:
                     print(" selectfullrank: reducing %d arrays to %d" % (nn, ngoodrank))
@@ -2043,7 +2033,7 @@ def generateABcase(
                 print("final round %d columns: input %d arrays, reduced to %d" % (k, data.size, nn))
 
             if a.size > 0:
-                fig = drawAvalues(a[inx[0:nn]], fig=200 + k)
+                drawAvalues(a[inx[0:nn]], fig=200 + k)
                 plt.title(r"Case $%s$: %d columns, selection, sorted" % (adata.latexstr(), k))
 
             ABhelper.selectArrays(afile, outfile, inx[0:nn], cache=cache)
@@ -2055,12 +2045,12 @@ def generateABcase(
         adatan = oalib.arraydata_t(adata, kn)
         nextfile = "selecteddynamicresult-" + adatan.idstr() + ".oa"
         logfile = nextfile.replace(".oa", "-log.txt")
-        cmd = dynamicExtendFile(
+        dynamicExtendFile(
             outfile, nextfile, kfinal=kfinal, Afinal=Afinal, verbose=1, cmdlog=cmdlogfid, logfile=logfile, cache=cache
         )
         dt = parseProcessingTime(logfile)
         totaltime += dt
-        print("processing: final step %.0f [s], %.1f [h]" % (dt, float(dt) / 3600))
+        print(f"processing: final step {dt:.0f} [s], {float(dt) / 3600:.1f} [h]")
 
     afile = nextfile
     adatan = oalib.arraydata_t(adata, kfinal)
@@ -2086,9 +2076,9 @@ def generateABcase(
     if selectfullrank:
         print("selectfullrank: go! ")
         gidxmask = (A >= Afinal) * (rnk == m)
-    bidxmask = gidxmask == False
+    bidxmask = gidxmask is False
     gidx = gidxmask.nonzero()[0]
-    bidx = bidxmask.nonzero()[0]
+    bidxmask.nonzero()[0]
 
     outfile = "finalselection-" + adatan.idstr() + "-A%.2f" % Afinal + ".oa"
 
@@ -2129,7 +2119,7 @@ def generateABcase(
     rr["calcmode"] = selectfullrank
 
     figfile = "finalDAscatter.png"
-    if not pfig is None:
+    if pfig is not None:
 
         plotABfigure(a, b, figid=100 + 1, verbose=1, fontsize=13)
         plotABboundaries(Acc=Acc)
@@ -2258,7 +2248,7 @@ def analyseABcase(rr, verbose=1, cache=1, subdir="tpages"):
     ad = rr["adata"]
     t = ad.strength
 
-    if not outfile is None:
+    if outfile is not None:
         gma = analyseGMA(os.path.join(datadir, outfile), cache=cache, verbose=0)
     else:
         gma = dict({"n": None, "indices": None, "gwp": None})
@@ -2270,10 +2260,10 @@ def analyseABcase(rr, verbose=1, cache=1, subdir="tpages"):
 
     # analyse and select good D-efficiency and VIF values
     afile = os.path.join(rr["datadir"], outfile)
-    if ("narrays" in list(rr.keys())) == False:
+    if ("narrays" in list(rr.keys())) is False:
         rr["narrays"] = nArrayFile(afile)
         rr["nselected"] = nArrayFile(afile)
-    if ("totaltime" in list(rr.keys())) == False:
+    if ("totaltime" in list(rr.keys())) is False:
         rr["totaltime"] = None
 
     rr["ABselection"] = None
@@ -2345,7 +2335,7 @@ def analyseABcase(rr, verbose=1, cache=1, subdir="tpages"):
             )
 
     # select arrays with good GWLP
-    if not gmadata["indices"] is None:
+    if gmadata["indices"] is not None:
         bgma = np.around(gmadata["gwp"], decimals=6)
 
         # write array file
@@ -2371,7 +2361,7 @@ def analyseABcase(rr, verbose=1, cache=1, subdir="tpages"):
     rr["gmastr"] = gstr
     rr["gmastrnolink"] = gstrnolink
 
-    if ("nselected" in list(rr.keys())) == False:
+    if ("nselected" in list(rr.keys())) is False:
         rr["nselected"] = -1
 
     if verbose:
@@ -2398,7 +2388,7 @@ def copyOAfile(source, targetdir, target0, convert=None, zipfile=None, verbose=1
         target0final = target0
         if not checkFiles(targetfile, cache):
             if verbose:
-                print("copyfile %s -> %s" % (source, targetfile))
+                print(f"copyfile {source} -> {targetfile}")
             shutil.copyfile(source, targetfile)
     else:
         na = oapackage.nArrayFile(source)
@@ -2410,7 +2400,7 @@ def copyOAfile(source, targetdir, target0, convert=None, zipfile=None, verbose=1
         if zipfile is None:
             zipfile = convert == "B"
         else:
-            if not zipfile == False:
+            if zipfile is not False:
                 # print('na %d, zipfile %d' % (na, zipfile))
                 zipfile = na >= zipfile
         if not (
@@ -2424,7 +2414,7 @@ def copyOAfile(source, targetdir, target0, convert=None, zipfile=None, verbose=1
         ):
             raise NameError("copyOAfile: convert: should be T, B or D")
         if verbose >= 3:
-            print("target0: %s, zipfile %s" % (target0, zipfile))
+            print(f"target0: {target0}, zipfile {zipfile}")
         if zipfile:
             if verbose:
                 print("copyOAfile: converting to format %s" % convert)
@@ -2443,15 +2433,15 @@ def copyOAfile(source, targetdir, target0, convert=None, zipfile=None, verbose=1
             targetfile = os.path.join(targetdir, target0)
             targetfilefinal = os.path.join(targetdir, target0)
         if verbose:
-            print("copyOAfile: target0 %s -> %s " % (target0, target0final))
+            print(f"copyOAfile: target0 {target0} -> {target0final} ")
         if verbose >= 2:
             print("copyOAfile: converting %s to %s (%d arrays, zip %d)" % (source, targetfile, na, zipfile))
         if checkFiles(targetfilefinal, cache):
             print("  copyOAfile: target file already exist")
         else:
             if verbose >= 2:
-                print("cmd: oaconvert -v 0 -f %s %s %s" % (convert, source, targetfile))
-            os.system("oaconvert -v 0 -f %s %s %s" % (convert, source, targetfile))
+                print(f"cmd: oaconvert -v 0 -f {convert} {source} {targetfile}")
+            os.system(f"oaconvert -v 0 -f {convert} {source} {targetfile}")
             if zipfile:
                 os.system("gzip -f %s" % targetfile)
     return target0final
@@ -2505,9 +2495,9 @@ def convertOAfile(f, verbose=1, dorun=0, maxsize=1000 * 1000, tmpdir=None):
     else:
         cmd = 'echo ""'
     # cmd2='oajoin -i %s -f B -o tmp' % fplain
-    cmd2 = "oaconvert -f B %s %s" % (fplain, tmpfile)
+    cmd2 = f"oaconvert -f B {fplain} {tmpfile}"
     cmd3 = "gzip %s" % tmpfile
-    cmd4 = "rm -f %s; mv %s %s" % (fplain, tmpfilegz, f)
+    cmd4 = f"rm -f {fplain}; mv {tmpfilegz} {f}"
     cmd5 = "oainfo %s" % f
     if verbose >= 2:
         print("Commands:")
@@ -2711,13 +2701,13 @@ def mdFile(lvls):
 
 
 def numbersFile(lvls, tag="numbers"):
-    return "%s-%s.txt" % (tag, splitTag(lvls))
+    return f"{tag}-{splitTag(lvls)}.txt"
 
 
 def writeprocessingTime(pfile, dt):
     try:
-        f = open(pfile, "wt")
-        s = f.write("%f\n" % dt)
+        f = open(pfile, "w")
+        f.write("%f\n" % dt)
         f.close()
     except:
         raise
@@ -2818,14 +2808,14 @@ def doSplitFile(lvls, splitdata, adata, verbose=1, outputdir=None, createdirs=Fa
     level = len(lvls)
     rfile = splitname(lvls)
     if verbose:
-        print("split level %s: file %s (extend and split)" % (splittag, rfile))
+        print(f"split level {splittag}: file {rfile} (extend and split)")
     ebase = rfile.replace(".oa", "-extend")
     edir = splitdir(lvls)
     mkdirc(edir)
 
-    spbase = rfile.replace(".oa", "-sp%d" % level)
+    rfile.replace(".oa", "-sp%d" % level)
     nn = splitdata[level]["n"]
-    rfilen = splitname(lvls + [nn - 1])
+    splitname(lvls + [nn - 1])
     splitout = rfile.replace(".oa", "-sp%d" % (level))
 
     klevel = splitdata[level]["k"]
@@ -2836,10 +2826,10 @@ def doSplitFile(lvls, splitdata, adata, verbose=1, outputdir=None, createdirs=Fa
         edirup = splitdir(lvls[:-1])
         afile = os.path.join(edirup, splitname(lvls))
     else:
-        afile = os.path.join(edir, "%s-%s" % (ebase, adatax.idstr() + ".oa"))
+        afile = os.path.join(edir, "{}-{}".format(ebase, adatax.idstr() + ".oa"))
 
     if verbose:
-        print("split level %s: file %s" % (splittag, afile))
+        print(f"split level {splittag}: file {afile}")
     splitcmd = "oasplit -v 1 -f Z --nb 1 -i %s -n %d -o %s; " % (afile, nn, os.path.join(edir, splitout))
     # cmd += splitcmd
     done = False
@@ -2887,7 +2877,7 @@ def checkLevel(lvls, splitdata, adata, outputdir, verbose=1):
         afile = os.path.join(outputdir, edir, afile0)
         if not oahelper.checkFilesOA(afile):
             if verbose:
-                print("checkLevel %s: no result file (%s)" % (tag, afile0))
+                print(f"checkLevel {tag}: no result file ({afile0})")
             fulldata = 0
             break
     for ii, k in enumerate(range(kmid + 1, kmax + 1)):
@@ -2897,7 +2887,7 @@ def checkLevel(lvls, splitdata, adata, outputdir, verbose=1):
         afile = os.path.join(outputdir, edir, afile0)
         if not oahelper.checkFilesOA(afile):
             if verbose:
-                print("checkLevel %s: no result file (%s)" % (tag, afile0))
+                print(f"checkLevel {tag}: no result file ({afile0})")
             fulldata = 0
             break
 
@@ -2911,7 +2901,7 @@ def checkLevel(lvls, splitdata, adata, outputdir, verbose=1):
     numbersfile = os.path.join(outputdir, edir, nfile)
     if not oahelper.checkFiles(numbersfile):
         if verbose:
-            print("checkLevel %s: no numbers file (%s)" % (tag, numbersfile))
+            print(f"checkLevel {tag}: no numbers file ({numbersfile})")
         return 0
     return 1
 
@@ -2920,7 +2910,7 @@ def checkLevel(lvls, splitdata, adata, outputdir, verbose=1):
 
 
 def touchFile(fname, txt=""):
-    with open(fname, "wt") as f:
+    with open(fname, "w") as f:
         f.write(txt)
     return
 
@@ -3018,7 +3008,7 @@ def gatherResults(
     else:
         kk = -1
     nsplitstr = " ".join(["--nsplit%d %d" % (x, splitdata[x]["n"]) for x in range(4) if x in splitdata])
-    cmd = 'echo "Calculating pareto optimal arrays"; cd %s;\n' % (join(outputdir, edir0),)
+    cmd = f'echo "Calculating pareto optimal arrays"; cd {join(outputdir, edir0)};\n'
     cmd += ("touch %s" % lockfile) + os.linesep
 
     lvloptions = " --split0 %d --split1 %d --split2 %d %s --kmax %d --kmin %d" % (ii, jj, kk, nsplitstr, kmax, kmin)
@@ -3039,7 +3029,7 @@ def gatherResults(
         cmd += os.linesep
     if gatherJstats:
         cmd += os.linesep + "# j-statistics " + os.linesep
-        cmd += "oaclustergather -c %s -b %s --method 1 --numbersfile %s %s --cleanrun 1 -o %s | tee %s;" % (
+        cmd += "oaclustergather -c {} -b {} --method 1 --numbersfile {} {} --cleanrun 1 -o {} | tee {};".format(
             join(outputdir, "oaconfig.txt"),
             join(outputdir),
             nfilej,
@@ -3113,7 +3103,7 @@ def gatherResults(
         lfile = os.path.join(os.path.join(outputdir, edirX), "lock-extend.txt")
 
         if os.path.exists(lfile):
-            print("gatherResults %s: lock file for %s exists, skipping" % (tag, kk))
+            print(f"gatherResults {tag}: lock file for {kk} exists, skipping")
             return joblist
 
     checkfilesstart = gatherFilesList(lvls, outputdir, splitdata, adata, verbose=0, legacy=legacy)
@@ -3140,7 +3130,7 @@ def gatherResults(
 def gatherFilesList(lvls, outputdir, splitdata, adata, verbose=1, paretofiles=True, legacy=False):
     """Return list of files needed to gather results for given stage"""
     tag = splitTag(lvls)
-    edir0 = splitdir(lvls)
+    splitdir(lvls)
     level = len(lvls)
     kmin = splitdata["levels"][level + 1] + 1
     kmax = splitdata["levels"][level + 2]
@@ -3223,7 +3213,7 @@ def evenoddAnalysePartialRun(outputdir, adata, splitdata, verbose=1, iimax=None)
             ebase = rfile.replace(".oa", "-extend")
             edir = splitdir([ii, jj])
 
-            afile = os.path.join(edir, "%s-%s" % (ebase, adataxx.idstr() + ".oa"))
+            afile = os.path.join(edir, "{}-{}".format(ebase, adataxx.idstr() + ".oa"))
 
             cmdlogfile = os.path.join(edir, rfile.replace(".oa", "-extend.txt"))
             dt0 = oapackage.parseProcessingTime(cmdlogfile, verbose=0)
@@ -3250,7 +3240,7 @@ def evenoddAnalysePartialRun(outputdir, adata, splitdata, verbose=1, iimax=None)
         "evenoddAnalysePartialRun: %d/%d files extended, # arrays at col %d: %d (estimate %.2e)"
         % (nfiles, nnn, splitdata["klevelcheck"], ntotal, 4 * ntotal * sfac)
     )
-    print("  time %.1f [s], estimate %.1f [h] " % (totaltime, float(totaltime) * sfac / 3600.0))
+    print("  time {:.1f} [s], estimate {:.1f} [h] ".format(totaltime, float(totaltime) * sfac / 3600.0))
     print(
         "  time estimated: cluster %.1f [d] (with %d cores)"
         % (float(totaltime) * sfac / (ncores * 24.0 * 3600.0), ncores)

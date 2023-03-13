@@ -19,9 +19,10 @@ import oapackage.graphtools
 # %%
 
 
-def generateConference(N, kmax=None, verbose=1, diagc=False,mode='nauty',
-                       nmax=None, selectmethod='random', tag='cdesign', outputdir=None):
-    """ General function to compute conference matrices
+def generateConference(
+    N, kmax=None, verbose=1, diagc=False, mode="nauty", nmax=None, selectmethod="random", tag="cdesign", outputdir=None
+):
+    """General function to compute conference matrices
 
     Arguments:
         N : integer
@@ -41,9 +42,9 @@ def generateConference(N, kmax=None, verbose=1, diagc=False,mode='nauty',
 
     if diagc:
         ctype.ctype = oapackage.conference_t.CONFERENCE_DIAGONAL
-        tag += '-diagonal'
-    if not nmax is None:
-        tag += '-r'
+        tag += "-diagonal"
+    if nmax is not None:
+        tag += "-r"
 
     al = ctype.create_root()
 
@@ -52,51 +53,48 @@ def generateConference(N, kmax=None, verbose=1, diagc=False,mode='nauty',
     LL = [[]] * (kmax)
     LL[1] = ll
     if verbose:
-        print(f'generateConference: start: {ctype}, mode {mode}' )
+        print(f"generateConference: start: {ctype}, mode {mode}")
     if outputdir is not None:
-        _ = oapackage.writearrayfile(
-            join(outputdir, 'cdesign-%d-%d.oa' % (N, 2)), LL[1], oapackage.ATEXT, N, 2)
+        _ = oapackage.writearrayfile(join(outputdir, "cdesign-%d-%d.oa" % (N, 2)), LL[1], oapackage.ATEXT, N, 2)
 
     for extcol in range(2, kmax):
         if verbose >= 2:
-            print('generateConference: N %d, extcol %d: %d designs' %
-                  (N, extcol, len(LL[extcol - 1])))
+            print("generateConference: N %d, extcol %d: %d designs" % (N, extcol, len(LL[extcol - 1])))
             sys.stdout.flush()
-        LL[extcol] = oapackage.extend_conference(
-            LL[extcol - 1], ctype, verbose=verbose >= 2)
+        LL[extcol] = oapackage.extend_conference(LL[extcol - 1], ctype, verbose=verbose >= 2)
 
-        if mode=='nauty':
+        if mode == "nauty":
             LL[extcol] = oapackage.selectConferenceIsomorpismClasses(LL[extcol], verbose >= 2)
-        elif mode=='lmc0':
+        elif mode == "lmc0":
 
-
-            LL[extcol] = oapackage.selectLMC0(LL[extcol], verbose>=2, ctype)
+            LL[extcol] = oapackage.selectLMC0(LL[extcol], verbose >= 2, ctype)
         else:
-            raise NotImplementedError(f'mode {mode}')
+            raise NotImplementedError(f"mode {mode}")
 
         LL[extcol] = oapackage.sortLMC0(LL[extcol])
 
         if nmax is not None:
             na = min(nmax, len(LL[extcol]))
             if na > 0:
-                if selectmethod == 'random':
+                if selectmethod == "random":
                     idx = np.random.choice(len(LL[extcol]), na, replace=False)
                     LL[extcol] = [LL[extcol][i] for i in idx]
-                elif selectmethod == 'first':
+                elif selectmethod == "first":
                     LL[extcol] = [LL[extcol][i] for i in range(na)]
                 else:
                     # mixed
-                    raise Exception('not implemented')
+                    raise Exception("not implemented")
         afmode = oapackage.ATEXT
-        if (len(LL[extcol]) > 1000):
+        if len(LL[extcol]) > 1000:
             afmode = oapackage.ABINARY
         if outputdir is not None:
-            _ = oapackage.writearrayfile(join(
-                outputdir, '%s-%d-%d.oa' % (tag, N, extcol + 1)), LL[extcol], afmode, N, extcol + 1)
+            _ = oapackage.writearrayfile(
+                join(outputdir, "%s-%d-%d.oa" % (tag, N, extcol + 1)), LL[extcol], afmode, N, extcol + 1
+            )
 
     ll = [len(l) for l in LL]
     if verbose:
-        print(f'   N {N}: generated sequence: {ll}')
+        print(f"   N {N}: generated sequence: {ll}")
     return LL
 
 
@@ -107,12 +105,12 @@ cases = range(4, 22, 2)
 generation_times = {}
 for NN in cases:
     t0 = time.time()
-    LL = generateConference(N=NN, kmax=NN+1, outputdir=outputdir, verbose=1, mode='lmc0')
-    dt = time.time()-t0
-    generation_times[f'cdesign{NN}'] = dt
+    LL = generateConference(N=NN, kmax=NN + 1, outputdir=outputdir, verbose=1, mode="lmc0")
+    dt = time.time() - t0
+    generation_times[f"cdesign{NN}"] = dt
 
 for NN in cases:
-    dt = generation_times[f'cdesign{NN}']
-    print(f'conference designs N={NN}: {dt:.2f} [s]')
+    dt = generation_times[f"cdesign{NN}"]
+    print(f"conference designs N={NN}: {dt:.2f} [s]")
 
-print(f'platform processor: {platform.processor()}')
+print(f"platform processor: {platform.processor()}")

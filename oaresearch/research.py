@@ -1,44 +1,35 @@
-# -*- coding: utf-8 -*-
 """ Misc functions
 
 Pieter Eendebak <pieter.eendebak@gmail.com>
 
 """
 
-from __future__ import print_function
 
 import numpy as np
 
 try:
-    import matplotlib
-    import matplotlib.pyplot as plt
+    pass
 except BaseException:
     pass
 
 import oapackage
 import oapackage.markup as markup
-import oapackage.oahelper as oahelper
-
-from oapackage.markup import oneliner as e
 
 # %%
 
 
-def array2cpp(array: oapackage.array_link, padding: str = '   '):
-    """ Convert array to C++ initialization code """
-    ss = padding + \
-        'array_link array (%d, %d, 0);' % (
-            array.n_rows, array.n_columns) + ' \n'
-    ss += padding + 'int array_data_tmp[] = {%s};\n' % (
-        ','.join(['%d' % v for v in np.array(array).T.flatten()]))
-    ss += padding + \
-        'array.setarraydata (array_data_tmp, array.n_rows * array.n_columns);\n'
+def array2cpp(array: oapackage.array_link, padding: str = "   "):
+    """Convert array to C++ initialization code"""
+    ss = padding + "array_link array (%d, %d, 0);" % (array.n_rows, array.n_columns) + " \n"
+    ss += padding + "int array_data_tmp[] = {%s};\n" % (",".join(["%d" % v for v in np.array(array).T.flatten()]))
+    ss += padding + "array.setarraydata (array_data_tmp, array.n_rows * array.n_columns);\n"
     return ss
 
 
-def array2html(X, header=1, tablestyle='border-collapse: collapse;',
-               trclass='', tdstyle='', trstyle='', thstyle='', comment=None):
-    """ Convert Numpy array to HTML table
+def array2html(
+    X, header=1, tablestyle="border-collapse: collapse;", trclass="", tdstyle="", trstyle="", thstyle="", comment=None
+):
+    """Convert Numpy array to HTML table
 
     Arguments
     ---------
@@ -53,9 +44,9 @@ def array2html(X, header=1, tablestyle='border-collapse: collapse;',
 
     """
     page = markup.page()
-    page.add('<!-- Created by array2html -->\n')
+    page.add("<!-- Created by array2html -->\n")
     if comment is not None:
-        page.add('<!-- %s-->\n' % comment)
+        page.add("<!-- %s-->\n" % comment)
 
     page.table(style=tablestyle)
     offset = 0
@@ -69,12 +60,11 @@ def array2html(X, header=1, tablestyle='border-collapse: collapse;',
 
     ri = 0
     if header:
-        page.tr(style='font-weight: bold; border-bottom: solid 1px black;'
-                + trstyle[ri], class_=trclass[ri])
+        page.tr(style="font-weight: bold; border-bottom: solid 1px black;" + trstyle[ri], class_=trclass[ri])
         ri = ri + 1
         for ii in range(nc):
             if isinstance(X[offset, ii], tuple):
-                print('array2html: tuple instance')
+                print("array2html: tuple instance")
                 page.th(X[offset, ii][0], style=thstyle + X[offset, ii][1])
             else:
                 page.th(X[offset, ii], style=thstyle)
@@ -95,36 +85,43 @@ def array2html(X, header=1, tablestyle='border-collapse: collapse;',
         ri = ri + 1
     page.table.close()
     return page
+
+
 # %%
 
 
-def citation(paper, style='brief'):
-    """ Return citation in html format
+def citation(paper, style="brief"):
+    """Return citation in html format
     Args:
         paper (str): paper to be cited
         style (str): brief or full (with authors and journal)
     """
-    if paper == 'complete':
-        return markup.oneliner.a('Complete Enumeration of Pure-Level and Mixed-Level Orthogonal Arrays',
-                                 href='https://doi.org/10.1002/jcd.20236')
-    elif paper == 'conference' or paper == 'cisomorphism':
-        if style == 'full':
-            hyperlink = markup.oneliner.a('A Classification Criterion for Definitive Screening Designs',
-                                          href='https://doi.org/10.1214/18-AOS1723')
-            return hyperlink + ', E.D. Schoen, P.T. Eendebak, P. Goos, Annals of Statistics, 2019'
+    if paper == "complete":
+        return markup.oneliner.a(
+            "Complete Enumeration of Pure-Level and Mixed-Level Orthogonal Arrays",
+            href="https://doi.org/10.1002/jcd.20236",
+        )
+    elif paper == "conference" or paper == "cisomorphism":
+        if style == "full":
+            hyperlink = markup.oneliner.a(
+                "A Classification Criterion for Definitive Screening Designs", href="https://doi.org/10.1214/18-AOS1723"
+            )
+            return hyperlink + ", E.D. Schoen, P.T. Eendebak, P. Goos, Annals of Statistics, 2019"
         else:
-            return markup.oneliner.a('A Classification Criterion for Definitive Screening Designs',
-                                     href='https://doi.org/10.1214/18-AOS1723')
-    elif paper == 'conference enumeration' or paper == 'cenumeration':
-        if style == 'full':
-            return markup.oneliner.a('Enumeration and Classification of Definitive Screening Designs',
-                                     href='') + ', Eric D. Schoen, Pieter T. Eendebak, Alan Vazquez-Alcocer, Peter Goos, in preparation'
+            return markup.oneliner.a(
+                "A Classification Criterion for Definitive Screening Designs", href="https://doi.org/10.1214/18-AOS1723"
+            )
+    elif paper == "conference enumeration" or paper == "cenumeration":
+        if style == "full":
+            return (
+                markup.oneliner.a("Enumeration and Classification of Definitive Screening Designs", href="")
+                + ", Eric D. Schoen, Pieter T. Eendebak, Alan Vazquez-Alcocer, Peter Goos, in preparation"
+            )
         else:
-            return 'Enumeration and Classification of Definitive Screening Designs, in preparation'
-            return markup.oneliner.a('Enumeration and Classification of Definitive Screening Designs',
-                                     href='')
+            return "Enumeration and Classification of Definitive Screening Designs, in preparation"
+            return markup.oneliner.a("Enumeration and Classification of Definitive Screening Designs", href="")
     else:
-        raise Exception('paper not known')
+        raise Exception("paper not known")
 
 
 def oaCssStyle(addframe=False):
@@ -152,7 +149,7 @@ tr.even {background-color: #fafafa; }
 
 """
     if addframe:
-        ss = '<style type="text/css">\n' + ss + '</style>\n'
+        ss = '<style type="text/css">\n' + ss + "</style>\n"
         return ss
     else:
         return ss

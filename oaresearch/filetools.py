@@ -1,13 +1,12 @@
 import os
-import oapackage
 import shutil
 
+import oapackage
 from oapackage.oahelper import checkFiles
 
 
-def copyOAfile(source, targetdir, target0, convert=None,
-               zipfile=None, verbose=1, cache=1):
-    """ Copy an OA file, depending on arguments convert or compress the file
+def copyOAfile(source, targetdir, target0, convert=None, zipfile=None, verbose=1, cache=1):
+    """Copy an OA file, depending on arguments convert or compress the file
 
     Args:
         source (str): source file
@@ -22,54 +21,59 @@ def copyOAfile(source, targetdir, target0, convert=None,
         target0final = target0
         if not checkFiles(targetfile, cache):
             if verbose:
-                print('copyfile %s -> %s' % (source, targetfile))
+                print(f"copyfile {source} -> {targetfile}")
             shutil.copyfile(source, targetfile)
     else:
         na = oapackage.nArrayFile(source)
         if not (isinstance(convert, bytes) or isinstance(convert, str)):
             if na < convert:
-                convert = 'T'
+                convert = "T"
             else:
-                convert = 'B'
+                convert = "B"
         if zipfile is None:
-            zipfile = convert == 'B'
+            zipfile = convert == "B"
         else:
-            if not zipfile == False:
+            if zipfile is not False:
                 zipfile = na >= zipfile
-        if not (convert == 'TEXT' or convert == 'BINARY' or convert == 'B' or convert ==
-                'T' or convert == 'D' or convert == 'Z' or convert == 'DIFF'):
+        if not (
+            convert == "TEXT"
+            or convert == "BINARY"
+            or convert == "B"
+            or convert == "T"
+            or convert == "D"
+            or convert == "Z"
+            or convert == "DIFF"
+        ):
             raise NameError("copyOAfile: convert: should be T, B or D")
         if verbose >= 3:
-            print('target0: %s, zipfile %s' % (target0, zipfile))
+            print(f"target0: {target0}, zipfile {zipfile}")
         if zipfile:
             if verbose:
-                print('copyOAfile: converting to format %s' % convert)
-            if target0.endswith('.gz'):
+                print("copyOAfile: converting to format %s" % convert)
+            if target0.endswith(".gz"):
                 target0final = target0
                 target0 = target0final[:-3]
             else:
-                target0final = target0 + '.gz'
+                target0final = target0 + ".gz"
             targetfilefinal = os.path.join(targetdir, target0final)
             targetfile = os.path.join(targetdir, target0)
         else:
             target0final = target0
-            if target0final.endswith('.gz'):
-                raise Exception('error: target file ends with .gz')
+            if target0final.endswith(".gz"):
+                raise Exception("error: target file ends with .gz")
             targetfile = os.path.join(targetdir, target0)
             targetfilefinal = os.path.join(targetdir, target0)
         if verbose:
-            print('copyOAfile: target0 %s -> %s ' % (target0, target0final))
+            print(f"copyOAfile: target0 {target0} -> {target0final} ")
         if verbose >= 2:
-            print('copyOAfile: converting %s to %s (%d arrays, zip %d)' %
-                  (source, targetfile, na, zipfile))
+            print("copyOAfile: converting %s to %s (%d arrays, zip %d)" % (source, targetfile, na, zipfile))
         if checkFiles(targetfilefinal, cache):
-            print('  copyOAfile: target file already exist')
+            print("  copyOAfile: target file already exist")
         else:
             file_mode = oapackage.arrayfile_t_parseModeString(convert)
             oapackage.convert_array_file(source, targetfile, file_mode)
             if verbose >= 2:
-                print('cmd: oaconvert -v 0 -f %s %s %s' %
-                      (convert, source, targetfile))
+                print("cmd: oaconvert -v 0 -f %s %s %s" % (convert, source, targetfile))
             if zipfile:
-                os.system('gzip -f %s' % targetfile)
+                os.system("gzip -f %s" % targetfile)
     return target0final
