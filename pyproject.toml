@@ -5,11 +5,11 @@ line-length = 120
 max_line_length = 120
 
 [tool.ruff]
-select = ["E", "F", "UP", "I"]
-ignore = [ "E501", # line too long
+linter.select = ["E", "F", "UP", "I"]
+linter.ignore = [ "E501", # line too long
            "E402",  # module level import not at top of file
          #"UP031", # use format specifiers instead of percent format
         ]
 line-length = 120
 
-target-version = "py38"
+target-version = "py311"
