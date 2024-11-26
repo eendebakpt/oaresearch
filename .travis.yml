@@ -3,12 +3,12 @@ cache: pip
 
 matrix:
   include:
-  - name: "Python 3.9"
-    python: "3.9"
-    dist: focal
-  - name: "Python 3.8"
-    python: "3.8"
-    dist: focal
+  - name: "Python 3.11"
+    python: "3.11"
+    dist: ubuntu-latest
+  - name: "Python 3.12"
+    python: "3.12"
+    dist: ubuntu-latest
 
 before_install:
   - sudo apt-get install -y swig
