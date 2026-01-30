@@ -20,9 +20,12 @@ def mkdirc(directory_name):
 
 
 if platform.system() == "Windows":
-    targetdir = mkdirc(r"c:\\projects\\oapackage\\dist")
+    targetdir = mkdirc(r"c:\projects_tmp\oapackage\dist")
 else:
     targetdir = "/home/eendebakpt/projects/oapackage/dist/"
+
+branch = "master"
+branch = "dev"
 
 username = "eendebakpt"
 project_name = "oapackage-4lws8"
@@ -30,7 +33,7 @@ baseurl = "https://ci.appveyor.com/api"
 
 document = requests.get(baseurl + f"/projects/{username}/{project_name}/history?recordsNumber=10").json()
 
-builds = [build for build in document["builds"] if build["branch"] == "master"]
+builds = [build for build in document["builds"] if build["branch"] == branch]
 
 latest_build = builds[0]
 branch = latest_build["branch"]
