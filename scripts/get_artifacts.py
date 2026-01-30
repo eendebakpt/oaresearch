@@ -6,7 +6,7 @@ import os
 import platform
 import urllib.request
 
-from coreapi import Client
+import requests
 
 
 def mkdirc(directory_name):
@@ -28,8 +28,7 @@ username = "eendebakpt"
 project_name = "oapackage-4lws8"
 baseurl = "https://ci.appveyor.com/api"
 
-client = Client()
-document = client.get(baseurl + f"/projects/{username}/{project_name}/history?recordsNumber=10")
+document = requests.get(baseurl + f"/projects/{username}/{project_name}/history?recordsNumber=10").json()
 
 builds = [build for build in document["builds"] if build["branch"] == "master"]
 
@@ -38,7 +37,7 @@ branch = latest_build["branch"]
 PRname = latest_build.get("pullRequestName")
 commitId = latest_build["commitId"]
 
-build = client.get(baseurl + "/projects/%s/%s/builds/%d" % (username, project_name, latest_build["buildId"]))
+build = requests.get(baseurl + "/projects/%s/%s/builds/%d" % (username, project_name, latest_build["buildId"])).json()
 
 print(
     "latest build: %s: branch %s: %s: %s"
@@ -56,7 +55,7 @@ for jobtag, job in enumerate(build["build"]["jobs"]):
     print("job {}: {}".format(job["jobId"], job["name"]))
 
     url = "/buildjobs/{}/artifacts".format(job["jobId"])
-    artifacts = client.get(baseurl + url)
+    artifacts = requests.get(baseurl + url).json()
     print("  found %d artifacts" % len(artifacts))
     for artifact in artifacts:
         filename0 = artifact["fileName"].split("/")[-1]
