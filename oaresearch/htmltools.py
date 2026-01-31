@@ -1,5 +1,5 @@
-import htmlmin
 import jsmin
+import minify_html
 import oapackage
 from oapackage.markup import oneliner as e
 
@@ -30,7 +30,7 @@ def minifyJS(javascript_code: str) -> str:
 
 def minifyHTML(htmlcode: str, verbose: int = 0) -> str:
     """Minify html code"""
-    htmlcode_minified = htmlmin.minify(htmlcode)
+    htmlcode_minified = minify_html.minify(htmlcode, minify_js=True, minify_css=True)
     if verbose:
         print("minify: length %d -> %d" % (len(htmlcode), len(htmlcode_minified)))
     return htmlcode_minified
